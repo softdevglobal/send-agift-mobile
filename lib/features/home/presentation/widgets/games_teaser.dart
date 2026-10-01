@@ -22,55 +22,112 @@ class GamesTeaser extends StatelessWidget {
       child: PressableScale(
         onTap: () => context.push(AppRoutes.games),
         child: Container(
-          padding: const EdgeInsets.all(18),
           decoration: BoxDecoration(
-            gradient: const LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: [AppColors.cream, AppColors.accent],
-            ),
-            borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-            border: Border.all(color: AppColors.border),
-          ),
-          child: Row(
-            children: [
-              Container(
-                width: 46,
-                height: 46,
-                decoration: BoxDecoration(
-                  color: AppColors.surface,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-                ),
-                alignment: Alignment.center,
-                child: const Icon(
-                  Icons.sports_basketball_rounded,
-                  color: AppColors.purple,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 14),
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Take a break, play a game',
-                      style: AppTypography.display(18),
-                    ),
-                    const SizedBox(height: 3),
-                    Text(
-                      'Basketball, Stack Tower, Archery, 2048 and more. Pure '
-                      'skill, free to play.',
-                      style: Theme.of(context).textTheme.bodySmall,
-                    ),
-                  ],
-                ),
-              ),
-              const Icon(
-                Icons.chevron_right_rounded,
-                color: AppColors.mutedForeground,
+            borderRadius: BorderRadius.circular(AppTheme.radius2xl),
+            boxShadow: [
+              BoxShadow(
+                color: AppColors.teal.withValues(alpha: 0.25),
+                blurRadius: 22,
+                offset: const Offset(0, 10),
               ),
             ],
+          ),
+          child: ClipRRect(
+            borderRadius: BorderRadius.circular(AppTheme.radius2xl),
+            child: DecoratedBox(
+              decoration: const BoxDecoration(
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [Color(0xFF0B6E68), Color(0xFF14B8B8)],
+                ),
+              ),
+              child: Stack(
+                children: [
+                  // Game pieces drifting across the card.
+                  for (final (icon, right, top, size, angle) in const [
+                    (Icons.sports_basketball_rounded, 18.0, 14.0, 34.0, -0.3),
+                    (Icons.extension_rounded, 72.0, 46.0, 26.0, 0.4),
+                    (Icons.gps_fixed_rounded, 24.0, 70.0, 28.0, 0.0),
+                    (Icons.grid_4x4_rounded, 110.0, 10.0, 22.0, 0.2),
+                  ])
+                    Positioned(
+                      right: right,
+                      top: top,
+                      child: Transform.rotate(
+                        angle: angle,
+                        child: Icon(
+                          icon,
+                          size: size,
+                          color: Colors.white.withValues(alpha: 0.22),
+                        ),
+                      ),
+                    ),
+                  Padding(
+                    padding: const EdgeInsets.all(18),
+                    child: Row(
+                      children: [
+                        Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.radiusMd,
+                            ),
+                          ),
+                          alignment: Alignment.center,
+                          child: const Icon(
+                            Icons.sports_esports_rounded,
+                            color: AppColors.accentForeground,
+                            size: 24,
+                          ),
+                        ),
+                        const SizedBox(width: 14),
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Take a break, play a game',
+                                style: AppTypography.display(
+                                  18,
+                                  color: Colors.white,
+                                ),
+                              ),
+                              const SizedBox(height: 3),
+                              Text(
+                                'Basketball, Stack Tower, Archery, 2048 and '
+                                'more. Pure skill.',
+                                style: Theme.of(context).textTheme.bodySmall
+                                    ?.copyWith(
+                                      color: Colors.white.withValues(
+                                        alpha: 0.85,
+                                      ),
+                                    ),
+                              ),
+                            ],
+                          ),
+                        ),
+                        const SizedBox(width: 8),
+                        Container(
+                          height: 34,
+                          width: 34,
+                          decoration: BoxDecoration(
+                            color: Colors.white.withValues(alpha: 0.2),
+                            shape: BoxShape.circle,
+                          ),
+                          child: const Icon(
+                            Icons.play_arrow_rounded,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            ),
           ),
         ),
       ),

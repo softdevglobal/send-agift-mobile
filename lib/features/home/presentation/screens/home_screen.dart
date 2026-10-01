@@ -5,12 +5,16 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_search_field.dart';
 import '../../../../core/widgets/brand_logo.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
+import '../../../../core/widgets/pressable_scale.dart';
 import '../../../../core/widgets/section_heading.dart';
+import '../../../auth/data/auth_controller.dart';
 import '../../../cart/data/cart_controller.dart';
 import '../../../delivery/presentation/widgets/gift_search_bar.dart';
+import '../../../games/data/games_providers.dart';
 import '../../../products/data/catalog_providers.dart';
 import '../../../products/domain/gift.dart';
 import '../../../products/presentation/widgets/gift_card.dart';
@@ -61,6 +65,11 @@ class HomeScreen extends ConsumerWidget {
               // wrapped again here — everything after it cascades in behind.
               const HomeHero(),
               const FadeSlideIn(
+                delay: Duration(milliseconds: 40),
+                child: _QuickActions(),
+              ),
+              const SizedBox(height: 30),
+              const FadeSlideIn(
                 delay: Duration(milliseconds: 60),
                 child: FeatureBar(),
               ),
@@ -84,7 +93,8 @@ class HomeScreen extends ConsumerWidget {
                   onAction: () => context.go(AppRoutes.explore),
                 ),
               ),
-              _GiftShelf(catalog: catalog),
+              _GiftShelf(gifts: catalog, heroPrefix: 'home'),
+              ..._rewardShelf(context, catalog),
               const SizedBox(height: 34),
               const FadeSlideIn(
                 delay: Duration(milliseconds: 220),
@@ -112,9 +122,20 @@ class HomeScreen extends ConsumerWidget {
 class _HomeTopBar extends ConsumerWidget {
   const _HomeTopBar();
 
+  static String _greeting() {
+    final hour = DateTime.now().hour;
+    if (hour < 12) return 'Good morning';
+    if (hour < 17) return 'Good afternoon';
+    return 'Good evening';
+  }
+
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartCount = ref.watch(cartCountProvider);
+    final auth = ref.watch(authProvider);
+    final first = auth.isSignedIn
+        ? auth.displayName.trim().split(RegExp(r'\s+')).first
+        : '';
 
     return Padding(
       padding: const EdgeInsets.fromLTRB(
@@ -128,16 +149,33 @@ class _HomeTopBar extends ConsumerWidget {
         children: [
           Row(
             children: [
-              const BrandMark(size: 34),
-              const SizedBox(width: 9),
-              // The wordmark is drawn artwork, so it is shown as supplied
-              // rather than re-set in a UI font.
-              const BrandWordmark(height: 19),
-              const Spacer(),
+              const BrandMark(size: 40),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      _greeting(),
+                      style: Theme.of(context).textTheme.bodySmall,
+                    ),
+                    Text(
+                      first.isEmpty ? 'Who are we spoiling?' : 'Hi, $first',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: AppTypography.display(22),
+                    ),
+                  ],
+                ),
+              ),
               // Cart isn't a tab — this is the one place it's always in
               // reach, opening as a panel over whatever's on screen.
               IconButton(
                 onPressed: () => context.push(AppRoutes.cart),
+                style: IconButton.styleFrom(
+                  backgroundColor: AppColors.surface,
+                  side: const BorderSide(color: AppColors.border),
+                ),
                 icon: Badge(
                   label: Text('$cartCount'),
                   isLabelVisible: cartCount > 0,
@@ -150,7 +188,7 @@ class _HomeTopBar extends ConsumerWidget {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 14),
           // Read-only: tapping hands off to Explore, which owns the query.
           AppSearchField(
             readOnly: true,
@@ -162,15 +200,134 @@ class _HomeTopBar extends ConsumerWidget {
   }
 }
 
+/// Four shortcuts to what people come back for, with the points balance
+/// live when signed in.
+class _QuickActions extends ConsumerWidget {
+  const _QuickActions();
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final signedIn = ref.watch(authProvider.select((a) => a.isSignedIn));
+    final points = signedIn
+        ? ref.watch(pointsWalletProvider).valueOrNull?.balance
+        : null;
+
+    void open(String route) => context.push(signedIn ? route : AppRoutes.login);
+
+    final actions = [
+      (
+        'Orders',
+        Icons.local_shipping_rounded,
+        AppColors.primary,
+        () => context.push(AppRoutes.orders),
+      ),
+      (
+        'Recipients',
+        Icons.people_alt_rounded,
+        AppColors.purple,
+        () => open(AppRoutes.recipients),
+      ),
+      (
+        points == null ? 'Points' : '$points pts',
+        Icons.stars_rounded,
+        AppColors.star,
+        () => open(AppRoutes.points),
+      ),
+      (
+        'Games',
+        Icons.sports_esports_rounded,
+        AppColors.accentForeground,
+        () => context.push(AppRoutes.games),
+      ),
+    ];
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.gutter),
+      child: Row(
+        children: [
+          for (var i = 0; i < actions.length; i++) ...[
+            if (i > 0) const SizedBox(width: 10),
+            Expanded(
+              child: PressableScale(
+                onTap: actions[i].$4,
+                child: Column(
+                  children: [
+                    AspectRatio(
+                      aspectRatio: 1,
+                      child: Container(
+                        decoration: BoxDecoration(
+                          color: AppColors.categoryTints[i],
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusXl,
+                          ),
+                        ),
+                        child: Icon(
+                          actions[i].$2,
+                          color: actions[i].$3,
+                          size: 26,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      actions[i].$1,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                        color: AppColors.foreground,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+/// "Gifts that pay you back": the ones carrying the most reward points.
+/// Left out when no published gift carries any.
+List<Widget> _rewardShelf(
+  BuildContext context,
+  AsyncValue<List<Gift>> catalog,
+) {
+  final rewarding =
+      (catalog.valueOrNull ?? const <Gift>[])
+          .where((g) => g.rewardPoints > 0)
+          .toList()
+        ..sort((a, b) => b.rewardPoints.compareTo(a.rewardPoints));
+  if (rewarding.isEmpty) return const [];
+  return [
+    const SizedBox(height: 34),
+    FadeSlideIn(
+      delay: const Duration(milliseconds: 200),
+      child: SectionHeading(
+        title: 'Gifts that pay you back',
+        subtitle: 'Earn points when they are delivered.',
+        actionLabel: 'View all',
+        onAction: () => context.go(AppRoutes.explore),
+      ),
+    ),
+    _GiftShelf(gifts: AsyncValue.data(rewarding), heroPrefix: 'home-points'),
+  ];
+}
+
 /// Horizontal shelf of the newest published gifts.
 class _GiftShelf extends StatelessWidget {
-  const _GiftShelf({required this.catalog});
+  const _GiftShelf({required this.gifts, required this.heroPrefix});
 
-  final AsyncValue<List<Gift>> catalog;
+  final AsyncValue<List<Gift>> gifts;
+
+  /// Keeps hero tags unique when the same gift sits on two shelves.
+  final String heroPrefix;
 
   @override
   Widget build(BuildContext context) {
-    return catalog.when(
+    return gifts.when(
       loading: () => const SizedBox(
         height: 300,
         child: Center(
@@ -212,7 +369,7 @@ class _GiftShelf extends StatelessWidget {
               delay: Duration(milliseconds: 45 * index),
               child: SizedBox(
                 width: cardWidth,
-                child: GiftCard(gift: shelf[index], heroPrefix: 'home'),
+                child: GiftCard(gift: shelf[index], heroPrefix: heroPrefix),
               ),
             ),
           ),

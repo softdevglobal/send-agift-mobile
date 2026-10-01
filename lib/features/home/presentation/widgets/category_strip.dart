@@ -5,33 +5,33 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/pressable_scale.dart';
 import '../../../products/data/catalog_providers.dart';
 import '../../../products/domain/gift_category.dart';
 
-/// Horizontally scrolling occasion categories. Tapping one jumps to Explore
-/// with that filter already applied.
+/// Horizontally scrolling occasion cards — a photo with the occasion's
+/// name over a soft fade. Tapping one jumps to Explore with that filter
+/// already applied.
 class CategoryStrip extends ConsumerWidget {
   const CategoryStrip({super.key});
 
-  static const _ringColors = [AppColors.primary, AppColors.purple, AppColors.teal];
+  static const _accents = [AppColors.purple, AppColors.teal, AppColors.star];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SizedBox(
-      height: 108,
+      height: 150,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppTheme.gutter),
         itemCount: GiftCategory.all.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 14),
+        separatorBuilder: (context, index) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final category = GiftCategory.all[index];
-          final tint =
-              AppColors.categoryTints[index % AppColors.categoryTints.length];
-          final ring = _ringColors[index % _ringColors.length];
+          final accent = _accents[index % _accents.length];
 
           return FadeSlideIn(
             delay: Duration(milliseconds: 35 * index),
@@ -41,38 +41,68 @@ class CategoryStrip extends ConsumerWidget {
                 ref.read(exploreQueryProvider.notifier).state = '';
                 context.go(AppRoutes.explore);
               },
-              child: SizedBox(
-                width: 76,
-                child: Column(
-                  children: [
-                    Container(
-                      height: 76,
-                      width: 76,
-                      decoration: BoxDecoration(
-                        color: tint,
-                        shape: BoxShape.circle,
-                        border: Border.all(
-                          color: ring.withValues(alpha: 0.35),
-                          width: 1.5,
+              child: Container(
+                width: 116,
+                decoration: BoxDecoration(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+                  boxShadow: AppTheme.cardShadow,
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      AppNetworkImage(url: category.image),
+                      const DecoratedBox(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            stops: [0.35, 1],
+                            colors: [Color(0x00000000), Color(0xCC0F1B45)],
+                          ),
                         ),
                       ),
-                      padding: const EdgeInsets.all(5),
-                      child: ClipOval(
-                        child: AppNetworkImage(url: category.image),
+                      Positioned(
+                        left: 10,
+                        top: 10,
+                        child: Container(
+                          height: 8,
+                          width: 8,
+                          decoration: BoxDecoration(
+                            color: accent,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.5),
+                          ),
+                        ),
                       ),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      category.name,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w500,
-                        color: AppColors.foreground,
+                      Positioned(
+                        left: 12,
+                        right: 10,
+                        bottom: 12,
+                        child: Row(
+                          children: [
+                            Expanded(
+                              child: Text(
+                                category.name,
+                                maxLines: 2,
+                                overflow: TextOverflow.ellipsis,
+                                style: AppTypography.display(
+                                  16,
+                                  color: Colors.white,
+                                ),
+                              ),
+                            ),
+                            const Icon(
+                              Icons.arrow_outward_rounded,
+                              size: 16,
+                              color: Colors.white,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ),

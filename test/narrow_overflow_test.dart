@@ -8,6 +8,8 @@ import 'package:send_agift_mobile/features/home/presentation/widgets/games_tease
 import 'package:send_agift_mobile/features/products/data/catalog_providers.dart';
 import 'package:send_agift_mobile/features/products/data/sample_gifts.dart';
 
+import 'support/fake_auth.dart';
+
 void main() {
   testWidgets('cart line does not overflow on a narrow phone', (tester) async {
     tester.view.physicalSize = const Size(320, 640);
@@ -53,6 +55,7 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          fakeAuth(),
           catalogProvider.overrideWith((ref) async => sampleGifts),
         ],
         child: const MaterialApp(home: HomeScreen()),

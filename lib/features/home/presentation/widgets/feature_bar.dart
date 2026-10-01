@@ -37,7 +37,9 @@ class FeatureBar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 122,
+      // Tall enough for the icon, the title and two lines of description;
+      // a Spacer here once overflowed on small phones.
+      height: 138,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppTheme.gutter),
@@ -69,9 +71,11 @@ class FeatureBar extends StatelessWidget {
                   ),
                   child: Icon(feature.icon, size: 17, color: chipColor),
                 ),
-                const Spacer(),
+                const SizedBox(height: 12),
                 Text(
                   feature.title,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: Theme.of(context).textTheme.titleSmall,
                 ),
                 const SizedBox(height: 3),

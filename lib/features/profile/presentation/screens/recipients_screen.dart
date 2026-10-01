@@ -150,12 +150,6 @@ class _RecipientsScreenState extends ConsumerState<RecipientsScreen> {
                     ],
                     const SizedBox(height: 8),
                   ],
-                  if (items.isNotEmpty)
-                    DashedAddCard(
-                      label: 'Add someone new',
-                      icon: Icons.person_add_alt_1_rounded,
-                      onTap: _add,
-                    ),
                 ],
               ),
             );

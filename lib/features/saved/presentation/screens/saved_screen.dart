@@ -135,11 +135,15 @@ class _SavedScreenState extends ConsumerState<SavedScreen> {
                               '${shown.length == 1 ? 'gift' : 'gifts'}',
                               style: Theme.of(context).textTheme.titleMedium,
                             ),
+                            const SizedBox(width: 8),
                             const Spacer(),
-                            _SortButton(
-                              value: _sort,
-                              onChanged: (value) =>
-                                  setState(() => _sort = value),
+                            Flexible(
+                              flex: 3,
+                              child: _SortButton(
+                                value: _sort,
+                                onChanged: (value) =>
+                                    setState(() => _sort = value),
+                              ),
                             ),
                           ],
                         ),
@@ -210,8 +214,8 @@ class _SortButton extends StatelessWidget {
 
   static const _labels = {
     _Sort.saved: 'Saved order',
-    _Sort.priceLow: 'Price: low to high',
-    _Sort.priceHigh: 'Price: high to low',
+    _Sort.priceLow: 'Lowest price',
+    _Sort.priceHigh: 'Highest price',
     _Sort.rating: 'Top rated',
   };
 
@@ -242,9 +246,13 @@ class _SortButton extends StatelessWidget {
               color: AppColors.primary,
             ),
             const SizedBox(width: 6),
-            Text(
-              _labels[value]!,
-              style: Theme.of(context).textTheme.labelLarge,
+            Flexible(
+              child: Text(
+                _labels[value]!,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: Theme.of(context).textTheme.labelLarge,
+              ),
             ),
           ],
         ),
