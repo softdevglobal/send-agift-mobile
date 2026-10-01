@@ -16,6 +16,7 @@ import '../../../checkout/presentation/widgets/delivery_summary.dart';
 import '../../../checkout/presentation/widgets/recipient_picker.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/widgets/reward_points_badge.dart';
+import '../../../delivery/data/delivery_providers.dart';
 import '../../../games/data/games_providers.dart';
 import '../../data/cart_controller.dart';
 import '../../domain/cart_item.dart';
@@ -31,7 +32,18 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String? _recipientId;
-  late DateTime _deliveryDate = DateTime.now().add(const Duration(days: 1));
+
+  /// The day asked for in the gift search, unless it has since passed.
+  late DateTime _deliveryDate = _initialDate(
+    ref.read(deliveryIntentProvider)?.date,
+  );
+
+  static DateTime _initialDate(DateTime? wanted) {
+    final now = DateTime.now();
+    final today = DateTime(now.year, now.month, now.day);
+    if (wanted != null && !wanted.isBefore(today)) return wanted;
+    return now.add(const Duration(days: 1));
+  }
 
   DeliveryQuote? _quote;
   bool _quoting = false;
@@ -143,6 +155,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       quote: _quote,
                       loading: _quoting,
                       hasRecipient: _recipientId != null,
+                      deliveryDate: _deliveryDate,
                     ),
                   ],
                 ),
@@ -204,7 +217,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       ),
                       const SizedBox(height: 4),
                       Text(
-                        'Delivery is priced for the date you choose.',
+                        'Each shop delivers itself and says how many days it '
+                        'needs, so pick a day it can make.',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: AppColors.mutedForeground,
                         ),
@@ -270,7 +284,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         child: SizedBox(
           width: double.infinity,
           child: ElevatedButton(
-            onPressed: _placing
+            onPressed: _placing || (auth.isSignedIn && _blocker != null)
                 ? null
                 : auth.isSignedIn
                 ? _placeOrder
@@ -281,11 +295,27 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     width: 18,
                     child: CircularProgressIndicator(strokeWidth: 2),
                   )
-                : Text(auth.isSignedIn ? 'Place order' : 'Sign in to continue'),
+                : Text(
+                    !auth.isSignedIn
+                        ? 'Sign in to continue'
+                        : _blocker ?? 'Place order',
+                  ),
           ),
         ),
       ),
     );
+  }
+
+  /// Why the order cannot be placed yet, as the button's label, or null when
+  /// it can. The server refuses an order without a recipient, or with a shop
+  /// whose delivery zones do not reach them.
+  String? get _blocker {
+    if (_recipientId == null) return 'Choose a recipient';
+    if (_quoting) return 'Pricing delivery…';
+    final quote = _quote;
+    if (quote == null) return 'Delivery not priced';
+    if (!quote.complete) return 'Cannot deliver there';
+    return null;
   }
 
   /// What the lines promise on delivery; the server decides the rest.
@@ -360,9 +390,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   static String _dateKey(DateTime date) =>
       '${date.year}-${date.month}-${date.day}';
 
-  /// Prices delivery for the current recipient, date and cart. A failure only
-  /// clears the quote: delivery then falls back to being arranged after the
-  /// order, which is how checkout worked before pricing existed.
+  /// Prices delivery for the current recipient, date and cart. A failure
+  /// clears the quote, which holds the order back until it can be priced.
   Future<void> _refreshQuote() async {
     final lines = ref.read(cartLinesProvider).valueOrNull ?? const [];
     final recipientId = _recipientId;
@@ -404,8 +433,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   Future<void> _placeOrder() async {
     final lines = ref.read(cartLinesProvider).valueOrNull ?? const [];
     if (lines.isEmpty) return;
+    final recipientId = _recipientId;
+    if (recipientId == null || _blocker != null) return;
     final balance = ref.read(pointsWalletProvider).valueOrNull?.balance ?? 0;
-    final giftPoints = _recipientId == null ? 0 : _giftPointsValue;
+    final giftPoints = _giftPointsValue;
     if (giftPoints > balance) {
       setState(() => _error = 'You have $balance points to send.');
       return;
@@ -416,31 +447,19 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     });
 
     final repository = ref.read(checkoutRepositoryProvider);
-    final summary = ref.read(cartSummaryProvider);
     try {
-      var countryId = '';
-      // Deliver to the recipient's own country when we know it, so the order
-      // is not filed under the buyer's country by default.
-      final recipientId = _recipientId;
-      if (recipientId != null) {
-        final recipient = await repository.getRecipient(recipientId);
-        countryId = recipient.deliveryAddress?.countryId ?? '';
-      }
+      // Deliver to the recipient's own country, so the order is not filed
+      // under the buyer's country by default.
+      final recipient = await repository.getRecipient(recipientId);
+      var countryId = recipient.deliveryAddress?.countryId ?? '';
       if (countryId.isEmpty) countryId = await repository.myCountryId();
 
-      final quote = _quote;
+      // Delivery is not sent: the server prices it from each shop's zones.
       final orderId = await repository.placeOrder(
         countryId: countryId,
         deliveryDate: _deliveryDate,
         lines: lines,
         recipientId: recipientId,
-        // Only a quote in the cart's own currency can be stored against the
-        // order, which holds a bare integer.
-        deliveryAmount: quote != null &&
-                quote.complete &&
-                quote.matchesCurrency(summary.currency)
-            ? quote.amount
-            : null,
         giftPoints: giftPoints,
       );
 

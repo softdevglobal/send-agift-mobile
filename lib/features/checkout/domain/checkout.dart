@@ -10,6 +10,8 @@ class RecipientAddress {
     this.line2,
     this.region,
     this.postalCode,
+    this.latitude,
+    this.longitude,
   });
 
   final String id;
@@ -19,6 +21,13 @@ class RecipientAddress {
   final String? line2;
   final String? region;
   final String? postalCode;
+
+  /// The map point shop delivery zones are measured to. An address saved
+  /// without one cannot be priced, so the order cannot be placed to it.
+  final double? latitude;
+  final double? longitude;
+
+  bool get hasPoint => latitude != null && longitude != null;
 
   /// One line, the way a label would read it.
   String get formatted => [
@@ -38,6 +47,8 @@ class RecipientAddress {
       line2: json['line2'] as String?,
       region: json['region'] as String?,
       postalCode: json['postal_code'] as String?,
+      latitude: (json['latitude'] as num?)?.toDouble(),
+      longitude: (json['longitude'] as num?)?.toDouble(),
     );
   }
 }
@@ -49,6 +60,7 @@ class Recipient {
     required this.id,
     required this.name,
     this.relationship,
+    this.email,
     this.phone,
     this.defaultAddressId,
     this.addresses = const [],
@@ -57,6 +69,9 @@ class Recipient {
   final String id;
   final String name;
   final String? relationship;
+
+  /// Gift points reach the recipient's account by this address.
+  final String? email;
   final String? phone;
   final String? defaultAddressId;
   final List<RecipientAddress> addresses;
@@ -81,6 +96,7 @@ class Recipient {
       id: json['id'] as String? ?? '',
       name: json['name'] as String? ?? '',
       relationship: json['relationship'] as String?,
+      email: json['email'] as String?,
       phone: json['phone'] as String?,
       defaultAddressId: json['default_address_id'] as String?,
       addresses: raw is List
@@ -93,7 +109,8 @@ class Recipient {
   }
 }
 
-/// The delivery service chosen for one shop's parcel.
+/// One shop's own delivery, priced from the delivery zone that covers the
+/// recipient's address.
 class QuotedShipment {
   const QuotedShipment({
     required this.shopName,
@@ -102,7 +119,6 @@ class QuotedShipment {
     required this.amount,
     required this.currency,
     required this.estimatedDays,
-    required this.missesDeliveryDate,
   });
 
   final String shopName;
@@ -112,16 +128,27 @@ class QuotedShipment {
   /// Minor units, in [currency].
   final int amount;
   final String currency;
+  /// Days the shop needs; 0 is same day.
   final int estimatedDays;
 
-  /// Nothing quoted could make the requested date; the fastest was taken.
-  final bool missesDeliveryDate;
+  /// The shop cannot get there by [deliveryDate], counted from [today].
+  bool arrivesAfter(DateTime deliveryDate, {DateTime? today}) {
+    final now = today ?? DateTime.now();
+    final start = DateTime(now.year, now.month, now.day);
+    final wanted = DateTime(
+      deliveryDate.year,
+      deliveryDate.month,
+      deliveryDate.day,
+    );
+    return start.add(Duration(days: estimatedDays)).isAfter(wanted);
+  }
 
   String get summary {
-    final days = estimatedDays > 0
-        ? ' · $estimatedDays day${estimatedDays == 1 ? '' : 's'}'
-        : '';
-    return '$shopName · $provider $serviceName$days';
+    final days = estimatedDays == 0
+        ? ' · same day'
+        : ' · $estimatedDays day${estimatedDays == 1 ? '' : 's'}';
+    final service = serviceName.isEmpty ? 'Shop delivery' : serviceName;
+    return '$shopName · $service$days';
   }
 
   factory QuotedShipment.fromJson(Map<String, dynamic> json) {
@@ -132,7 +159,6 @@ class QuotedShipment {
       amount: (json['amount'] as num?)?.toInt() ?? 0,
       currency: json['currency'] as String? ?? 'USD',
       estimatedDays: (json['estimated_days'] as num?)?.toInt() ?? 0,
-      missesDeliveryDate: json['misses_delivery_date'] as bool? ?? false,
     );
   }
 }
@@ -151,16 +177,18 @@ class DeliveryQuote {
   final int amount;
   final String currency;
 
-  /// False when at least one shop could not be priced — no carrier for the
-  /// lane, no dispatch address, or shipping switched off. Delivery for those
-  /// is arranged after the order.
+  /// False when at least one shop cannot deliver there — the address is
+  /// outside its delivery zones, or the shop or address has no map point.
+  /// The order cannot be placed until that is fixed.
   final bool complete;
   final List<String> unquoted;
 
-  bool get missesDeliveryDate =>
-      shipments.any((shipment) => shipment.missesDeliveryDate);
+  /// Some shop needs longer than the days left before [deliveryDate].
+  bool arrivesAfter(DateTime deliveryDate, {DateTime? today}) => shipments.any(
+    (shipment) => shipment.arrivesAfter(deliveryDate, today: today),
+  );
 
-  /// Delivery is quoted in the carrier's currency, which is not always the
+  /// Delivery is priced in each shop's zone currency, which is not always the
   /// cart's. Adding the two would be nonsense, so a combined total is only
   /// offered when they agree.
   bool matchesCurrency(String cartCurrency) =>

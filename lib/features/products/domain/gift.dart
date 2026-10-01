@@ -48,6 +48,28 @@ class Gift {
   /// the seller cannot currently pay the reward, so any value here is real.
   final int rewardPoints;
 
+  /// The same gift labelled with its shop, for results that carry the shop
+  /// name beside the product rather than inside it.
+  Gift withShopName(String name) => Gift(
+    id: id,
+    name: this.name,
+    priceAmount: priceAmount,
+    currency: currency,
+    image: image,
+    description: description,
+    categoryId: categoryId,
+    shopId: shopId,
+    shopName: name.trim().isEmpty ? shopName : name,
+    shopImageUrl: shopImageUrl,
+    sellerId: sellerId,
+    compareAtAmount: compareAtAmount,
+    rating: rating,
+    reviewCount: reviewCount,
+    prepMinutes: prepMinutes,
+    occasionTags: occasionTags,
+    rewardPoints: rewardPoints,
+  );
+
   String get priceLabel => Money.format(priceAmount, currency);
 
   String? get compareAtLabel =>

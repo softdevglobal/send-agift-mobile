@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/providers.dart';
+import '../../delivery/data/delivery_providers.dart';
 import '../domain/gift.dart';
 import 'catalog_repository.dart';
 
@@ -27,8 +28,18 @@ final exploreQueryProvider = StateProvider<String>((ref) => '');
 final exploreCategoryProvider = StateProvider<String>((ref) => 'all');
 
 /// Catalog narrowed by the current query and category filters.
+///
+/// A picked delivery address owns the shelf: only gifts a shop's delivery
+/// zones can bring there in time are listed, the same as the web.
 final filteredGiftsProvider = Provider<AsyncValue<List<Gift>>>((ref) {
-  final catalog = ref.watch(catalogProvider);
+  final deliverable = ref.watch(deliverableGiftsProvider);
+  final catalog = switch (deliverable) {
+    AsyncData(value: final gifts?) => AsyncValue.data(gifts),
+    AsyncData() => ref.watch(catalogProvider),
+    AsyncError(:final error, :final stackTrace) =>
+      AsyncValue<List<Gift>>.error(error, stackTrace),
+    _ => const AsyncValue<List<Gift>>.loading(),
+  };
   final query = ref.watch(exploreQueryProvider);
   final category = ref.watch(exploreCategoryProvider);
 

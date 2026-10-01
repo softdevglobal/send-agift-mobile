@@ -294,8 +294,10 @@ class _DeliveryNotes extends StatelessWidget {
         children: const [
           _NoteRow(
             icon: Icons.local_shipping_outlined,
-            title: 'Delivery by country',
-            description: 'Availability is checked against the recipient country.',
+            title: 'Delivered by the shop',
+            description:
+                'Each shop delivers within its own zones. Search an address '
+                'to see what can reach it.',
           ),
           SizedBox(height: 14),
           _NoteRow(

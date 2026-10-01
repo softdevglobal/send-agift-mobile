@@ -4,17 +4,18 @@ import 'package:send_agift_mobile/features/checkout/domain/checkout.dart';
 
 void main() {
   group('DeliveryQuote', () {
-    test('reads a complete quote', () {
+    test('reads a complete zone quote', () {
       final quote = DeliveryQuote.fromJson({
         'shipments': [
           {
             'shop_name': 'PD Gifts',
-            'provider': 'USPS',
-            'service_name': 'Ground Advantage',
+            'mode': 'seller_delivery',
+            'provider': 'Seller delivery',
+            'service_name': 'Within 25 km',
             'amount': 568,
             'currency': 'USD',
             'estimated_days': 2,
-            'misses_delivery_date': false,
+            'days_available': 2,
           },
         ],
         'amount': 568,
@@ -25,11 +26,10 @@ void main() {
       expect(quote.complete, isTrue);
       expect(quote.amount, 568);
       expect(quote.shipments.single.summary,
-          'PD Gifts · USPS Ground Advantage · 2 days');
-      expect(quote.missesDeliveryDate, isFalse);
+          'PD Gifts · Within 25 km · 2 days');
     });
 
-    test('a carrier currency that differs from the cart is never combined', () {
+    test('a zone currency that differs from the cart is never combined', () {
       // The bug this guards: a USD delivery quote added to an AUD cart and
       // labelled AUD.
       final quote = DeliveryQuote.fromJson({
@@ -50,22 +50,26 @@ void main() {
         'amount': 0,
         'currency': 'USD',
         'complete': false,
-        'unquoted': ['PD Gifts: no carrier available for this route'],
+        'unquoted': ["PD Gifts: recipient is outside the shop's delivery zones"],
       });
       expect(quote.complete, isFalse);
       expect(quote.unquoted, hasLength(1));
     });
 
-    test('a missed delivery date surfaces from any shipment', () {
+    test('a shop that needs more days than are left arrives late', () {
       final quote = DeliveryQuote.fromJson({
         'amount': 3257,
         'currency': 'USD',
         'complete': true,
         'shipments': [
-          {'amount': 3257, 'currency': 'USD', 'misses_delivery_date': true},
+          {'amount': 0, 'currency': 'USD', 'estimated_days': 0},
+          {'amount': 3257, 'currency': 'USD', 'estimated_days': 3},
         ],
       });
-      expect(quote.missesDeliveryDate, isTrue);
+      final today = DateTime(2026, 10, 1, 15, 30);
+      expect(quote.arrivesAfter(DateTime(2026, 10, 3), today: today), isTrue);
+      expect(quote.arrivesAfter(DateTime(2026, 10, 4), today: today), isFalse);
+      expect(quote.shipments.first.summary, ' · Shop delivery · same day');
     });
   });
 

@@ -17,8 +17,8 @@ class OrderItemTracking {
   /// label_created | collected | in_transit | delivered | failed | returned.
   final String status;
 
-  /// `courier` for a bought carrier label, `seller_managed` when the shop
-  /// arranged delivery itself.
+  /// `seller_managed` when the shop delivers it inside its own zones,
+  /// `courier` when the shop handed it to a courier and recorded the number.
   final String deliveryMode;
   final String? courierProvider;
   final String? trackingNumber;

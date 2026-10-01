@@ -4,12 +4,13 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../data/checkout_repository.dart';
+import 'new_recipient_sheet.dart';
 
 /// Picks who the gift goes to, and shows the address it would ship to.
 ///
-/// The address matters at checkout, not just the name: delivery is priced
-/// against it, and it is the last chance to notice the gift is pointed at the
-/// wrong place.
+/// Every order needs one: each shop prices its own delivery from the
+/// distance to this address. It is also the last chance to notice the gift
+/// is pointed at the wrong place.
 class RecipientPicker extends ConsumerWidget {
   const RecipientPicker({
     super.key,
@@ -39,23 +40,23 @@ class RecipientPicker extends ConsumerWidget {
           data: (list) {
             if (list.isEmpty) {
               return Text(
-                'You have no saved recipients yet. The gift will be sent '
-                'without one, and delivery is arranged after ordering.',
+                'Add who the gift is for. Their address is what each shop '
+                'prices delivery against.',
                 style: theme.textTheme.bodySmall?.copyWith(
                   color: AppColors.mutedForeground,
                   height: 1.35,
                 ),
               );
             }
+            final known = list.any((recipient) => recipient.id == selectedId);
             return DropdownButtonFormField<String?>(
-              initialValue: selectedId,
+              // Rebuilt when a new recipient is saved and picked.
+              key: ValueKey('recipient-${known ? selectedId : ''}'),
+              initialValue: known ? selectedId : null,
               isExpanded: true,
+              hint: const Text('Choose a recipient'),
               decoration: const InputDecoration(labelText: 'Send to'),
               items: [
-                const DropdownMenuItem<String?>(
-                  value: null,
-                  child: Text('Send without a recipient'),
-                ),
                 for (final recipient in list)
                   DropdownMenuItem<String?>(
                     value: recipient.id,
@@ -69,6 +70,18 @@ class RecipientPicker extends ConsumerWidget {
               onChanged: onChanged,
             );
           },
+        ),
+        Align(
+          alignment: Alignment.centerLeft,
+          child: TextButton.icon(
+            key: const Key('recipient-add'),
+            onPressed: () async {
+              final created = await showNewRecipientSheet(context);
+              if (created != null) onChanged(created.id);
+            },
+            icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),
+            label: const Text('New recipient'),
+          ),
         ),
         if (selectedId != null) _Address(recipientId: selectedId!),
       ],
@@ -130,12 +143,24 @@ class _Address extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       address?.formatted ??
-                          'No saved address — delivery cannot be priced yet.',
+                          'No saved address — add one before sending.',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: AppColors.mutedForeground,
                         height: 1.35,
                       ),
                     ),
+                    if (address != null && !address.hasPoint) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        'This address was saved without a map point, so '
+                        'shops cannot price delivery to it. Add them again '
+                        'with the address picked from the list.',
+                        style: theme.textTheme.bodySmall?.copyWith(
+                          color: AppColors.destructive,
+                          height: 1.35,
+                        ),
+                      ),
+                    ],
                     if (recipient.phone != null &&
                         recipient.phone!.trim().isNotEmpty) ...[
                       const SizedBox(height: 2),

@@ -7,7 +7,8 @@ import '../../domain/checkout.dart';
 
 /// Subtotal, delivery and the final total.
 ///
-/// Delivery is quoted in the carrier's currency, which is not always the
+/// Delivery is each shop's own, priced from the delivery zone that covers
+/// the recipient's address. A zone can be priced in a currency other than the
 /// cart's. When they differ the two are shown side by side rather than added,
 /// because there is no exchange rate here to combine them honestly.
 class DeliverySummary extends StatelessWidget {
@@ -18,6 +19,7 @@ class DeliverySummary extends StatelessWidget {
     required this.quote,
     required this.loading,
     required this.hasRecipient,
+    required this.deliveryDate,
   });
 
   final int subtotal;
@@ -25,6 +27,7 @@ class DeliverySummary extends StatelessWidget {
   final DeliveryQuote? quote;
   final bool loading;
   final bool hasRecipient;
+  final DateTime deliveryDate;
 
   @override
   Widget build(BuildContext context) {
@@ -43,8 +46,10 @@ class DeliverySummary extends StatelessWidget {
               ? 'Pricing…'
               : priced
               ? Money.format(quote!.amount, quote!.currency)
+              : quote != null
+              ? 'Not available there'
               : hasRecipient
-              ? 'Arranged after ordering'
+              ? 'Not priced yet'
               : 'Pick a recipient',
           muted: !priced,
         ),
@@ -125,26 +130,29 @@ class DeliverySummary extends StatelessWidget {
           const SizedBox(height: 8),
           _note(
             context,
-            'The carrier quotes delivery in ${quote!.currency.toUpperCase()} '
+            'The shop prices delivery in ${quote!.currency.toUpperCase()} '
             'while this cart is priced in ${currency.toUpperCase()}, so they '
             'are shown separately rather than converted.',
           ),
         ],
-        if (quote?.missesDeliveryDate ?? false) ...[
+        if (priced && quote!.arrivesAfter(deliveryDate)) ...[
           const SizedBox(height: 8),
           _note(
             context,
-            'No service can arrive by the date you picked. The fastest was '
-            'chosen, but it may turn up later.',
+            'A shop needs more days than are left before the date you picked, '
+            'so it may arrive later. Pick a later day to be sure.',
             warn: true,
           ),
         ],
-        if (quote != null && !quote!.complete && quote!.unquoted.isNotEmpty) ...[
+        if (quote != null && !quote!.complete) ...[
           const SizedBox(height: 8),
           _note(
             context,
-            'Delivery could not be priced (${quote!.unquoted.join('; ')}), so '
-            'the shop will arrange it after you order.',
+            quote!.unquoted.isEmpty
+                ? 'A shop in your cart cannot deliver to this address.'
+                : 'Cannot deliver there: ${quote!.unquoted.join('; ')}. '
+                      'Choose another recipient or remove that shop\'s gifts.',
+            warn: true,
           ),
         ],
       ],

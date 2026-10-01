@@ -40,8 +40,55 @@ class CheckoutRepository {
     }
   }
 
-  /// Prices delivery before the order exists. The server picks the cheapest
-  /// service that still arrives by [deliveryDate].
+  /// Saves someone new to send gifts to, with the one address the gift goes
+  /// to. Its map point is what shop delivery zones are priced against, so it
+  /// is sent whenever the address was picked from the lookup.
+  Future<Recipient> createRecipient({
+    required String name,
+    required String countryId,
+    required String line1,
+    required String city,
+    String? email,
+    String? phone,
+    String? line2,
+    String? region,
+    String? postalCode,
+    double? latitude,
+    double? longitude,
+  }) async {
+    String? optional(String? value) =>
+        value == null || value.trim().isEmpty ? null : value.trim();
+    try {
+      final response = await _client.dio.post<Map<String, dynamic>>(
+        '/customers/me/recipients',
+        data: {
+          'name': name.trim(),
+          'email': optional(email),
+          'phone': optional(phone),
+          'addresses': [
+            {
+              'country_id': countryId,
+              'address_type': 'shipping',
+              'line1': line1.trim(),
+              'line2': optional(line2),
+              'city': city.trim(),
+              'region': optional(region),
+              'postal_code': optional(postalCode),
+              'latitude': latitude,
+              'longitude': longitude,
+              'is_default': true,
+            },
+          ],
+        },
+      );
+      return Recipient.fromJson(response.data ?? const {});
+    } on DioException catch (error) {
+      throw _client.mapError(error);
+    }
+  }
+
+  /// Prices delivery before the order exists, from each shop's own delivery
+  /// zones and the distance to the recipient's address.
   Future<DeliveryQuote> quoteDelivery({
     required String recipientId,
     required DateTime deliveryDate,
@@ -65,16 +112,15 @@ class CheckoutRepository {
     }
   }
 
-  /// Places the order. [deliveryAmount] is only sent when it was quoted in the
-  /// cart's own currency — the order stores a bare integer, so a quote in a
-  /// different currency would be saved as the wrong amount.
+  /// Places the order. A recipient is required: the server prices delivery
+  /// from each shop's zones to their address, and ignores any amount the app
+  /// could send.
   Future<String> placeOrder({
     required String countryId,
     required DateTime deliveryDate,
     required List<CartLine> lines,
-    String? recipientId,
+    required String recipientId,
     String? giftMessage,
-    int? deliveryAmount,
     int giftPoints = 0,
   }) async {
     try {
@@ -84,10 +130,9 @@ class CheckoutRepository {
           'country_id': countryId,
           'customer_type': 'personal',
           'delivery_date': _dateOnly(deliveryDate),
-          'recipient_id': ?recipientId,
+          'recipient_id': recipientId,
           if (giftMessage != null && giftMessage.trim().isNotEmpty)
             'gift_message': giftMessage.trim(),
-          'delivery_amount': ?deliveryAmount,
           // Points from the customer's own balance, sent with the gift. The
           // server checks the balance and the recipient's email.
           if (giftPoints > 0) 'gift_points': giftPoints,

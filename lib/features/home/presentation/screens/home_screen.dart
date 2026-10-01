@@ -10,6 +10,7 @@ import '../../../../core/widgets/brand_logo.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/section_heading.dart';
 import '../../../cart/data/cart_controller.dart';
+import '../../../delivery/presentation/widgets/gift_search_bar.dart';
 import '../../../products/data/catalog_providers.dart';
 import '../../../products/domain/gift.dart';
 import '../../../products/presentation/widgets/gift_card.dart';
@@ -41,6 +42,21 @@ class HomeScreen extends ConsumerWidget {
             padding: const EdgeInsets.only(bottom: 32),
             children: [
               const _HomeTopBar(),
+              // Where and when first, like the top of the web home page.
+              // Find gifts opens Explore with only gifts that can get there.
+              FadeSlideIn(
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppTheme.gutter,
+                    0,
+                    AppTheme.gutter,
+                    18,
+                  ),
+                  child: GiftSearchBar(
+                    onSubmitted: () => context.go(AppRoutes.explore),
+                  ),
+                ),
+              ),
               // The hero animates its own entrance in sequence, so it isn't
               // wrapped again here — everything after it cascades in behind.
               const HomeHero(),
