@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/sheet_header.dart';
 import '../../../auth/data/countries_provider.dart';
 import '../../../checkout/data/checkout_repository.dart';
 import '../../../checkout/domain/checkout.dart';
@@ -246,9 +246,7 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SheetHandle(),
-            const SizedBox(height: 16),
-            Text(widget.title, style: AppTypography.display(22)),
+            SheetHeader(title: widget.title),
             const SizedBox(height: 18),
             DropdownButtonFormField<String>(
               key: ValueKey('address-country-$_countryId-${countries.length}'),
@@ -417,25 +415,6 @@ class _AddressFormSheetState extends ConsumerState<_AddressFormSheet> {
               ),
             ),
           ],
-        ),
-      ),
-    );
-  }
-}
-
-/// The grab bar at the top of a bottom sheet.
-class SheetHandle extends StatelessWidget {
-  const SheetHandle({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return Center(
-      child: Container(
-        width: 38,
-        height: 4,
-        decoration: BoxDecoration(
-          color: AppColors.mist,
-          borderRadius: BorderRadius.circular(99),
         ),
       ),
     );

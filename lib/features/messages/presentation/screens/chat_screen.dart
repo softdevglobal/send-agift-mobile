@@ -9,6 +9,7 @@ import '../../../../core/errors/app_exception.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../core/widgets/sheet_header.dart';
 import '../../../auth/data/auth_controller.dart';
 import '../../data/messages_providers.dart';
 import '../../domain/chat.dart';
@@ -852,6 +853,14 @@ class _ComposerState extends State<_Composer> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 0, 12, 4),
+              child: SheetHeader(
+                title: 'Attach',
+                titleStyle: Theme.of(context).textTheme.titleMedium,
+                showHandle: false,
+              ),
+            ),
             ListTile(
               leading: const Icon(Icons.photo_library_outlined),
               title: const Text('Photo library'),

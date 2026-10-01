@@ -4,8 +4,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/dial_codes.dart';
+import '../../../../core/widgets/sheet_header.dart';
 import '../../../auth/data/countries_provider.dart';
 import '../../../delivery/data/delivery_providers.dart';
 import '../../../delivery/domain/delivery_intent.dart';
@@ -268,24 +268,9 @@ class _NewRecipientSheetState extends ConsumerState<_NewRecipientSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(
-                width: 38,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.mist,
-                  borderRadius: BorderRadius.circular(99),
-                ),
-              ),
-            ),
-            const SizedBox(height: 16),
-            Text('New recipient', style: AppTypography.display(22)),
-            const SizedBox(height: 4),
-            Text(
-              'Saved to your recipients, so next time it is one tap.',
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.mutedForeground,
-              ),
+            const SheetHeader(
+              title: 'New recipient',
+              subtitle: 'Saved to your recipients, so next time it is one tap.',
             ),
             const SizedBox(height: 18),
             TextField(

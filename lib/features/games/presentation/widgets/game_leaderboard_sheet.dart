@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/sheet_header.dart';
 import '../../data/games_providers.dart';
 import '../../domain/game.dart';
 import '../game_visuals.dart';
@@ -84,6 +85,8 @@ class _LeaderboardSheet extends ConsumerWidget {
                   ],
                 ),
               ),
+              const SizedBox(width: 8),
+              const SheetCloseButton(),
             ],
           ),
           const SizedBox(height: 16),

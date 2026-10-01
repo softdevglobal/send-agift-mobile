@@ -6,7 +6,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/sheet_header.dart';
 import '../../data/delivery_providers.dart';
 import '../../data/delivery_repository.dart';
 import '../../domain/place.dart';
@@ -153,25 +153,14 @@ class _AddressSearchSheetState extends ConsumerState<_AddressSearchSheet> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SizedBox(height: 10),
-            Center(
-              child: Container(
-                width: 38,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.mist,
-                  borderRadius: BorderRadius.circular(99),
-                ),
-              ),
-            ),
             Padding(
               padding: const EdgeInsets.fromLTRB(
                 AppTheme.gutter,
-                16,
+                10,
                 AppTheme.gutter,
                 4,
               ),
-              child: Text(widget.title, style: AppTypography.display(22)),
+              child: SheetHeader(title: widget.title),
             ),
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: AppTheme.gutter),

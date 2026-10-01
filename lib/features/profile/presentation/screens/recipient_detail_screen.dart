@@ -10,6 +10,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
+import '../../../../core/widgets/sheet_header.dart';
 import '../../../auth/data/countries_provider.dart';
 import '../../../checkout/data/checkout_repository.dart';
 import '../../../checkout/domain/checkout.dart';
@@ -638,9 +639,7 @@ class _EditDetailsSheetState extends ConsumerState<_EditDetailsSheet> {
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            const SheetHandle(),
-            const SizedBox(height: 16),
-            Text('Edit details', style: AppTypography.display(22)),
+            const SheetHeader(title: 'Edit details'),
             const SizedBox(height: 18),
             TextField(
               controller: _name,

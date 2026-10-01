@@ -10,6 +10,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/sheet_header.dart';
 import '../../data/games_providers.dart';
 import '../../domain/competition.dart';
 import '../competition_format.dart';
@@ -344,7 +345,11 @@ void _showRules(BuildContext context, Competition c) {
         controller: controller,
         padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
         children: [
-          Text('Official rules', style: AppTypography.display(24)),
+          SheetHeader(
+            title: 'Official rules',
+            titleStyle: AppTypography.display(24),
+            showHandle: false,
+          ),
           const SizedBox(height: 12),
           Text(
             c.officialRules ??
@@ -1152,95 +1157,108 @@ class _ClaimSheetState extends ConsumerState<_ClaimSheet> {
         20,
         20 + MediaQuery.viewInsetsOf(context).bottom,
       ),
-      child: FutureBuilder<List<DeliveryAddress>>(
-        future: _addresses,
-        builder: (context, snapshot) {
-          if (snapshot.hasError) {
-            return const Padding(
-              padding: EdgeInsets.all(24),
-              child: Text('Could not load your addresses. Try again later.'),
-            );
-          }
-          final addresses = snapshot.data;
-          if (addresses == null) {
-            return const SizedBox(
-              height: 160,
-              child: Center(child: CircularProgressIndicator()),
-            );
-          }
-          if (_selected == null && addresses.isNotEmpty) {
-            final preferred = addresses.where((a) => a.isDefault);
-            _selected = (preferred.isEmpty ? addresses : preferred).first.id;
-          }
-
-          return SingleChildScrollView(
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text('Claim your prize', style: AppTypography.display(24)),
-                const SizedBox(height: 4),
-                Text(widget.competition.prizeDescription),
-                const SizedBox(height: 16),
-                Text('DELIVER TO', style: AppTypography.eyebrow),
-                const SizedBox(height: 8),
-                if (addresses.isEmpty)
-                  const Text(
-                    'Add a delivery address in your account, then come back '
-                    'to claim.',
-                  )
-                else
-                  for (final address in addresses)
-                    ListTile(
-                      contentPadding: EdgeInsets.zero,
-                      onTap: () => setState(() => _selected = address.id),
-                      leading: Icon(
-                        _selected == address.id
-                            ? Icons.radio_button_checked_rounded
-                            : Icons.radio_button_unchecked_rounded,
-                        color: AppColors.purple,
-                      ),
-                      title: Text(address.label ?? address.line1),
-                      subtitle: Text(
-                        address.label == null
-                            ? address.summary
-                            : '${address.line1}, ${address.summary}',
-                      ),
-                    ),
-                const SizedBox(height: 4),
-                CheckboxListTile(
-                  contentPadding: EdgeInsets.zero,
-                  controlAffinity: ListTileControlAffinity.leading,
-                  value: _accepted,
-                  onChanged: (value) =>
-                      setState(() => _accepted = value ?? false),
-                  title: const Text(
-                    'I accept the prize terms and the official rules',
-                  ),
-                ),
-                if (_error != null)
-                  Padding(
-                    padding: const EdgeInsets.only(bottom: 8),
-                    child: Text(
-                      _error!,
-                      style: const TextStyle(color: AppColors.destructive),
-                    ),
-                  ),
-                const SizedBox(height: 8),
-                SizedBox(
-                  width: double.infinity,
-                  child: FilledButton(
-                    onPressed: _selected != null && _accepted && !_sending
-                        ? _claim
-                        : null,
-                    child: Text(_sending ? 'Claiming…' : 'Claim prize'),
-                  ),
-                ),
-              ],
-            ),
-          );
-        },
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SheetHeader(
+            title: 'Claim your prize',
+            subtitle: widget.competition.prizeDescription,
+            titleStyle: AppTypography.display(24),
+            showHandle: false,
+          ),
+          const SizedBox(height: 12),
+          Flexible(child: _body()),
+        ],
       ),
+    );
+  }
+
+  Widget _body() {
+    return FutureBuilder<List<DeliveryAddress>>(
+      future: _addresses,
+      builder: (context, snapshot) {
+        if (snapshot.hasError) {
+          return const Padding(
+            padding: EdgeInsets.all(24),
+            child: Text('Could not load your addresses. Try again later.'),
+          );
+        }
+        final addresses = snapshot.data;
+        if (addresses == null) {
+          return const SizedBox(
+            height: 160,
+            child: Center(child: CircularProgressIndicator()),
+          );
+        }
+        if (_selected == null && addresses.isNotEmpty) {
+          final preferred = addresses.where((a) => a.isDefault);
+          _selected = (preferred.isEmpty ? addresses : preferred).first.id;
+        }
+
+        return SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('DELIVER TO', style: AppTypography.eyebrow),
+              const SizedBox(height: 8),
+              if (addresses.isEmpty)
+                const Text(
+                  'Add a delivery address in your account, then come back '
+                  'to claim.',
+                )
+              else
+                for (final address in addresses)
+                  ListTile(
+                    contentPadding: EdgeInsets.zero,
+                    onTap: () => setState(() => _selected = address.id),
+                    leading: Icon(
+                      _selected == address.id
+                          ? Icons.radio_button_checked_rounded
+                          : Icons.radio_button_unchecked_rounded,
+                      color: AppColors.purple,
+                    ),
+                    title: Text(address.label ?? address.line1),
+                    subtitle: Text(
+                      address.label == null
+                          ? address.summary
+                          : '${address.line1}, ${address.summary}',
+                    ),
+                  ),
+              const SizedBox(height: 4),
+              CheckboxListTile(
+                contentPadding: EdgeInsets.zero,
+                controlAffinity: ListTileControlAffinity.leading,
+                value: _accepted,
+                onChanged: (value) =>
+                    setState(() => _accepted = value ?? false),
+                title: const Text(
+                  'I accept the prize terms and the official rules',
+                ),
+              ),
+              if (_error != null)
+                Padding(
+                  padding: const EdgeInsets.only(bottom: 8),
+                  child: Text(
+                    _error!,
+                    style: const TextStyle(color: AppColors.destructive),
+                  ),
+                ),
+              const SizedBox(height: 8),
+              SizedBox(
+                width: double.infinity,
+                child: FilledButton(
+                  onPressed: _selected != null && _accepted && !_sending
+                      ? _claim
+                      : null,
+                  child: Text(_sending ? 'Claiming…' : 'Claim prize'),
+                ),
+              ),
+            ],
+          ),
+        );
+      },
     );
   }
 }

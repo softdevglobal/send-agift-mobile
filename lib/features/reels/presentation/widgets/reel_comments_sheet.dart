@@ -9,6 +9,7 @@ import '../../../../core/errors/app_exception.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/sheet_header.dart';
 import '../../../auth/data/auth_controller.dart';
 import '../../data/reel_social_repository.dart';
 import '../../data/reels_providers.dart';
@@ -163,8 +164,7 @@ class _ReelCommentsSheetState extends ConsumerState<ReelCommentsSheet> {
     });
     try {
       if (editing != null) {
-        final updated =
-            await _social.updateComment(_reelId, editing.id, body);
+        final updated = await _social.updateComment(_reelId, editing.id, body);
         _feed.patchReel(
           _reelId,
           (reel) => reel.copyWith(comments: _replaced(reel.comments, updated)),
@@ -249,8 +249,9 @@ class _ReelCommentsSheetState extends ConsumerState<ReelCommentsSheet> {
         _reelId,
         (reel) => reel.copyWith(
           commentCount: math.max(0, reel.commentCount - 1),
-          comments:
-              reel.comments.where((item) => item.id != comment.id).toList(),
+          comments: reel.comments
+              .where((item) => item.id != comment.id)
+              .toList(),
         ),
       );
       if (!mounted) return;
@@ -307,8 +308,7 @@ class _ReelCommentsSheetState extends ConsumerState<ReelCommentsSheet> {
   static List<ReelComment> _replaced(
     List<ReelComment> comments,
     ReelComment updated,
-  ) =>
-      [for (final item in comments) item.id == updated.id ? updated : item];
+  ) => [for (final item in comments) item.id == updated.id ? updated : item];
 
   @override
   Widget build(BuildContext context) {
@@ -356,9 +356,7 @@ class _ReelCommentsSheetState extends ConsumerState<ReelCommentsSheet> {
   Widget _buildList(bool signedIn) {
     if (_items.isEmpty) {
       if (_loading) {
-        return const Center(
-          child: CircularProgressIndicator(strokeWidth: 2.5),
-        );
+        return const Center(child: CircularProgressIndicator(strokeWidth: 2.5));
       }
       return _EmptyComments(error: _listError);
     }
@@ -455,7 +453,9 @@ class _ReelCommentsSheetState extends ConsumerState<ReelCommentsSheet> {
                       ),
                     )
                   : Icon(
-                      editing != null ? Icons.check_rounded : Icons.send_rounded,
+                      editing != null
+                          ? Icons.check_rounded
+                          : Icons.send_rounded,
                       size: 20,
                     ),
             ),
@@ -543,21 +543,30 @@ class _SheetHeader extends StatelessWidget {
         : '${compactCount(count)} ${count == 1 ? 'comment' : 'comments'}';
 
     return Padding(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 12),
-      child: Column(
+      padding: const EdgeInsets.fromLTRB(20, 0, 12, 12),
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
-            'Comments',
-            style: AppTypography.display(20, color: AppColors.foreground),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Comments',
+                  style: AppTypography.display(20, color: AppColors.foreground),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  likers == null ? summary : '$summary · $likers',
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: _metaStyle,
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 2),
-          Text(
-            likers == null ? summary : '$summary · $likers',
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: _metaStyle,
-          ),
+          const SizedBox(width: 8),
+          const SheetCloseButton(),
         ],
       ),
     );
@@ -585,8 +594,9 @@ class _CommentTile extends StatelessWidget {
       children: [
         CircleAvatar(
           radius: 16,
-          backgroundColor:
-              comment.isCustomer ? AppColors.primary : AppColors.mist,
+          backgroundColor: comment.isCustomer
+              ? AppColors.primary
+              : AppColors.mist,
           child: comment.isCustomer
               ? Text(
                   name.isEmpty ? '?' : name.characters.first.toUpperCase(),

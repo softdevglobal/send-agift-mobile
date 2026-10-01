@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/sheet_header.dart';
 import '../../data/delivery_providers.dart';
 import '../../domain/delivery_intent.dart';
 import 'address_search_sheet.dart';
@@ -354,21 +355,11 @@ Future<ArrivalChoice?> showArrivalDateSheet(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Center(
-              child: Container(
-                width: 38,
-                height: 4,
-                decoration: BoxDecoration(
-                  color: AppColors.mist,
-                  borderRadius: BorderRadius.circular(99),
-                ),
-              ),
-            ),
             Padding(
-              padding: const EdgeInsets.fromLTRB(8, 14, 8, 10),
-              child: Text(
-                'When should it arrive?',
-                style: theme.textTheme.titleMedium,
+              padding: const EdgeInsets.fromLTRB(8, 0, 4, 10),
+              child: SheetHeader(
+                title: 'When should it arrive?',
+                titleStyle: theme.textTheme.titleMedium,
               ),
             ),
             option(
