@@ -6,6 +6,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/pressable_scale.dart';
 import '../../../../core/widgets/quantity_stepper.dart';
@@ -60,8 +61,10 @@ class AccountScreen extends ConsumerWidget {
                     ? _ProfileHero(
                         name: auth.displayName,
                         email: auth.email,
+                        imageUrl: auth.imageUrl,
                         points: points,
                         onPointsTap: () => context.push(AppRoutes.points),
+                        onEdit: () => context.push(AppRoutes.editProfile),
                       )
                     : const _GuestHero(),
               ),
@@ -341,12 +344,16 @@ class _ProfileHero extends StatelessWidget {
     required this.email,
     required this.points,
     required this.onPointsTap,
+    required this.onEdit,
+    this.imageUrl,
   });
 
   final String name;
   final String? email;
+  final String? imageUrl;
   final int? points;
   final VoidCallback onPointsTap;
+  final VoidCallback onEdit;
 
   String get _initials {
     final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
@@ -367,26 +374,36 @@ class _ProfileHero extends StatelessWidget {
         children: [
           Row(
             children: [
-              // Teal-to-white ring around the initials, echoing the plane.
-              Container(
-                padding: const EdgeInsets.all(2.5),
-                decoration: const BoxDecoration(
-                  shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    colors: [AppColors.teal, Colors.white],
-                  ),
-                ),
+              // Teal-to-white ring around the photo or initials, echoing
+              // the plane. Tapping it edits the profile.
+              GestureDetector(
+                onTap: onEdit,
                 child: Container(
-                  height: 58,
-                  width: 58,
+                  padding: const EdgeInsets.all(2.5),
                   decoration: const BoxDecoration(
-                    color: AppColors.accent,
                     shape: BoxShape.circle,
+                    gradient: LinearGradient(
+                      colors: [AppColors.teal, Colors.white],
+                    ),
                   ),
-                  alignment: Alignment.center,
-                  child: Text(
-                    _initials,
-                    style: AppTypography.display(22, color: AppColors.primary),
+                  child: Container(
+                    height: 58,
+                    width: 58,
+                    clipBehavior: Clip.antiAlias,
+                    decoration: const BoxDecoration(
+                      color: AppColors.accent,
+                      shape: BoxShape.circle,
+                    ),
+                    alignment: Alignment.center,
+                    child: imageUrl != null
+                        ? AppNetworkImage(url: imageUrl!, width: 58, height: 58)
+                        : Text(
+                            _initials,
+                            style: AppTypography.display(
+                              22,
+                              color: AppColors.primary,
+                            ),
+                          ),
                   ),
                 ),
               ),
@@ -417,6 +434,16 @@ class _ProfileHero extends StatelessWidget {
                     ],
                   ],
                 ),
+              ),
+              IconButton(
+                key: const Key('account-edit-profile'),
+                tooltip: 'Edit profile',
+                onPressed: onEdit,
+                style: IconButton.styleFrom(
+                  backgroundColor: Colors.white.withValues(alpha: 0.16),
+                  foregroundColor: Colors.white,
+                ),
+                icon: const Icon(Icons.edit_rounded, size: 18),
               ),
             ],
           ),

@@ -26,6 +26,16 @@ class AuthState {
   }
 
   String? get email => customer?['email'] as String?;
+
+  String? get phone => _text('phone');
+
+  /// The profile photo, when one is set.
+  String? get imageUrl => _text('image_url');
+
+  String? _text(String key) {
+    final value = customer?[key];
+    return value is String && value.trim().isNotEmpty ? value.trim() : null;
+  }
 }
 
 /// Session state. Guests are the default: nothing here blocks browsing, and
@@ -75,6 +85,13 @@ class AuthController extends StateNotifier<AuthState> {
       state = const AuthState();
       rethrow;
     }
+  }
+
+  /// Re-reads the profile after it was edited, so every screen shows the
+  /// new name, phone and photo.
+  Future<void> refresh() async {
+    if (!state.isSignedIn) return;
+    state = AuthState(customer: await _repository.me());
   }
 
   Future<void> logout() async {

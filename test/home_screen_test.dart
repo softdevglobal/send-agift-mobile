@@ -1,8 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:send_agift_mobile/features/games/data/games_providers.dart';
-import 'package:send_agift_mobile/features/games/domain/competition.dart';
 import 'package:send_agift_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:send_agift_mobile/features/products/data/catalog_providers.dart';
 import 'package:send_agift_mobile/features/products/data/sample_gifts.dart';
@@ -11,7 +9,7 @@ import 'package:send_agift_mobile/features/products/domain/gift.dart';
 import 'support/fake_auth.dart';
 
 void main() {
-  testWidgets('home greets the customer and shows their points', (
+  testWidgets('home greets the customer and shows the reward shelf', (
     tester,
   ) async {
     tester.view.physicalSize = const Size(390 * 3, 844 * 3);
@@ -40,14 +38,6 @@ void main() {
           catalogProvider.overrideWith(
             (ref) async => [...sampleGifts, rewarding],
           ),
-          pointsWalletProvider.overrideWith(
-            (ref) async => const PointsWallet(
-              balance: 200,
-              lifetimeEarned: 250,
-              lifetimeSpent: 50,
-              entries: [],
-            ),
-          ),
         ],
         child: const MaterialApp(home: HomeScreen()),
       ),
@@ -58,7 +48,7 @@ void main() {
     }
 
     expect(find.textContaining('Hi, '), findsOneWidget);
-    expect(find.text('200 pts'), findsOneWidget);
+    expect(find.text('Orders'), findsNothing);
     expect(find.text('The right gift, on the right day.'), findsOneWidget);
     await tester.scrollUntilVisible(
       find.text('Gifts that pay you back'),

@@ -24,6 +24,7 @@ import '../../features/products/presentation/screens/explore_screen.dart';
 import '../../features/products/presentation/screens/gift_detail_screen.dart';
 import '../../features/profile/presentation/screens/account_screen.dart';
 import '../../features/profile/presentation/screens/addresses_screen.dart';
+import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/help_centre_screen.dart';
 import '../../features/profile/presentation/screens/recipient_detail_screen.dart';
 import '../../features/profile/presentation/screens/recipients_screen.dart';
@@ -58,6 +59,7 @@ class AppRoutes {
   static const points = '/points';
 
   static const addresses = '/addresses';
+  static const editProfile = '/profile/edit';
   static const recipients = '/recipients';
   static const help = '/help';
   static const terms = '/terms';
@@ -389,6 +391,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.points,
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) => _fadePage(state, const PointsScreen()),
+      ),
+      GoRoute(
+        path: AppRoutes.editProfile,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            _fadePage(state, const EditProfileScreen()),
       ),
       GoRoute(
         path: AppRoutes.addresses,

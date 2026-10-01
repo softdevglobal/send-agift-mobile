@@ -9,12 +9,10 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_search_field.dart';
 import '../../../../core/widgets/brand_logo.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
-import '../../../../core/widgets/pressable_scale.dart';
 import '../../../../core/widgets/section_heading.dart';
 import '../../../auth/data/auth_controller.dart';
 import '../../../cart/data/cart_controller.dart';
 import '../../../delivery/presentation/widgets/gift_search_bar.dart';
-import '../../../games/data/games_providers.dart';
 import '../../../products/data/catalog_providers.dart';
 import '../../../products/domain/gift.dart';
 import '../../../products/presentation/widgets/gift_card.dart';
@@ -64,11 +62,6 @@ class HomeScreen extends ConsumerWidget {
               // The hero animates its own entrance in sequence, so it isn't
               // wrapped again here — everything after it cascades in behind.
               const HomeHero(),
-              const FadeSlideIn(
-                delay: Duration(milliseconds: 40),
-                child: _QuickActions(),
-              ),
-              const SizedBox(height: 30),
               const FadeSlideIn(
                 delay: Duration(milliseconds: 60),
                 child: FeatureBar(),
@@ -194,95 +187,6 @@ class _HomeTopBar extends ConsumerWidget {
             readOnly: true,
             onTap: () => context.go(AppRoutes.explore),
           ),
-        ],
-      ),
-    );
-  }
-}
-
-/// Four shortcuts to what people come back for, with the points balance
-/// live when signed in.
-class _QuickActions extends ConsumerWidget {
-  const _QuickActions();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final signedIn = ref.watch(authProvider.select((a) => a.isSignedIn));
-    final points = signedIn
-        ? ref.watch(pointsWalletProvider).valueOrNull?.balance
-        : null;
-
-    void open(String route) => context.push(signedIn ? route : AppRoutes.login);
-
-    final actions = [
-      (
-        'Orders',
-        Icons.local_shipping_rounded,
-        AppColors.primary,
-        () => context.push(AppRoutes.orders),
-      ),
-      (
-        'Recipients',
-        Icons.people_alt_rounded,
-        AppColors.purple,
-        () => open(AppRoutes.recipients),
-      ),
-      (
-        points == null ? 'Points' : '$points pts',
-        Icons.stars_rounded,
-        AppColors.star,
-        () => open(AppRoutes.points),
-      ),
-      (
-        'Games',
-        Icons.sports_esports_rounded,
-        AppColors.accentForeground,
-        () => context.push(AppRoutes.games),
-      ),
-    ];
-
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppTheme.gutter),
-      child: Row(
-        children: [
-          for (var i = 0; i < actions.length; i++) ...[
-            if (i > 0) const SizedBox(width: 10),
-            Expanded(
-              child: PressableScale(
-                onTap: actions[i].$4,
-                child: Column(
-                  children: [
-                    AspectRatio(
-                      aspectRatio: 1,
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: AppColors.categoryTints[i],
-                          borderRadius: BorderRadius.circular(
-                            AppTheme.radiusXl,
-                          ),
-                        ),
-                        child: Icon(
-                          actions[i].$2,
-                          color: actions[i].$3,
-                          size: 26,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      actions[i].$1,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                        color: AppColors.foreground,
-                        fontWeight: FontWeight.w600,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
         ],
       ),
     );

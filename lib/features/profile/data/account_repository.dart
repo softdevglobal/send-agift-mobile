@@ -1,6 +1,7 @@
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/errors/app_exception.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/providers.dart';
 import '../../auth/data/auth_controller.dart';
@@ -60,6 +61,76 @@ class AccountRepository {
   AccountRepository(this._client);
 
   final ApiClient _client;
+
+  /// Talks to the presigned storage URL directly — no base URL and no API
+  /// auth header, which the storage service would reject.
+  final Dio _storage = Dio(
+    BaseOptions(
+      connectTimeout: const Duration(seconds: 20),
+      sendTimeout: const Duration(seconds: 60),
+      receiveTimeout: const Duration(seconds: 30),
+    ),
+  );
+
+  /// Saves the editable parts of the profile. Email is not one of them: it
+  /// is how the customer signs in. An empty phone clears it; a null photo
+  /// leaves it alone and an empty one removes it.
+  Future<void> updateProfile({
+    required String displayName,
+    required String phone,
+    String? imageUrl,
+  }) => _call(() async {
+    await _client.dio.put<dynamic>(
+      '/customers/me',
+      data: {
+        'display_name': displayName.trim(),
+        'phone': phone.trim(),
+        'image_url': ?imageUrl,
+      },
+    );
+  });
+
+  /// Presign → PUT → the photo's public address.
+  Future<String> uploadProfilePhoto({
+    required String fileName,
+    required String mimeType,
+    required List<int> bytes,
+  }) async {
+    final cleaned = fileName.replaceAll(RegExp(r'[^A-Za-z0-9._-]+'), '_');
+    final Map<String, dynamic> presign;
+    try {
+      final response = await _client.dio.post<Map<String, dynamic>>(
+        '/media/presign-upload',
+        data: {
+          'filename': cleaned.isEmpty ? 'profile.jpg' : cleaned,
+          'content_type': mimeType,
+          'folder': 'customer-profile',
+        },
+      );
+      presign = response.data ?? const {};
+    } on DioException catch (error) {
+      throw _client.mapError(error);
+    }
+    final uploadUrl = presign['upload_url'] as String? ?? '';
+    final publicUrl = presign['public_url'] as String? ?? '';
+    if (uploadUrl.isEmpty || publicUrl.isEmpty) {
+      throw const AppException('Could not prepare the upload.');
+    }
+    try {
+      await _storage.put<void>(
+        uploadUrl,
+        data: Stream<List<int>>.value(bytes),
+        options: Options(
+          // Must match the content type the URL was signed for.
+          contentType: mimeType,
+          headers: {Headers.contentLengthHeader: bytes.length},
+        ),
+      );
+    } on DioException {
+      throw const AppException('Could not upload the photo. Please try again.');
+    }
+    return publicUrl;
+  }
 
   Future<T> _call<T>(Future<T> Function() run) async {
     try {
