@@ -16,7 +16,9 @@ class CheckoutRepository {
   /// Saved recipients. Names only — addresses come from [getRecipient].
   Future<List<Recipient>> listRecipients() async {
     try {
-      final response = await _client.dio.get<dynamic>('/customers/me/recipients');
+      final response = await _client.dio.get<dynamic>(
+        '/customers/me/recipients',
+      );
       final data = response.data;
       if (data is! List) return const [];
       return data
@@ -55,6 +57,9 @@ class CheckoutRepository {
     String? postalCode,
     double? latitude,
     double? longitude,
+    String? label,
+    String addressType = 'shipping',
+    bool isDefault = true,
   }) async {
     String? optional(String? value) =>
         value == null || value.trim().isEmpty ? null : value.trim();
@@ -68,7 +73,8 @@ class CheckoutRepository {
           'addresses': [
             {
               'country_id': countryId,
-              'address_type': 'shipping',
+              'label': optional(label),
+              'address_type': optional(addressType) ?? 'shipping',
               'line1': line1.trim(),
               'line2': optional(line2),
               'city': city.trim(),
@@ -76,7 +82,7 @@ class CheckoutRepository {
               'postal_code': optional(postalCode),
               'latitude': latitude,
               'longitude': longitude,
-              'is_default': true,
+              'is_default': isDefault,
             },
           ],
         },
@@ -152,7 +158,9 @@ class CheckoutRepository {
   /// address does not supply one.
   Future<String> myCountryId() async {
     try {
-      final response = await _client.dio.get<Map<String, dynamic>>('/customers/me');
+      final response = await _client.dio.get<Map<String, dynamic>>(
+        '/customers/me',
+      );
       return response.data?['country_id'] as String? ?? '';
     } on DioException catch (error) {
       throw _client.mapError(error);
@@ -169,7 +177,9 @@ final checkoutRepositoryProvider = Provider<CheckoutRepository>((ref) {
   return CheckoutRepository(ref.watch(apiClientProvider));
 });
 
-final recipientsProvider = FutureProvider.autoDispose<List<Recipient>>((ref) async {
+final recipientsProvider = FutureProvider.autoDispose<List<Recipient>>((
+  ref,
+) async {
   final signedIn = ref.watch(authProvider.select((auth) => auth.isSignedIn));
   if (!signedIn) return const [];
   return ref.watch(checkoutRepositoryProvider).listRecipients();

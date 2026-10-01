@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -13,10 +15,12 @@ import '../../../auth/data/auth_controller.dart';
 import '../../../checkout/data/checkout_repository.dart';
 import '../../../checkout/domain/checkout.dart';
 import '../../../checkout/presentation/widgets/delivery_summary.dart';
+import '../../../checkout/presentation/widgets/new_recipient_sheet.dart';
 import '../../../checkout/presentation/widgets/recipient_picker.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/widgets/reward_points_badge.dart';
 import '../../../delivery/data/delivery_providers.dart';
+import '../../../delivery/domain/delivery_intent.dart';
 import '../../data/cart_controller.dart';
 import '../../domain/cart_item.dart';
 
@@ -53,9 +57,77 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   /// slower earlier request never overwrites a newer one.
   String _quoteToken = '';
 
+  /// The address searched for before checkout is applied once, when the
+  /// customer's recipients have loaded.
+  bool _intentHandled = false;
+
+  /// Carries the searched address into checkout: a recipient already saved
+  /// at that address is picked, with their details; otherwise the new
+  /// recipient form opens with the address filled in, asking only for who
+  /// lives there.
+  Future<void> _applySearchedAddress(List<Recipient> saved) async {
+    final intent = ref.read(deliveryIntentProvider);
+    if (intent == null || !intent.hasAddress) return;
+
+    final repository = ref.read(checkoutRepositoryProvider);
+    Recipient? match;
+    try {
+      // The list does not carry addresses, so read each recipient in full.
+      final all = await Future.wait(
+        saved.map((recipient) => repository.getRecipient(recipient.id)),
+      );
+      for (final recipient in all) {
+        if (recipient.addresses.any((a) => _sameAddress(intent, a))) {
+          match = recipient;
+          break;
+        }
+      }
+    } on AppException {
+      // Could not compare: fall through to asking for a new recipient.
+    }
+    if (!mounted || _recipientId != null) return;
+    if (match != null) {
+      setState(() => _recipientId = match!.id);
+      return;
+    }
+    final created = await showNewRecipientSheet(context);
+    if (created != null && mounted) setState(() => _recipientId = created.id);
+  }
+
+  /// Within about 100 m when both have a map point, else the same street and
+  /// city.
+  static bool _sameAddress(DeliveryIntent intent, RecipientAddress address) {
+    if (intent.hasPoint && address.hasPoint) {
+      const earthRadius = 6371000.0;
+      double rad(double deg) => deg * math.pi / 180;
+      final dLat = rad(address.latitude! - intent.latitude!);
+      final dLng = rad(address.longitude! - intent.longitude!);
+      final a =
+          math.pow(math.sin(dLat / 2), 2) +
+          math.cos(rad(intent.latitude!)) *
+              math.cos(rad(address.latitude!)) *
+              math.pow(math.sin(dLng / 2), 2);
+      final meters = 2 * earthRadius * math.asin(math.sqrt(a));
+      return meters <= 100;
+    }
+    String norm(String? v) =>
+        (v ?? '').toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+    final line1 = norm(intent.line1 ?? intent.address);
+    return line1.isNotEmpty &&
+        norm(address.line1) == line1 &&
+        norm(address.city) == norm(intent.city);
+  }
+
   @override
   Widget build(BuildContext context) {
     final auth = ref.watch(authProvider);
+    final recipients = ref.watch(recipientsProvider).valueOrNull;
+    if (auth.isSignedIn && !_intentHandled && recipients != null) {
+      _intentHandled = true;
+      WidgetsBinding.instance.addPostFrameCallback(
+        (_) => _applySearchedAddress(recipients),
+      );
+    }
     final summary = ref.watch(cartSummaryProvider);
     final lines = ref.watch(cartLinesProvider).valueOrNull ?? const [];
 

@@ -76,8 +76,7 @@ class Recipient {
   final String? defaultAddressId;
   final List<RecipientAddress> addresses;
 
-  String get label =>
-      relationship == null || relationship!.trim().isEmpty
+  String get label => relationship == null || relationship!.trim().isEmpty
       ? name
       : '$name · $relationship';
 
@@ -128,6 +127,7 @@ class QuotedShipment {
   /// Minor units, in [currency].
   final int amount;
   final String currency;
+
   /// Days the shop needs; 0 is same day.
   final int estimatedDays;
 
