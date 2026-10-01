@@ -169,14 +169,14 @@ class AccountScreen extends ConsumerWidget {
                     color: AppColors.purple,
                     label: 'Recipients',
                     subtitle: 'People you send gifts to',
-                    onTap: () => _requiresAccount(context, auth.isSignedIn),
+                    onTap: () => signedInOnly(AppRoutes.recipients),
                   ),
                   _MenuItem(
                     icon: Icons.location_on_outlined,
                     color: AppColors.accentForeground,
                     label: 'Addresses',
                     subtitle: 'Delivery and return addresses',
-                    onTap: () => _requiresAccount(context, auth.isSignedIn),
+                    onTap: () => signedInOnly(AppRoutes.addresses),
                   ),
                 ],
               ),
@@ -192,13 +192,13 @@ class AccountScreen extends ConsumerWidget {
                     color: AppColors.primary,
                     label: 'Help centre',
                     subtitle: 'Orders, points, and competitions',
-                    onTap: () => _notYetAvailable(context),
+                    onTap: () => context.push(AppRoutes.help),
                   ),
                   _MenuItem(
                     icon: Icons.description_outlined,
                     color: AppColors.mutedForeground,
                     label: 'Terms & privacy',
-                    onTap: () => _notYetAvailable(context),
+                    onTap: () => context.push(AppRoutes.terms),
                   ),
                   if (auth.isSignedIn)
                     _MenuItem(
@@ -222,20 +222,6 @@ class AccountScreen extends ConsumerWidget {
     if (value < 10000) return '$value';
     if (value < 1000000) return '${(value / 1000).toStringAsFixed(1)}k';
     return '${(value / 1000000).toStringAsFixed(1)}m';
-  }
-
-  static void _requiresAccount(BuildContext context, bool isSignedIn) {
-    if (!isSignedIn) {
-      context.push(AppRoutes.login);
-      return;
-    }
-    _notYetAvailable(context);
-  }
-
-  static void _notYetAvailable(BuildContext context) {
-    ScaffoldMessenger.of(context)
-      ..hideCurrentSnackBar()
-      ..showSnackBar(const SnackBar(content: Text('Coming soon.')));
   }
 
   static Future<void> _confirmSignOut(
@@ -339,7 +325,10 @@ class _Glow extends StatelessWidget {
       decoration: BoxDecoration(
         shape: BoxShape.circle,
         gradient: RadialGradient(
-          colors: [color.withValues(alpha: alpha), color.withValues(alpha: 0)],
+          colors: [
+            color.withValues(alpha: alpha),
+            color.withValues(alpha: 0),
+          ],
         ),
       ),
     );
@@ -362,10 +351,7 @@ class _ProfileHero extends StatelessWidget {
   String get _initials {
     final parts = name.trim().split(RegExp(r'\s+')).where((p) => p.isNotEmpty);
     if (parts.isEmpty) return '?';
-    return parts
-        .take(2)
-        .map((p) => p.characters.first.toUpperCase())
-        .join();
+    return parts.take(2).map((p) => p.characters.first.toUpperCase()).join();
   }
 
   String get _firstName {
@@ -400,10 +386,7 @@ class _ProfileHero extends StatelessWidget {
                   alignment: Alignment.center,
                   child: Text(
                     _initials,
-                    style: AppTypography.display(
-                      22,
-                      color: AppColors.primary,
-                    ),
+                    style: AppTypography.display(22, color: AppColors.primary),
                   ),
                 ),
               ),
@@ -711,10 +694,7 @@ class _MenuItem extends StatelessWidget {
             if (badge > 0) ...[
               const SizedBox(width: 8),
               Container(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: 8,
-                  vertical: 3,
-                ),
+                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
                 decoration: BoxDecoration(
                   color: AppColors.purple,
                   borderRadius: BorderRadius.circular(999),

@@ -23,6 +23,11 @@ import '../../features/reviews/presentation/screens/my_reviews_screen.dart';
 import '../../features/products/presentation/screens/explore_screen.dart';
 import '../../features/products/presentation/screens/gift_detail_screen.dart';
 import '../../features/profile/presentation/screens/account_screen.dart';
+import '../../features/profile/presentation/screens/addresses_screen.dart';
+import '../../features/profile/presentation/screens/help_centre_screen.dart';
+import '../../features/profile/presentation/screens/recipient_detail_screen.dart';
+import '../../features/profile/presentation/screens/recipients_screen.dart';
+import '../../features/profile/presentation/screens/terms_screen.dart';
 import '../../features/reels/presentation/screens/reels_screen.dart';
 import '../../features/saved/presentation/screens/saved_screen.dart';
 
@@ -51,6 +56,13 @@ class AppRoutes {
 
   /// The customer's SendAgift Points balance and history.
   static const points = '/points';
+
+  static const addresses = '/addresses';
+  static const recipients = '/recipients';
+  static const help = '/help';
+  static const terms = '/terms';
+
+  static String recipientPath(String id) => '$recipients/$id';
 
   static String chatPath(String conversationId) => '$messages/$conversationId';
 
@@ -330,10 +342,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           if (definition == null) {
             return _fadePage(state, const GamesScreen());
           }
-          return _gameWindowPage(
-            state,
-            GamePlayScreen(definition: definition),
-          );
+          return _gameWindowPage(state, GamePlayScreen(definition: definition));
         },
       ),
       GoRoute(
@@ -380,6 +389,37 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.points,
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) => _fadePage(state, const PointsScreen()),
+      ),
+      GoRoute(
+        path: AppRoutes.addresses,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            _fadePage(state, const AddressesScreen()),
+      ),
+      GoRoute(
+        path: AppRoutes.recipients,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            _fadePage(state, const RecipientsScreen()),
+      ),
+      GoRoute(
+        path: '${AppRoutes.recipients}/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          RecipientDetailScreen(recipientId: state.pathParameters['id'] ?? ''),
+        ),
+      ),
+      GoRoute(
+        path: AppRoutes.help,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            _fadePage(state, const HelpCentreScreen()),
+      ),
+      GoRoute(
+        path: AppRoutes.terms,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => _fadePage(state, const TermsScreen()),
       ),
       GoRoute(
         path: AppRoutes.login,

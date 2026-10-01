@@ -1,6 +1,7 @@
 // Checkout models: who a gift goes to, and what delivery will cost.
 
-/// A saved recipient's delivery address.
+/// A saved delivery address: a recipient's, or the customer's own (the API
+/// returns the same shape for both).
 class RecipientAddress {
   const RecipientAddress({
     required this.id,
@@ -12,7 +13,24 @@ class RecipientAddress {
     this.postalCode,
     this.latitude,
     this.longitude,
+    this.label,
+    this.addressType = 'shipping',
+    this.isDefault = false,
   });
+
+  /// What the customer calls it, e.g. "Home" or "Office".
+  final String? label;
+  final String addressType;
+  final bool isDefault;
+
+  /// The label, else the address type, for a heading.
+  String get title {
+    final named = label?.trim() ?? '';
+    if (named.isNotEmpty) return named;
+    final type = addressType.trim();
+    if (type.isEmpty) return 'Address';
+    return type[0].toUpperCase() + type.substring(1);
+  }
 
   final String id;
   final String countryId;
@@ -49,6 +67,9 @@ class RecipientAddress {
       postalCode: json['postal_code'] as String?,
       latitude: (json['latitude'] as num?)?.toDouble(),
       longitude: (json['longitude'] as num?)?.toDouble(),
+      label: json['label'] as String?,
+      addressType: json['address_type'] as String? ?? 'shipping',
+      isDefault: json['is_default'] as bool? ?? false,
     );
   }
 }
@@ -63,8 +84,15 @@ class Recipient {
     this.email,
     this.phone,
     this.defaultAddressId,
+    this.imageUrl,
+    this.preferences = const {},
     this.addresses = const [],
   });
+
+  /// Kept only so an update sends them back unchanged: the API replaces
+  /// every field on update.
+  final String? imageUrl;
+  final Map<String, dynamic> preferences;
 
   final String id;
   final String name;
@@ -98,6 +126,10 @@ class Recipient {
       email: json['email'] as String?,
       phone: json['phone'] as String?,
       defaultAddressId: json['default_address_id'] as String?,
+      imageUrl: json['image_url'] as String?,
+      preferences: json['preferences'] is Map<String, dynamic>
+          ? json['preferences'] as Map<String, dynamic>
+          : const {},
       addresses: raw is List
           ? raw
                 .whereType<Map<String, dynamic>>()

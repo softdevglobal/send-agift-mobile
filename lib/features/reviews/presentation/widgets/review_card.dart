@@ -121,19 +121,28 @@ class ReviewCard extends StatelessWidget {
             _SellerReply(review: review, reply: reply),
           ],
           const SizedBox(height: 12),
-          Row(
+          // One line when it fits; on a narrow phone or with large text the
+          // edit and delete buttons drop below instead of overflowing.
+          OverflowBar(
+            alignment: MainAxisAlignment.spaceBetween,
+            overflowAlignment: OverflowBarAlignment.end,
             children: [
               _HelpfulButton(review: review, onVote: onVote),
-              const Spacer(),
-              if (onEdit != null)
-                TextButton(onPressed: onEdit, child: const Text('Edit')),
-              if (onDelete != null)
-                TextButton(
-                  onPressed: onDelete,
-                  style: TextButton.styleFrom(
-                    foregroundColor: AppColors.destructive,
-                  ),
-                  child: const Text('Delete'),
+              if (onEdit != null || onDelete != null)
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    if (onEdit != null)
+                      TextButton(onPressed: onEdit, child: const Text('Edit')),
+                    if (onDelete != null)
+                      TextButton(
+                        onPressed: onDelete,
+                        style: TextButton.styleFrom(
+                          foregroundColor: AppColors.destructive,
+                        ),
+                        child: const Text('Delete'),
+                      ),
+                  ],
                 ),
             ],
           ),
