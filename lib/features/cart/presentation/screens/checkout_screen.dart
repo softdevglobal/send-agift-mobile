@@ -17,7 +17,6 @@ import '../../../checkout/presentation/widgets/recipient_picker.dart';
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/widgets/reward_points_badge.dart';
 import '../../../delivery/data/delivery_providers.dart';
-import '../../../games/data/games_providers.dart';
 import '../../data/cart_controller.dart';
 import '../../domain/cart_item.dart';
 
@@ -49,17 +48,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   bool _quoting = false;
   bool _placing = false;
   String? _error;
-
-  /// Points from the customer's balance to send with the gift.
-  final _giftPoints = TextEditingController();
-
-  @override
-  void dispose() {
-    _giftPoints.dispose();
-    super.dispose();
-  }
-
-  int get _giftPointsValue => int.tryParse(_giftPoints.text.trim()) ?? 0;
 
   /// Identifies the inputs a quote was made for, so a stale response from a
   /// slower earlier request never overwrites a newer one.
@@ -189,7 +177,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         onChanged: (value) =>
                             setState(() => _recipientId = value),
                       ),
-                      if (_recipientId != null) _giftPointsField(context),
                     ],
                   ),
                 ),
@@ -324,59 +311,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     (sum, line) => sum + line.gift.rewardPoints * line.quantity,
   );
 
-  /// Sends points with the gift, when the customer has any. They reach the
-  /// recipient's account on delivery, matched by email, or come back.
-  Widget _giftPointsField(BuildContext context) {
-    final balance = ref.watch(pointsWalletProvider).valueOrNull?.balance ?? 0;
-    if (balance <= 0) return const SizedBox.shrink();
-    final value = _giftPointsValue;
-    final tooMany = value > balance;
-    return Padding(
-      padding: const EdgeInsets.only(top: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              const Icon(Icons.stars_rounded, size: 18, color: AppColors.star),
-              const SizedBox(width: 8),
-              Expanded(
-                child: Text(
-                  'Add points to this gift',
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-              ),
-              Text(
-                'You have $balance',
-                style: Theme.of(context).textTheme.bodySmall,
-              ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          TextField(
-            key: const Key('checkout-gift-points'),
-            controller: _giftPoints,
-            keyboardType: TextInputType.number,
-            decoration: const InputDecoration(hintText: '0', isDense: true),
-            onChanged: (_) => setState(() {}),
-          ),
-          const SizedBox(height: 6),
-          Text(
-            tooMany
-                ? 'You have $balance points.'
-                : 'They reach the recipient\'s SendAGift account (matched by '
-                      'email) when the gift is delivered, or come back to you.',
-            style: Theme.of(context).textTheme.bodySmall?.copyWith(
-              color: tooMany
-                  ? AppColors.destructive
-                  : AppColors.mutedForeground,
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
   static bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;
 
@@ -435,12 +369,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (lines.isEmpty) return;
     final recipientId = _recipientId;
     if (recipientId == null || _blocker != null) return;
-    final balance = ref.read(pointsWalletProvider).valueOrNull?.balance ?? 0;
-    final giftPoints = _giftPointsValue;
-    if (giftPoints > balance) {
-      setState(() => _error = 'You have $balance points to send.');
-      return;
-    }
     setState(() {
       _placing = true;
       _error = null;
@@ -460,11 +388,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         deliveryDate: _deliveryDate,
         lines: lines,
         recipientId: recipientId,
-        giftPoints: giftPoints,
       );
 
       ref.read(cartProvider.notifier).clear();
-      if (giftPoints > 0) ref.invalidate(pointsWalletProvider);
       if (!mounted) return;
       context.go('${AppRoutes.orders}/$orderId');
     } on AppException catch (error) {
