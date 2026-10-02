@@ -114,16 +114,4 @@ void main() {
       expect(find.text('You · #12'), findsOneWidget);
     });
   }
-
-  testWidgets('filters narrow the cards', (tester) async {
-    await _pump(tester, const Size(390, 844));
-    await tester.ensureVisible(find.text('Results'));
-    await tester.pump();
-    await tester.tap(find.text('Results'));
-    for (var i = 0; i < 6; i++) {
-      await tester.pump(const Duration(milliseconds: 60));
-    }
-    expect(find.text('Won by Sarah M.'), findsOneWidget);
-    expect(find.text('ENDS IN'), findsNothing);
-  });
 }

@@ -12,27 +12,10 @@ import '../../domain/competition.dart';
 import '../game_visuals.dart';
 import 'countdown.dart';
 
-enum _Filter { all, live, upcoming, ended }
-
-extension on _Filter {
-  String get label => switch (this) {
-    _Filter.all => 'All',
-    _Filter.live => 'Live now',
-    _Filter.upcoming => 'Coming up',
-    _Filter.ended => 'Results',
-  };
-
-  bool matches(Competition c) => switch (this) {
-    _Filter.all => true,
-    _Filter.live => c.isLive || c.isPaused,
-    _Filter.upcoming => c.isUpcoming,
-    _Filter.ended => !(c.isLive || c.isPaused || c.isUpcoming),
-  };
-}
-
 /// The competitions at the top of the game zone: a swipeable stage of big
-/// prize cards with live countdowns, filtered by live, upcoming and results.
-/// Stays out of the way when there are none — the games still work.
+/// prize cards with live countdowns. Customers are only sent live
+/// competitions (and any prize they have yet to claim). Stays out of the way
+/// when there are none — the games still work.
 class CompetitionsArena extends ConsumerStatefulWidget {
   const CompetitionsArena({super.key});
 
@@ -42,7 +25,6 @@ class CompetitionsArena extends ConsumerStatefulWidget {
 
 class _CompetitionsArenaState extends ConsumerState<CompetitionsArena> {
   final _pages = PageController(viewportFraction: 0.86);
-  _Filter _filter = _Filter.all;
   double _page = 0;
 
   @override
@@ -59,14 +41,6 @@ class _CompetitionsArenaState extends ConsumerState<CompetitionsArena> {
     super.dispose();
   }
 
-  void _choose(_Filter f) {
-    setState(() {
-      _filter = f;
-      _page = 0;
-    });
-    if (_pages.hasClients) _pages.jumpToPage(0);
-  }
-
   Future<void> _open(Competition c) async {
     await context.push(AppRoutes.competitionPath(c.id));
     if (mounted) ref.invalidate(competitionsProvider);
@@ -77,11 +51,7 @@ class _CompetitionsArenaState extends ConsumerState<CompetitionsArena> {
     final all = ref.watch(competitionsProvider).valueOrNull;
     if (all == null || all.isEmpty) return const SizedBox.shrink();
 
-    final live = all.where(_Filter.live.matches).length;
-    final filters = _Filter.values
-        .where((f) => f == _Filter.all || all.any(f.matches))
-        .toList(growable: false);
-    final shown = all.where(_filter.matches).toList(growable: false);
+    final live = all.where((c) => c.isLive).length;
 
     return Padding(
       padding: const EdgeInsets.only(top: 22),
@@ -119,70 +89,14 @@ class _CompetitionsArenaState extends ConsumerState<CompetitionsArena> {
             ),
           ),
           const SizedBox(height: 12),
-          if (filters.length > 2)
-            SizedBox(
-              height: 36,
-              // Only a handful of chips, so all are built (no lazy list).
-              child: SingleChildScrollView(
-                scrollDirection: Axis.horizontal,
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.gutter,
-                ),
-                child: Row(
-                  children: [
-                    for (final f in filters)
-                      Padding(
-                        padding: const EdgeInsets.only(right: 8),
-                        child: GestureDetector(
-                          onTap: () => _choose(f),
-                          child: AnimatedContainer(
-                            duration: const Duration(milliseconds: 200),
-                            padding: const EdgeInsets.symmetric(horizontal: 14),
-                            alignment: Alignment.center,
-                            decoration: BoxDecoration(
-                              color: f == _filter
-                                  ? AppColors.foreground
-                                  : AppColors.surface,
-                              borderRadius: BorderRadius.circular(20),
-                              border: Border.all(
-                                color: f == _filter
-                                    ? AppColors.foreground
-                                    : AppColors.border,
-                              ),
-                            ),
-                            child: Text(
-                              f.label,
-                              style: TextStyle(
-                                color: f == _filter
-                                    ? Colors.white
-                                    : AppColors.foreground,
-                                fontWeight: FontWeight.w700,
-                                fontSize: 13,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ),
-                  ],
-                ),
-              ),
-            ),
           const SizedBox(height: 14),
-          if (shown.isEmpty)
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: AppTheme.gutter),
-              child: Text(
-                'Nothing here right now.',
-                style: Theme.of(context).textTheme.bodyMedium,
-              ),
-            )
-          else ...[
+          ...[
             SizedBox(
               height: 268,
               child: PageView.builder(
                 controller: _pages,
-                itemCount: shown.length,
-                padEnds: shown.length == 1,
+                itemCount: all.length,
+                padEnds: all.length == 1,
                 itemBuilder: (context, i) {
                   // Cards beside the centre one sit a little smaller and
                   // lower, so the stage reads as a carousel.
@@ -193,14 +107,12 @@ class _CompetitionsArenaState extends ConsumerState<CompetitionsArena> {
                       scale: 1 - 0.06 * t,
                       child: Padding(
                         padding: EdgeInsets.only(
-                          left: i == 0 && shown.length > 1
-                              ? AppTheme.gutter
-                              : 6,
+                          left: i == 0 && all.length > 1 ? AppTheme.gutter : 6,
                           right: 6,
                         ),
                         child: _PrizeCard(
-                          competition: shown[i],
-                          onTap: () => _open(shown[i]),
+                          competition: all[i],
+                          onTap: () => _open(all[i]),
                         ),
                       ),
                     ),
@@ -208,12 +120,12 @@ class _CompetitionsArenaState extends ConsumerState<CompetitionsArena> {
                 },
               ),
             ),
-            if (shown.length > 1) ...[
+            if (all.length > 1) ...[
               const SizedBox(height: 12),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  for (var i = 0; i < shown.length; i++)
+                  for (var i = 0; i < all.length; i++)
                     AnimatedContainer(
                       duration: const Duration(milliseconds: 220),
                       margin: const EdgeInsets.symmetric(horizontal: 3),
