@@ -5,6 +5,7 @@ import '../core/notifications/push_notifications.dart';
 import '../core/router/app_router.dart';
 import '../core/theme/app_theme.dart';
 import '../features/auth/data/auth_controller.dart';
+import '../features/notifications/data/notifications_repository.dart';
 
 class SendAGiftApp extends ConsumerStatefulWidget {
   const SendAGiftApp({super.key});
@@ -14,10 +15,26 @@ class SendAGiftApp extends ConsumerStatefulWidget {
 }
 
 class _SendAGiftAppState extends ConsumerState<SendAGiftApp> {
+  late final AppLifecycleListener _lifecycle;
+
   @override
   void initState() {
     super.initState();
     ref.read(pushNotificationsProvider).start(ref.read(appRouterProvider));
+    // Back from the background: a notification may have come in meanwhile,
+    // so the bell's count is re-read and anything new is shown.
+    _lifecycle = AppLifecycleListener(
+      onResume: () {
+        ref.invalidate(notificationInboxProvider);
+        ref.read(pushNotificationsProvider).catchUp();
+      },
+    );
+  }
+
+  @override
+  void dispose() {
+    _lifecycle.dispose();
+    super.dispose();
   }
 
   @override

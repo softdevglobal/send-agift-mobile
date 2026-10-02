@@ -15,7 +15,7 @@ import '../../domain/game.dart';
 import '../game_definitions.dart';
 import '../game_visuals.dart';
 import '../widgets/game_art.dart';
-import '../widgets/competition_card.dart';
+import '../widgets/competitions_arena.dart';
 
 /// The game zone: every skill game as a colourful tile.
 class GamesScreen extends ConsumerWidget {
@@ -45,7 +45,7 @@ class GamesScreen extends ConsumerWidget {
               ),
               sliver: SliverToBoxAdapter(child: _Header()),
             ),
-            const SliverToBoxAdapter(child: _CompetitionsStrip()),
+            const SliverToBoxAdapter(child: CompetitionsArena()),
             ...games.when<List<Widget>>(
               loading: () => const [
                 SliverFillRemaining(
@@ -199,68 +199,6 @@ class _PointsBanner extends ConsumerWidget {
             ),
           ],
         ),
-      ),
-    );
-  }
-}
-
-/// Live and upcoming competitions, above the games. Stays out of the way
-/// when there are none or they cannot be loaded — the games still work.
-class _CompetitionsStrip extends ConsumerWidget {
-  const _CompetitionsStrip();
-
-  @override
-  Widget build(BuildContext context, WidgetRef ref) {
-    final items = ref.watch(competitionsProvider).valueOrNull;
-    if (items == null || items.isEmpty) return const SizedBox.shrink();
-
-    return Padding(
-      padding: const EdgeInsets.only(top: 20),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Padding(
-            padding: const EdgeInsets.symmetric(horizontal: AppTheme.gutter),
-            child: Row(
-              children: [
-                const Icon(Icons.emoji_events_rounded, color: AppColors.star),
-                const SizedBox(width: 6),
-                Text('Competitions', style: AppTypography.display(22)),
-              ],
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.fromLTRB(
-              AppTheme.gutter,
-              2,
-              AppTheme.gutter,
-              12,
-            ),
-            child: Text(
-              'Pre-funded prizes. Same board for everyone — the best verified '
-              'score wins.',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ),
-          SizedBox(
-            height: 176,
-            child: ListView.separated(
-              scrollDirection: Axis.horizontal,
-              padding: const EdgeInsets.symmetric(horizontal: AppTheme.gutter),
-              itemCount: items.length,
-              separatorBuilder: (_, _) => const SizedBox(width: 12),
-              itemBuilder: (context, index) => CompetitionCard(
-                competition: items[index],
-                onTap: () async {
-                  await context.push(
-                    AppRoutes.competitionPath(items[index].id),
-                  );
-                  if (context.mounted) ref.invalidate(competitionsProvider);
-                },
-              ),
-            ),
-          ),
-        ],
       ),
     );
   }

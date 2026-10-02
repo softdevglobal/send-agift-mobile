@@ -172,7 +172,7 @@ class _ChancePlayScreenState extends ConsumerState<ChancePlayScreen> {
     final canPlayAgain =
         _revealed &&
         !(result?.won ?? false) &&
-        play.attemptsRemaining > 0 &&
+        play.attemptsRemaining != 0 && // -1: no limit
         play.walletPointsRemaining >= cost &&
         (competition?.isLive ?? true);
 

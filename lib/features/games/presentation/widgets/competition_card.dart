@@ -191,7 +191,7 @@ class _TimeLine extends StatelessWidget {
       fontSize: 12.5,
       fontWeight: FontWeight.w600,
     );
-    final attempts = me != null && c.isLive
+    final attempts = me != null && c.isLive && !c.unlimitedPlays
         ? ' · ${me.attemptsRemaining} of ${c.maxAttempts} left'
         : '';
 

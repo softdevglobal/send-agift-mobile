@@ -13,6 +13,7 @@ import '../../../../core/widgets/section_heading.dart';
 import '../../../auth/data/auth_controller.dart';
 import '../../../cart/data/cart_controller.dart';
 import '../../../delivery/presentation/widgets/gift_search_bar.dart';
+import '../../../notifications/data/notifications_repository.dart';
 import '../../../products/data/catalog_providers.dart';
 import '../../../products/domain/gift.dart';
 import '../../../products/presentation/widgets/gift_card.dart';
@@ -125,6 +126,7 @@ class _HomeTopBar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final cartCount = ref.watch(cartCountProvider);
+    final unread = ref.watch(unreadNotificationsProvider);
     final auth = ref.watch(authProvider);
     final first = auth.isSignedIn
         ? auth.displayName.trim().split(RegExp(r'\s+')).first
@@ -161,6 +163,24 @@ class _HomeTopBar extends ConsumerWidget {
                   ],
                 ),
               ),
+              // New competitions and other news; the badge counts unread.
+              IconButton(
+                onPressed: () => context.push(AppRoutes.notifications),
+                style: IconButton.styleFrom(
+                  backgroundColor: AppColors.surface,
+                  side: const BorderSide(color: AppColors.border),
+                ),
+                icon: Badge(
+                  label: Text(unread > 9 ? '9+' : '$unread'),
+                  isLabelVisible: unread > 0,
+                  backgroundColor: AppColors.teal,
+                  textColor: AppColors.tealForeground,
+                  child: const Icon(Icons.notifications_none_rounded),
+                ),
+                color: AppColors.foreground,
+                tooltip: 'Notifications',
+              ),
+              const SizedBox(width: 8),
               // Cart isn't a tab — this is the one place it's always in
               // reach, opening as a panel over whatever's on screen.
               IconButton(

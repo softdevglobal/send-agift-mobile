@@ -221,7 +221,7 @@ class _CompetitionViewState extends ConsumerState<_CompetitionView> {
     if (me == null) {
       // Only signed-in customers get a "me" block back from the server.
       label = 'Sign in to play';
-      note = 'Competitions are for signed-in players aged ${c.minAge}+.';
+      note = 'Sign in to play this competition.';
       icon = Icons.login_rounded;
       onPressed = () async {
         await context.push(AppRoutes.login);
@@ -243,7 +243,7 @@ class _CompetitionViewState extends ConsumerState<_CompetitionView> {
       label = 'Not eligible';
       note = me.ineligibleReason;
       icon = Icons.block_rounded;
-    } else if (me.attemptsRemaining <= 0) {
+    } else if (me.attemptsRemaining == 0) {
       label = 'No plays left';
       note = c.isChance
           ? 'You have used every play in this round.'
@@ -275,9 +275,10 @@ class _CompetitionViewState extends ConsumerState<_CompetitionView> {
       final daily = me.playsLeftToday == null
           ? ''
           : ' · ${me.playsLeftToday} today';
-      note =
-          '${me.attemptsRemaining} of ${c.maxAttempts} plays left$daily · '
-          '${me.pointsBalance} points';
+      note = c.unlimitedPlays
+          ? 'Play as often as you like$daily · ${me.pointsBalance} points'
+          : '${me.attemptsRemaining} of ${c.maxAttempts} plays left$daily · '
+                '${me.pointsBalance} points';
       if (c.isDraw) label = cost > 0 ? 'Enter · $cost points' : 'Enter · free';
       onPressed = () async {
         await context.push(
@@ -778,7 +779,9 @@ class _EntryCard extends StatelessWidget {
           _Fact(
             icon: Icons.replay_rounded,
             label: 'Plays',
-            value: me == null
+            value: c.unlimitedPlays
+                ? 'No limit · play while your points last'
+                : me == null
                 ? '${c.maxAttempts} per player'
                 : '${me.attemptsRemaining} of ${c.maxAttempts} left',
           ),
@@ -804,9 +807,7 @@ class _EntryCard extends StatelessWidget {
           _Fact(
             icon: Icons.badge_outlined,
             label: 'Who can enter',
-            value:
-                '${c.minAge}+ in ${c.countryName}, age verified'
-                '${c.requiresIdentityVerification ? ' and identity verified' : ''}',
+            value: 'Players in ${c.countryName}',
           ),
           if (best != null)
             _Fact(

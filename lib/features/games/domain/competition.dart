@@ -102,7 +102,7 @@ class Competition {
       pointsPerAttempt: _int(json['points_per_attempt']) ?? 0,
       pointsDeductionEnabled:
           json['points_deduction_enabled'] as bool? ?? false,
-      maxAttempts: _int(json['max_attempts_per_customer']) ?? 1,
+      maxAttempts: _int(json['max_attempts_per_customer']) ?? 0,
       minAge: _int(json['min_age']) ?? 18,
       requiresIdentityVerification:
           json['requires_identity_verification'] as bool? ?? true,
@@ -219,7 +219,11 @@ class Competition {
 
   /// False until SendAgift Points go live; attempts are free until then.
   final bool pointsDeductionEnabled;
+
+  /// 0 means no limit: players play as long as their points last.
   final int maxAttempts;
+
+  bool get unlimitedPlays => maxAttempts == 0;
   final int minAge;
   final bool requiresIdentityVerification;
   final int numberOfWinners;

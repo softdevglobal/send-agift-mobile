@@ -567,7 +567,7 @@ class GameResultOverlay extends StatelessWidget {
                       value: '${result.personalBest}',
                       color: visual.accent,
                     ),
-                    if (attemptsLeft != null)
+                    if (attemptsLeft != null && attemptsLeft >= 0)
                       _StatPill(
                         label: 'Attempts left',
                         value: '$attemptsLeft',

@@ -114,9 +114,10 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
   String get _slug => widget.definition.slug;
   bool get _official => widget.competitionId != null;
 
-  /// Practice can always go again; an official attempt only while attempts
-  /// remain.
-  bool get _canPlayAgain => !_official || (_result?.attemptsRemaining ?? 0) > 0;
+  /// Practice can always go again; an official attempt while attempts
+  /// remain (-1 from the server means the round has no limit).
+  bool get _canPlayAgain =>
+      !_official || (_result?.attemptsRemaining ?? 0) != 0;
 
   @override
   void initState() {

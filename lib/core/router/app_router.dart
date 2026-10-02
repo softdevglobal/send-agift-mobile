@@ -9,6 +9,7 @@ import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/cart/presentation/screens/checkout_screen.dart';
 import '../../features/games/presentation/game_definitions.dart';
 import '../../features/games/presentation/screens/competition_leaderboard_screen.dart';
+import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/games/presentation/screens/competition_screen.dart';
 import '../../features/games/presentation/screens/chance_play_screen.dart';
 import '../../features/games/presentation/screens/points_screen.dart';
@@ -55,6 +56,7 @@ class AppRoutes {
   static const reviews = '/reviews';
   static const games = '/games';
   static const competitions = '/competitions';
+  static const notifications = '/notifications';
 
   /// The customer's SendAgift Points balance and history.
   static const points = '/points';
@@ -284,6 +286,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             heroTag: state.uri.queryParameters['hero'],
           ),
         ),
+      ),
+      GoRoute(
+        path: AppRoutes.notifications,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            _fadePage(state, const NotificationsScreen()),
       ),
       GoRoute(
         path: AppRoutes.checkout,
