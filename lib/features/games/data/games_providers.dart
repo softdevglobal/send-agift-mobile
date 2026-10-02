@@ -47,6 +47,14 @@ final competitionLeaderboardProvider = FutureProvider.autoDispose
       return ref.watch(gamesRepositoryProvider).competitionLeaderboard(id);
     });
 
+/// One competition's full board (the top 100), for the leaderboard screen.
+final competitionFullLeaderboardProvider = FutureProvider.autoDispose
+    .family<CompetitionLeaderboard, String>((ref, id) {
+      return ref
+          .watch(gamesRepositoryProvider)
+          .competitionLeaderboard(id, limit: 100);
+    });
+
 /// A round's live prize while it is open. Screens merge it over the round
 /// they loaded with [Competition.withLive].
 final livePrizeProvider = StreamProvider.autoDispose.family<LivePrize, String>(

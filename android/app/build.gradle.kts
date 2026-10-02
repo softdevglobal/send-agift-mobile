@@ -13,6 +13,8 @@ android {
     compileOptions {
         sourceCompatibility = JavaVersion.VERSION_17
         targetCompatibility = JavaVersion.VERSION_17
+        // flutter_local_notifications needs java.time on older Androids.
+        isCoreLibraryDesugaringEnabled = true
     }
 
     kotlinOptions {
@@ -41,4 +43,14 @@ android {
 
 flutter {
     source = "../.."
+}
+
+dependencies {
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.1.4")
+}
+
+// Push notifications need app/google-services.json from the Firebase
+// console. Until it is added the app still builds; push is simply off.
+if (file("google-services.json").exists()) {
+    apply(plugin = "com.google.gms.google-services")
 }

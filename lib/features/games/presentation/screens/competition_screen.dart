@@ -898,13 +898,36 @@ class _BoardSection extends ConsumerWidget {
           ),
           error: (error, _) =>
               const Text('Could not load the leaderboard. Pull to refresh.'),
-          data: (b) => LeaderboardList(
-            entries: b.entries,
-            me: b.me,
-            colors: visual.colors,
-            emptyMessage: c.isUpcoming
-                ? 'The board opens when the competition starts.'
-                : 'No scores yet. Be the first on the board.',
+          data: (b) => Column(
+            children: [
+              // The top five here; everyone on the full board.
+              LeaderboardList(
+                entries: b.entries.take(5).toList(growable: false),
+                me: b.me,
+                colors: visual.colors,
+                emptyMessage: c.isUpcoming
+                    ? 'The board opens when the competition starts.'
+                    : 'No scores yet. Be the first on the board.',
+              ),
+              if (b.entries.isNotEmpty) ...[
+                const SizedBox(height: 4),
+                SizedBox(
+                  width: double.infinity,
+                  child: TextButton.icon(
+                    onPressed: () => context.push(
+                      AppRoutes.competitionLeaderboardPath(c.id),
+                    ),
+                    icon: const Icon(Icons.leaderboard_rounded),
+                    label: Text(
+                      b.totalPlayers > 5
+                          ? 'See all ${b.totalPlayers} players'
+                          : 'Open full leaderboard',
+                    ),
+                    style: TextButton.styleFrom(foregroundColor: visual.accent),
+                  ),
+                ),
+              ],
+            ],
           ),
         ),
       ],

@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/providers.dart';
+import '../../../core/notifications/push_notifications.dart';
 import 'auth_repository.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
@@ -41,11 +42,17 @@ class AuthState {
 /// Session state. Guests are the default: nothing here blocks browsing, and
 /// the app only asks for credentials at checkout or order history.
 class AuthController extends StateNotifier<AuthState> {
-  AuthController(this._repository) : super(const AuthState(isLoading: true)) {
+  AuthController(this._repository, {Future<void> Function()? beforeSignOut})
+    : _beforeSignOut = beforeSignOut,
+      super(const AuthState(isLoading: true)) {
     _restore();
   }
 
   final AuthRepository _repository;
+
+  /// Runs while the session is still valid, so the device can be removed
+  /// from push notifications before the token is cleared.
+  final Future<void> Function()? _beforeSignOut;
 
   Future<void> _restore() async {
     if (!await _repository.hasSession()) {
@@ -95,11 +102,15 @@ class AuthController extends StateNotifier<AuthState> {
   }
 
   Future<void> logout() async {
+    await _beforeSignOut?.call();
     await _repository.logout();
     state = const AuthState();
   }
 }
 
 final authProvider = StateNotifierProvider<AuthController, AuthState>((ref) {
-  return AuthController(ref.watch(authRepositoryProvider));
+  return AuthController(
+    ref.watch(authRepositoryProvider),
+    beforeSignOut: () => ref.read(pushNotificationsProvider).unregisterDevice(),
+  );
 });

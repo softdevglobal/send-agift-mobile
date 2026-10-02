@@ -8,6 +8,7 @@ import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/cart/presentation/screens/checkout_screen.dart';
 import '../../features/games/presentation/game_definitions.dart';
+import '../../features/games/presentation/screens/competition_leaderboard_screen.dart';
 import '../../features/games/presentation/screens/competition_screen.dart';
 import '../../features/games/presentation/screens/chance_play_screen.dart';
 import '../../features/games/presentation/screens/points_screen.dart';
@@ -76,6 +77,10 @@ class AppRoutes {
   static String gameLeaderboardPath(String slug) => '$games/$slug/leaderboard';
 
   static String competitionPath(String id) => '$competitions/$id';
+
+  /// A competition's full leaderboard.
+  static String competitionLeaderboardPath(String id) =>
+      '$competitions/$id/leaderboard';
 
   /// An official attempt. The game travels with the route so the right
   /// engine opens straight away.
@@ -353,6 +358,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => _fadePage(
           state,
           GameLeaderboardScreen(slug: state.pathParameters['slug'] ?? ''),
+        ),
+      ),
+      GoRoute(
+        path: '${AppRoutes.competitions}/:id/leaderboard',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          CompetitionLeaderboardScreen(
+            competitionId: state.pathParameters['id'] ?? '',
+          ),
         ),
       ),
       GoRoute(
