@@ -11,6 +11,7 @@ import '../../../../core/utils/dial_codes.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../data/auth_controller.dart';
 import '../../data/countries_provider.dart';
+import '../widgets/auth_header_parts.dart';
 import '../widgets/auth_scaffold.dart';
 
 /// Customer registration — just enough to start gifting. A photo and
@@ -139,13 +140,12 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
     return AuthScaffold(
       title: 'Start sending smiles',
-      eyebrow: const _FreePill(),
-      titleWidget: const _Headline(),
+      titleWidget: const AuthHeadline(lead: 'Start sending ', accent: 'smiles'),
       subtitle:
           'Create your account, then add a photo and delivery addresses '
           'whenever you like.',
       logoWidth: 84,
-      header: const _PerkChips(),
+      header: const AuthPerkChips(),
       form: Form(
         key: _formKey,
         child: Column(
@@ -397,7 +397,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             const SizedBox(height: 26),
             FadeSlideIn(
               delay: const Duration(milliseconds: 350),
-              child: _GradientButton(
+              child: AuthPrimaryButton(
                 key: const Key('register-submit'),
                 loading: _submitting,
                 onPressed: _submitting ? null : _submit,
@@ -515,114 +515,6 @@ class _EmailTakenCard extends StatelessWidget {
           ),
         ],
       ),
-    );
-  }
-}
-
-/// "Free forever · takes 30 seconds", as on the web sign-up.
-class _FreePill extends StatelessWidget {
-  const _FreePill();
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.purple.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.purple.withValues(alpha: 0.18)),
-      ),
-      child: const Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(Icons.card_giftcard_rounded, size: 14, color: AppColors.purple),
-          SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              'Free forever · takes 30 seconds',
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                color: AppColors.purple,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-}
-
-/// "Start sending smiles", with the last word in the brand gradient.
-class _Headline extends StatelessWidget {
-  const _Headline();
-
-  @override
-  Widget build(BuildContext context) {
-    final style = AppTypography.display(34, height: 1.05);
-    return Wrap(
-      crossAxisAlignment: WrapCrossAlignment.end,
-      children: [
-        Text('Start sending ', style: style),
-        ShaderMask(
-          shaderCallback: (rect) => const LinearGradient(
-            colors: [AppColors.purple, Color(0xFFDB2777)],
-          ).createShader(rect),
-          child: Text('smiles', style: style.copyWith(color: Colors.white)),
-        ),
-      ],
-    );
-  }
-}
-
-/// What an account unlocks: three outlined pills in one row.
-class _PerkChips extends StatelessWidget {
-  const _PerkChips();
-
-  static const _perks = <({IconData icon, String label})>[
-    (icon: Icons.local_shipping_outlined, label: 'Live tracking'),
-    (icon: Icons.star_outline_rounded, label: 'Earn points'),
-    (icon: Icons.auto_awesome_outlined, label: 'Win prizes'),
-  ];
-
-  @override
-  Widget build(BuildContext context) {
-    return Row(
-      children: [
-        for (final perk in _perks) ...[
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
-              decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Icon(perk.icon, size: 14, color: AppColors.purple),
-                  const SizedBox(width: 5),
-                  Flexible(
-                    child: Text(
-                      perk.label,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        color: AppColors.mutedForeground,
-                        fontSize: 11.5,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (perk != _perks.last) const SizedBox(width: 8),
-        ],
-      ],
     );
   }
 }
@@ -780,77 +672,6 @@ class _StrengthMeter extends StatelessWidget {
           ),
         ),
       ],
-    );
-  }
-}
-
-class _GradientButton extends StatelessWidget {
-  const _GradientButton({
-    super.key,
-    required this.label,
-    required this.onPressed,
-    required this.loading,
-  });
-
-  final String label;
-  final VoidCallback? onPressed;
-  final bool loading;
-
-  @override
-  Widget build(BuildContext context) {
-    return Opacity(
-      opacity: onPressed == null && !loading ? 0.6 : 1,
-      child: DecoratedBox(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(999),
-          color: AppColors.purple,
-        ),
-        child: Material(
-          color: Colors.transparent,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(999),
-            onTap: onPressed,
-            child: SizedBox(
-              height: 52,
-              width: double.infinity,
-              child: Center(
-                child: loading
-                    ? const SizedBox(
-                        height: 20,
-                        width: 20,
-                        child: CircularProgressIndicator(
-                          strokeWidth: 2,
-                          color: Colors.white,
-                        ),
-                      )
-                    : Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          Flexible(
-                            child: Text(
-                              label,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
-                                color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
-                              ),
-                            ),
-                          ),
-                          const SizedBox(width: 6),
-                          const Icon(
-                            Icons.arrow_forward_rounded,
-                            color: Colors.white,
-                            size: 18,
-                          ),
-                        ],
-                      ),
-              ),
-            ),
-          ),
-        ),
-      ),
     );
   }
 }

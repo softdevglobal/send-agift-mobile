@@ -93,7 +93,8 @@ class AuthScaffold extends StatelessWidget {
                   // unfinished rather than deliberate.
                   child: Align(child: BrandLockup(width: logoWidth)),
                 ),
-                const SizedBox(height: 20),
+                // Clear space between the logo and the heading below it.
+                const SizedBox(height: 40),
                 if (eyebrow != null) ...[
                   FadeSlideIn(
                     delay: const Duration(milliseconds: 40),

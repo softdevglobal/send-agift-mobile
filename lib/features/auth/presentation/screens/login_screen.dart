@@ -4,9 +4,9 @@ import 'package:go_router/go_router.dart';
 
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/router/app_router.dart';
-import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../data/auth_controller.dart';
+import '../widgets/auth_header_parts.dart';
 import '../widgets/auth_scaffold.dart';
 
 /// Customer sign-in. Reached only when the customer chooses to — from
@@ -42,7 +42,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
     });
 
     try {
-      await ref.read(authProvider.notifier).login(
+      await ref
+          .read(authProvider.notifier)
+          .login(
             email: _emailController.text.trim(),
             password: _passwordController.text,
           );
@@ -61,9 +63,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   Widget build(BuildContext context) {
     return AuthScaffold(
       title: 'Welcome back',
+      titleWidget: const AuthHeadline(lead: 'Welcome ', accent: 'back'),
       subtitle:
-          'Sign in to check out, track deliveries, and keep your saved gifts '
-          'across devices.',
+          'Discover country-ready gifts, track every delivery, and earn '
+          'points along the way.',
+      header: const AuthPerkChips(),
       form: Form(
         key: _formKey,
         child: Column(
@@ -76,6 +80,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               delay: const Duration(milliseconds: 140),
               child: AuthField(
                 label: 'Email',
+                prefixIcon: Icons.mail_outline_rounded,
                 controller: _emailController,
                 hintText: 'you@example.com',
                 keyboardType: TextInputType.emailAddress,
@@ -90,6 +95,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               delay: const Duration(milliseconds: 190),
               child: AuthField(
                 label: 'Password',
+                prefixIcon: Icons.lock_outline_rounded,
                 controller: _passwordController,
                 hintText: 'Your password',
                 obscureText: true,
@@ -104,18 +110,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               delay: const Duration(milliseconds: 240),
               child: SizedBox(
                 width: double.infinity,
-                child: ElevatedButton(
+                child: AuthPrimaryButton(
+                  key: const Key('login-submit'),
+                  label: 'Sign in',
+                  loading: _submitting,
                   onPressed: _submitting ? null : _submit,
-                  child: _submitting
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.primaryForeground,
-                          ),
-                        )
-                      : const Text('Sign in'),
                 ),
               ),
             ),
@@ -124,8 +123,9 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       ),
       footer: Column(
         children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.center,
+          Wrap(
+            alignment: WrapAlignment.center,
+            crossAxisAlignment: WrapCrossAlignment.center,
             children: [
               Text(
                 'New to SendAgift?',
