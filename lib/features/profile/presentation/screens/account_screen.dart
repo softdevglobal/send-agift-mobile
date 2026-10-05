@@ -69,6 +69,17 @@ class AccountScreen extends ConsumerWidget {
                     : const _GuestHero(),
               ),
             ),
+            if (auth.isSignedIn && auth.passwordChangeRequired) ...[
+              const SizedBox(height: 14),
+              Padding(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: AppTheme.gutter,
+                ),
+                child: _TemporaryPasswordPrompt(
+                  onTap: () => context.push(AppRoutes.changePassword),
+                ),
+              ),
+            ],
             const SizedBox(height: 16),
             FadeSlideIn(
               delay: const Duration(milliseconds: 50),
@@ -159,6 +170,13 @@ class AccountScreen extends ConsumerWidget {
                 title: 'Gifting',
                 items: [
                   _MenuItem(
+                    icon: Icons.card_giftcard_rounded,
+                    color: const Color(0xFFDB2777),
+                    label: 'Gifts received',
+                    subtitle: 'Gifts sent to you — review them here',
+                    onTap: () => signedInOnly(AppRoutes.receivedGifts),
+                  ),
+                  _MenuItem(
                     icon: Icons.favorite_border_rounded,
                     color: const Color(0xFFE0457B),
                     label: 'Saved gifts',
@@ -203,6 +221,13 @@ class AccountScreen extends ConsumerWidget {
                     label: 'Terms & privacy',
                     onTap: () => context.push(AppRoutes.terms),
                   ),
+                  if (auth.isSignedIn)
+                    _MenuItem(
+                      icon: Icons.key_rounded,
+                      color: AppColors.primary,
+                      label: 'Change password',
+                      onTap: () => context.push(AppRoutes.changePassword),
+                    ),
                   if (auth.isSignedIn)
                     _MenuItem(
                       icon: Icons.logout_rounded,
@@ -746,6 +771,60 @@ class _MenuItem extends StatelessWidget {
               ),
             ],
           ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Shown while a gift recipient is still on the temporary password their
+/// gift email gave them.
+class _TemporaryPasswordPrompt extends StatelessWidget {
+  const _TemporaryPasswordPrompt({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: const Color(0xFFFFF7E6),
+      borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+      child: InkWell(
+        key: const Key('temporary-password-prompt'),
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        onTap: onTap,
+        child: Container(
+          padding: const EdgeInsets.all(14),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+            border: Border.all(color: const Color(0xFFFCD34D)),
+          ),
+          child: const Row(
+            children: [
+              Icon(Icons.shield_outlined, color: Color(0xFFB45309)),
+              SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      "You're using a temporary password",
+                      style: TextStyle(
+                        fontWeight: FontWeight.w700,
+                        color: Color(0xFF78350F),
+                      ),
+                    ),
+                    SizedBox(height: 2),
+                    Text(
+                      'Set your own so only you can get into your account.',
+                      style: TextStyle(fontSize: 13, color: Color(0xFF92400E)),
+                    ),
+                  ],
+                ),
+              ),
+              Icon(Icons.chevron_right_rounded, color: Color(0xFFB45309)),
+            ],
+          ),
         ),
       ),
     );

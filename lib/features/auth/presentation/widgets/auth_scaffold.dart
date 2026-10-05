@@ -18,6 +18,8 @@ class AuthScaffold extends StatelessWidget {
     required this.footer,
     this.logoWidth = 132,
     this.header,
+    this.eyebrow,
+    this.titleWidget,
   });
 
   final String title;
@@ -34,15 +36,15 @@ class AuthScaffold extends StatelessWidget {
   /// uses this for its "why sign up" row.
   final Widget? header;
 
+  /// Optional small label above the title (e.g. a pill).
+  final Widget? eyebrow;
+
+  /// Replaces the plain [title] text when the heading needs styling.
+  final Widget? titleWidget;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(
-        leading: IconButton(
-          icon: const Icon(Icons.close_rounded),
-          onPressed: () => context.canPop() ? context.pop() : context.go('/'),
-        ),
-      ),
       body: Stack(
         children: [
           // Two soft brand-colour blobs behind the header — quiet enough not
@@ -62,11 +64,25 @@ class AuthScaffold extends StatelessWidget {
             child: ListView(
               padding: const EdgeInsets.fromLTRB(
                 AppTheme.gutter,
-                8,
+                4,
                 AppTheme.gutter,
                 32,
               ),
               children: [
+                // No app bar: the back arrow sits on the page itself, so
+                // the header has no separate strip above it.
+                Align(
+                  alignment: Alignment.centerLeft,
+                  child: IconButton(
+                    key: const Key('auth-back'),
+                    tooltip: 'Back',
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                    icon: const Icon(Icons.arrow_back_rounded),
+                    onPressed: () =>
+                        context.canPop() ? context.pop() : context.go('/'),
+                  ),
+                ),
                 FadeSlideIn(
                   // A ListView hands its children a tight, full-width
                   // constraint, which would otherwise force the image wider
@@ -78,9 +94,21 @@ class AuthScaffold extends StatelessWidget {
                   child: Align(child: BrandLockup(width: logoWidth)),
                 ),
                 const SizedBox(height: 20),
+                if (eyebrow != null) ...[
+                  FadeSlideIn(
+                    delay: const Duration(milliseconds: 40),
+                    child: Align(
+                      alignment: Alignment.centerLeft,
+                      child: eyebrow!,
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                ],
                 FadeSlideIn(
                   delay: const Duration(milliseconds: 60),
-                  child: Text(title, style: AppTypography.display(28)),
+                  child:
+                      titleWidget ??
+                      Text(title, style: AppTypography.display(28)),
                 ),
                 const SizedBox(height: 8),
                 FadeSlideIn(
@@ -158,8 +186,10 @@ class AuthField extends StatefulWidget {
     this.keyboardType,
     this.textInputAction,
     this.validator,
+    this.prefixIcon,
   });
 
+  final IconData? prefixIcon;
   final String label;
   final TextEditingController controller;
   final String? hintText;
@@ -196,6 +226,9 @@ class _AuthFieldState extends State<AuthField> {
           validator: widget.validator,
           decoration: InputDecoration(
             hintText: widget.hintText,
+            prefixIcon: widget.prefixIcon == null
+                ? null
+                : Icon(widget.prefixIcon, size: 20),
             suffixIcon: widget.obscureText
                 ? IconButton(
                     icon: Icon(

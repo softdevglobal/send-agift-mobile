@@ -21,11 +21,13 @@ import '../../features/messages/presentation/screens/chat_screen.dart';
 import '../../features/messages/presentation/screens/messages_screen.dart';
 import '../../features/orders/presentation/screens/order_detail_screen.dart';
 import '../../features/orders/presentation/screens/order_list_screen.dart';
+import '../../features/orders/presentation/screens/received_gifts_screen.dart';
 import '../../features/reviews/presentation/screens/my_reviews_screen.dart';
 import '../../features/products/presentation/screens/explore_screen.dart';
 import '../../features/products/presentation/screens/gift_detail_screen.dart';
 import '../../features/profile/presentation/screens/account_screen.dart';
 import '../../features/profile/presentation/screens/addresses_screen.dart';
+import '../../features/profile/presentation/screens/change_password_screen.dart';
 import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/help_centre_screen.dart';
 import '../../features/profile/presentation/screens/recipient_detail_screen.dart';
@@ -63,6 +65,10 @@ class AppRoutes {
 
   static const addresses = '/addresses';
   static const editProfile = '/profile/edit';
+  static const changePassword = '/profile/password';
+
+  /// Delivered gifts other customers sent to this one.
+  static const receivedGifts = '/gifts-received';
   static const recipients = '/recipients';
   static const help = '/help';
   static const terms = '/terms';
@@ -314,6 +320,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
+        path: AppRoutes.receivedGifts,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            _fadePage(state, const ReceivedGiftsScreen()),
+      ),
+      GoRoute(
         path: AppRoutes.reviews,
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) =>
@@ -420,6 +432,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) =>
             _fadePage(state, const EditProfileScreen()),
+      ),
+      GoRoute(
+        path: AppRoutes.changePassword,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            _fadePage(state, const ChangePasswordScreen()),
       ),
       GoRoute(
         path: AppRoutes.addresses,

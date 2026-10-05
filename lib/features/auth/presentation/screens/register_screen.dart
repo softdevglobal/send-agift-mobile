@@ -6,12 +6,16 @@ import '../../../../core/errors/app_exception.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/dial_codes.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../data/auth_controller.dart';
 import '../../data/countries_provider.dart';
 import '../widgets/auth_scaffold.dart';
 
-/// Customer registration. Sellers and admins register on the web app only.
+/// Customer registration — just enough to start gifting. A photo and
+/// delivery addresses are added later from the Account tab. Sellers and
+/// admins register on the web app only.
 class RegisterScreen extends ConsumerStatefulWidget {
   const RegisterScreen({super.key});
 
@@ -19,21 +23,62 @@ class RegisterScreen extends ConsumerStatefulWidget {
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
+/// Who the customer is gifting as; sent as `customer_type`.
+const _giftingAs = <({String value, String label, String hint, IconData icon})>[
+  (
+    value: 'individual',
+    label: 'Just me',
+    hint: 'Gifts for friends',
+    icon: Icons.favorite_rounded,
+  ),
+  (
+    value: 'family',
+    label: 'Family',
+    hint: 'One home',
+    icon: Icons.people_alt_rounded,
+  ),
+  (
+    value: 'business',
+    label: 'Business',
+    hint: 'Teams & clients',
+    icon: Icons.work_rounded,
+  ),
+];
+
 class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
   final _emailController = TextEditingController();
+  final _phoneController = TextEditingController();
   final _passwordController = TextEditingController();
+  final _confirmController = TextEditingController();
 
+  String _customerType = 'individual';
   String? _countryId;
+  String _dialIso = 'LK';
   bool _submitting = false;
   String? _error;
+
+  /// The email the server said already has an account.
+  String? _takenEmail;
+
+  @override
+  void initState() {
+    super.initState();
+    // The strength meter and the match tick follow every keystroke.
+    _passwordController.addListener(_refresh);
+    _confirmController.addListener(_refresh);
+  }
+
+  void _refresh() => setState(() {});
 
   @override
   void dispose() {
     _nameController.dispose();
     _emailController.dispose();
+    _phoneController.dispose();
     _passwordController.dispose();
+    _confirmController.dispose();
     super.dispose();
   }
 
@@ -47,19 +92,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     setState(() {
       _submitting = true;
       _error = null;
+      _takenEmail = null;
     });
 
     try {
-      await ref.read(authProvider.notifier).register(
+      await ref
+          .read(authProvider.notifier)
+          .register(
             email: _emailController.text.trim(),
             password: _passwordController.text,
             displayName: _nameController.text.trim(),
             countryId: _countryId!,
+            phone: '$_dial ${_phoneController.text.trim()}',
+            customerType: _customerType,
           );
       if (!mounted) return;
       context.canPop() ? context.pop() : context.go(AppRoutes.account);
     } on AppException catch (error) {
-      if (mounted) setState(() => _error = error.message);
+      if (!mounted) return;
+      // 409: this email already has an account — offer sign-in, not an error.
+      if (error.statusCode == 409) {
+        setState(() => _takenEmail = _emailController.text.trim());
+      } else {
+        setState(() => _error = error.message);
+      }
     } catch (_) {
       if (mounted) {
         setState(() => _error = 'Could not create your account. Try again.');
@@ -69,31 +125,89 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     }
   }
 
+  String get _dial => dialCodes
+      .firstWhere((d) => d.iso2 == _dialIso, orElse: () => dialCodes.first)
+      .dial;
+
   @override
   Widget build(BuildContext context) {
     final countries = ref.watch(countriesProvider);
+    final password = _passwordController.text;
+    final matches =
+        _confirmController.text.isNotEmpty &&
+        _confirmController.text == password;
 
     return AuthScaffold(
-      title: 'Create your account',
+      title: 'Start sending smiles',
+      eyebrow: const _FreePill(),
+      titleWidget: const _Headline(),
       subtitle:
-          'Save gifts across devices, check out faster, and track every '
-          'delivery you send.',
-      // Smaller than login's — this form runs to four fields plus a country
-      // picker, so the full-size lockup would push it too far down the page.
+          'Create your account, then add a photo and delivery addresses '
+          'whenever you like.',
       logoWidth: 84,
-      header: const _BenefitRow(),
+      header: const _PerkChips(),
       form: Form(
         key: _formKey,
         child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (_error != null) ...[
               AuthAlert(message: _error!),
               const SizedBox(height: 18),
             ],
+            if (_takenEmail != null) ...[
+              _EmailTakenCard(
+                email: _takenEmail!,
+                onSignIn: () => context.pushReplacement(AppRoutes.login),
+                onChange: () {
+                  setState(() {
+                    _takenEmail = null;
+                    _emailController.clear();
+                  });
+                },
+              ),
+              const SizedBox(height: 18),
+            ],
             FadeSlideIn(
-              delay: const Duration(milliseconds: 180),
+              delay: const Duration(milliseconds: 160),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    "I'm gifting as",
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    children: [
+                      for (final option in _giftingAs) ...[
+                        Expanded(
+                          child: _ChoiceCard(
+                            key: Key('gifting-as-${option.value}'),
+                            label: option.label,
+                            hint: option.hint,
+                            icon: option.icon,
+                            selected: _customerType == option.value,
+                            onTap: _submitting
+                                ? null
+                                : () => setState(
+                                    () => _customerType = option.value,
+                                  ),
+                          ),
+                        ),
+                        if (option != _giftingAs.last) const SizedBox(width: 8),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 18),
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 200),
               child: AuthField(
-                label: 'Name',
+                label: 'Your name',
+                prefixIcon: Icons.person_outline_rounded,
                 controller: _nameController,
                 hintText: 'How should we greet you?',
                 textInputAction: TextInputAction.next,
@@ -104,14 +218,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             ),
             const SizedBox(height: 16),
             FadeSlideIn(
-              delay: const Duration(milliseconds: 220),
+              delay: const Duration(milliseconds: 230),
               child: AuthField(
                 label: 'Email',
+                prefixIcon: Icons.mail_outline_rounded,
                 controller: _emailController,
                 hintText: 'you@example.com',
                 keyboardType: TextInputType.emailAddress,
                 textInputAction: TextInputAction.next,
-                validator: (value) => (value == null || !value.contains('@'))
+                validator: (value) =>
+                    (value == null ||
+                        !RegExp(
+                          r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
+                        ).hasMatch(value.trim()))
                     ? 'Enter a valid email address'
                     : null,
               ),
@@ -119,20 +238,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             const SizedBox(height: 16),
             FadeSlideIn(
               delay: const Duration(milliseconds: 260),
-              child: AuthField(
-                label: 'Password',
-                controller: _passwordController,
-                hintText: 'At least 8 characters',
-                obscureText: true,
-                textInputAction: TextInputAction.done,
-                validator: (value) => (value == null || value.length < 8)
-                    ? 'Use at least 8 characters'
-                    : null,
-              ),
-            ),
-            const SizedBox(height: 16),
-            FadeSlideIn(
-              delay: const Duration(milliseconds: 300),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -142,16 +247,18 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   ),
                   const SizedBox(height: 7),
                   countries.when(
-                    loading: () => const _CountryPlaceholder(
-                      label: 'Loading countries…',
-                    ),
+                    loading: () =>
+                        const _CountryPlaceholder(label: 'Loading countries…'),
                     error: (error, stack) => const _CountryPlaceholder(
                       label: 'Countries unavailable — try again later',
                     ),
                     data: (list) => DropdownButtonFormField<String>(
                       initialValue: _countryId,
                       isExpanded: true,
-                      hint: const Text('Select your country'),
+                      hint: const Text('Where are you gifting from?'),
+                      decoration: const InputDecoration(
+                        prefixIcon: Icon(Icons.public_rounded),
+                      ),
                       items: [
                         for (final country in list)
                           DropdownMenuItem(
@@ -165,31 +272,144 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 16),
             FadeSlideIn(
-              delay: const Duration(milliseconds: 340),
-              child: SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: _submitting ? null : _submit,
-                  child: _submitting
-                      ? const SizedBox(
-                          height: 18,
-                          width: 18,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2,
-                            color: AppColors.primaryForeground,
+              delay: const Duration(milliseconds: 275),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    'Phone number',
+                    style: Theme.of(context).textTheme.titleSmall,
+                  ),
+                  const SizedBox(height: 7),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      SizedBox(
+                        width: 108,
+                        child: DropdownButtonFormField<String>(
+                          key: const Key('register-dial'),
+                          initialValue: _dialIso,
+                          isExpanded: true,
+                          selectedItemBuilder: (_) => [
+                            for (final code in dialCodes) Text(code.dial),
+                          ],
+                          items: [
+                            for (final code in dialCodes)
+                              DropdownMenuItem(
+                                value: code.iso2,
+                                child: Text(
+                                  '${code.dial}  ${code.name}',
+                                  overflow: TextOverflow.ellipsis,
+                                ),
+                              ),
+                          ],
+                          onChanged: (value) {
+                            if (value != null) {
+                              setState(() => _dialIso = value);
+                            }
+                          },
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: TextFormField(
+                          key: const Key('register-phone'),
+                          controller: _phoneController,
+                          keyboardType: TextInputType.phone,
+                          textInputAction: TextInputAction.next,
+                          decoration: const InputDecoration(
+                            hintText: '77 123 4567',
                           ),
-                        )
-                      : const Text('Create account'),
-                ),
+                          validator: (value) =>
+                              (value == null ||
+                                  value.replaceAll(RegExp(r'\D'), '').length <
+                                      7)
+                              ? 'Enter your phone number'
+                              : null,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 290),
+              child: AuthField(
+                label: 'Create a password',
+                controller: _passwordController,
+                hintText: 'At least 8 characters',
+                obscureText: true,
+                textInputAction: TextInputAction.next,
+                validator: (value) => (value == null || value.length < 8)
+                    ? 'Use at least 8 characters'
+                    : null,
+              ),
+            ),
+            if (password.isNotEmpty) ...[
+              const SizedBox(height: 8),
+              _StrengthMeter(password: password),
+            ],
+            const SizedBox(height: 16),
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 320),
+              child: Stack(
+                children: [
+                  AuthField(
+                    label: 'Confirm password',
+                    controller: _confirmController,
+                    hintText: 'Type it once more',
+                    obscureText: true,
+                    textInputAction: TextInputAction.done,
+                    validator: (value) => value != _passwordController.text
+                        ? "The passwords don't match"
+                        : null,
+                  ),
+                  if (matches)
+                    const Positioned(
+                      top: 0,
+                      right: 0,
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.check_circle_rounded,
+                            size: 16,
+                            color: Color(0xFF10B981),
+                          ),
+                          SizedBox(width: 4),
+                          Text(
+                            'Matches',
+                            style: TextStyle(
+                              fontSize: 12,
+                              fontWeight: FontWeight.w600,
+                              color: Color(0xFF047857),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 26),
+            FadeSlideIn(
+              delay: const Duration(milliseconds: 350),
+              child: _GradientButton(
+                key: const Key('register-submit'),
+                loading: _submitting,
+                onPressed: _submitting ? null : _submit,
+                label: 'Create my account',
               ),
             ),
           ],
         ),
       ),
-      footer: Row(
-        mainAxisAlignment: MainAxisAlignment.center,
+      footer: Wrap(
+        alignment: WrapAlignment.center,
+        crossAxisAlignment: WrapCrossAlignment.center,
         children: [
           Text(
             'Already have an account?',
@@ -205,50 +425,432 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   }
 }
 
-/// The three things creating an account unlocks, as a quick reassurance
-/// before the form asks for anything.
-class _BenefitRow extends StatelessWidget {
-  const _BenefitRow();
+/// Shown when the email already has an account: a way forward, not an error.
+class _EmailTakenCard extends StatelessWidget {
+  const _EmailTakenCard({
+    required this.email,
+    required this.onSignIn,
+    required this.onChange,
+  });
 
-  static const _benefits = <({IconData icon, String label})>[
-    (icon: Icons.favorite_rounded, label: 'Saved gifts'),
-    (icon: Icons.bolt_rounded, label: 'Faster checkout'),
-    (icon: Icons.local_shipping_rounded, label: 'Live tracking'),
+  final String email;
+  final VoidCallback onSignIn;
+  final VoidCallback onChange;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('email-taken'),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+        gradient: const LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [AppColors.cream, Color(0xFFFDEEF6)],
+        ),
+        border: Border.all(color: AppColors.purple.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Container(
+                height: 42,
+                width: 42,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: AppColors.purple,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+                ),
+                child: const Text('👋', style: TextStyle(fontSize: 20)),
+              ),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Welcome back — you’re already in!',
+                      style: AppTypography.display(18),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$email already has a SendAGift account. Sign in to '
+                      'pick up where you left off.',
+                      style: const TextStyle(
+                        color: AppColors.mutedForeground,
+                        fontSize: 13,
+                        height: 1.4,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 14),
+          Row(
+            children: [
+              Expanded(
+                child: FilledButton(
+                  key: const Key('email-taken-sign-in'),
+                  onPressed: onSignIn,
+                  child: const Text('Sign in instead'),
+                ),
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: OutlinedButton(
+                  onPressed: onChange,
+                  child: const FittedBox(
+                    fit: BoxFit.scaleDown,
+                    child: Text('Different email'),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Free forever · takes 30 seconds", as on the web sign-up.
+class _FreePill extends StatelessWidget {
+  const _FreePill();
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+      decoration: BoxDecoration(
+        color: AppColors.purple.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(999),
+        border: Border.all(color: AppColors.purple.withValues(alpha: 0.18)),
+      ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.card_giftcard_rounded, size: 14, color: AppColors.purple),
+          SizedBox(width: 6),
+          Flexible(
+            child: Text(
+              'Free forever · takes 30 seconds',
+              maxLines: 1,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                color: AppColors.purple,
+                fontSize: 12,
+                fontWeight: FontWeight.w600,
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// "Start sending smiles", with the last word in the brand gradient.
+class _Headline extends StatelessWidget {
+  const _Headline();
+
+  @override
+  Widget build(BuildContext context) {
+    final style = AppTypography.display(34, height: 1.05);
+    return Wrap(
+      crossAxisAlignment: WrapCrossAlignment.end,
+      children: [
+        Text('Start sending ', style: style),
+        ShaderMask(
+          shaderCallback: (rect) => const LinearGradient(
+            colors: [AppColors.purple, Color(0xFFDB2777)],
+          ).createShader(rect),
+          child: Text('smiles', style: style.copyWith(color: Colors.white)),
+        ),
+      ],
+    );
+  }
+}
+
+/// What an account unlocks: three outlined pills in one row.
+class _PerkChips extends StatelessWidget {
+  const _PerkChips();
+
+  static const _perks = <({IconData icon, String label})>[
+    (icon: Icons.local_shipping_outlined, label: 'Live tracking'),
+    (icon: Icons.star_outline_rounded, label: 'Earn points'),
+    (icon: Icons.auto_awesome_outlined, label: 'Win prizes'),
   ];
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        for (final benefit in _benefits) ...[
+        for (final perk in _perks) ...[
           Expanded(
-            child: Column(
-              children: [
-                Container(
-                  height: 38,
-                  width: 38,
-                  decoration: BoxDecoration(
-                    color: AppColors.accent,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
+              decoration: BoxDecoration(
+                color: AppColors.surface,
+                borderRadius: BorderRadius.circular(999),
+                border: Border.all(color: AppColors.border),
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Icon(perk.icon, size: 14, color: AppColors.purple),
+                  const SizedBox(width: 5),
+                  Flexible(
+                    child: Text(
+                      perk.label,
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                      style: const TextStyle(
+                        color: AppColors.mutedForeground,
+                        fontSize: 11.5,
+                      ),
+                    ),
                   ),
-                  child: Icon(
-                    benefit.icon,
-                    size: 18,
-                    color: AppColors.accentForeground,
-                  ),
-                ),
-                const SizedBox(height: 6),
-                Text(
-                  benefit.label,
-                  textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.labelSmall,
-                ),
-              ],
+                ],
+              ),
             ),
           ),
-          if (benefit != _benefits.last) const SizedBox(width: 8),
+          if (perk != _perks.last) const SizedBox(width: 8),
         ],
       ],
+    );
+  }
+}
+
+class _ChoiceCard extends StatelessWidget {
+  const _ChoiceCard({
+    super.key,
+    required this.label,
+    required this.hint,
+    required this.icon,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final String label;
+  final String hint;
+  final IconData icon;
+  final bool selected;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      selected: selected,
+      button: true,
+      child: GestureDetector(
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 200),
+          padding: const EdgeInsets.all(10),
+          decoration: BoxDecoration(
+            color: selected
+                ? AppColors.purple.withValues(alpha: 0.07)
+                : AppColors.surface,
+            borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+            border: Border.all(
+              color: selected ? AppColors.purple : AppColors.border,
+              width: selected ? 2 : 1,
+            ),
+          ),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  AnimatedContainer(
+                    duration: const Duration(milliseconds: 200),
+                    height: 32,
+                    width: 32,
+                    decoration: BoxDecoration(
+                      color: selected ? AppColors.purple : AppColors.muted,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                    ),
+                    child: Icon(
+                      icon,
+                      size: 17,
+                      color: selected
+                          ? Colors.white
+                          : AppColors.mutedForeground,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                label,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontWeight: FontWeight.w700,
+                  fontSize: 13,
+                ),
+              ),
+              Text(
+                hint,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+                style: const TextStyle(
+                  fontSize: 11,
+                  color: AppColors.mutedForeground,
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Four bars that fill as the password gets stronger.
+class _StrengthMeter extends StatelessWidget {
+  const _StrengthMeter({required this.password});
+
+  final String password;
+
+  static const _levels = [
+    ('Too short', AppColors.destructive),
+    ('Okay', Color(0xFFF59E0B)),
+    ('Good', Color(0xFF84CC16)),
+    ('Strong', Color(0xFF10B981)),
+    ('Excellent', Color(0xFF059669)),
+  ];
+
+  /// 0–4: length, mixed case, digits and symbols.
+  static int score(String password) {
+    if (password.length < 8) return 0;
+    var score = 1.0;
+    if (password.length >= 12) score += 1;
+    final mixedCase =
+        RegExp('[a-z]').hasMatch(password) &&
+        RegExp('[A-Z]').hasMatch(password);
+    if (mixedCase) score += 1;
+    final digit = RegExp(r'\d').hasMatch(password);
+    final symbol = RegExp(r'[^A-Za-z0-9]').hasMatch(password);
+    if (digit && symbol) {
+      score += 1;
+    } else if (digit || symbol) {
+      score += 0.5;
+    }
+    return score.floor().clamp(0, 4);
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final s = score(password);
+    final (label, color) = _levels[s];
+    final filled = s == 0 ? 1 : s;
+    return Row(
+      children: [
+        for (var i = 1; i <= 4; i++) ...[
+          Expanded(
+            child: AnimatedContainer(
+              duration: const Duration(milliseconds: 250),
+              height: 5,
+              decoration: BoxDecoration(
+                color: i <= filled ? color : AppColors.muted,
+                borderRadius: BorderRadius.circular(99),
+              ),
+            ),
+          ),
+          const SizedBox(width: 4),
+        ],
+        const SizedBox(width: 6),
+        SizedBox(
+          width: 66,
+          child: Text(
+            label,
+            textAlign: TextAlign.right,
+            style: const TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+              color: AppColors.mutedForeground,
+            ),
+          ),
+        ),
+      ],
+    );
+  }
+}
+
+class _GradientButton extends StatelessWidget {
+  const _GradientButton({
+    super.key,
+    required this.label,
+    required this.onPressed,
+    required this.loading,
+  });
+
+  final String label;
+  final VoidCallback? onPressed;
+  final bool loading;
+
+  @override
+  Widget build(BuildContext context) {
+    return Opacity(
+      opacity: onPressed == null && !loading ? 0.6 : 1,
+      child: DecoratedBox(
+        decoration: BoxDecoration(
+          borderRadius: BorderRadius.circular(999),
+          color: AppColors.purple,
+        ),
+        child: Material(
+          color: Colors.transparent,
+          child: InkWell(
+            borderRadius: BorderRadius.circular(999),
+            onTap: onPressed,
+            child: SizedBox(
+              height: 52,
+              width: double.infinity,
+              child: Center(
+                child: loading
+                    ? const SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          color: Colors.white,
+                        ),
+                      )
+                    : Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Flexible(
+                            child: Text(
+                              label,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: const TextStyle(
+                                color: Colors.white,
+                                fontSize: 15,
+                                fontWeight: FontWeight.w700,
+                              ),
+                            ),
+                          ),
+                          const SizedBox(width: 6),
+                          const Icon(
+                            Icons.arrow_forward_rounded,
+                            color: Colors.white,
+                            size: 18,
+                          ),
+                        ],
+                      ),
+              ),
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

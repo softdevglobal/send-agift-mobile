@@ -90,6 +90,17 @@ class AccountRepository {
     );
   });
 
+  /// Replaces the customer's password after checking the current one.
+  Future<void> changePassword({
+    required String currentPassword,
+    required String newPassword,
+  }) => _call(() async {
+    await _client.dio.put<dynamic>(
+      '/customers/me/password',
+      data: {'current_password': currentPassword, 'new_password': newPassword},
+    );
+  });
+
   /// Presign → PUT → the photo's public address.
   Future<String> uploadProfilePhoto({
     required String fileName,

@@ -33,6 +33,11 @@ class AuthState {
   /// The profile photo, when one is set.
   String? get imageUrl => _text('image_url');
 
+  /// An account made for a gift recipient, still on the temporary password
+  /// emailed with their gift.
+  bool get passwordChangeRequired =>
+      customer?['password_change_required'] == true;
+
   String? _text(String key) {
     final value = customer?[key];
     return value is String && value.trim().isNotEmpty ? value.trim() : null;
@@ -78,6 +83,8 @@ class AuthController extends StateNotifier<AuthState> {
     required String password,
     required String displayName,
     required String countryId,
+    required String phone,
+    String customerType = 'individual',
   }) async {
     state = const AuthState(isLoading: true);
     try {
@@ -86,6 +93,8 @@ class AuthController extends StateNotifier<AuthState> {
         password: password,
         displayName: displayName,
         countryId: countryId,
+        phone: phone,
+        customerType: customerType,
       );
       state = AuthState(customer: await _repository.me());
     } catch (_) {

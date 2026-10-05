@@ -34,6 +34,8 @@ class AuthRepository {
     required String password,
     required String displayName,
     required String countryId,
+    required String phone,
+    String customerType = 'individual',
   }) async {
     try {
       await _client.dio.post<Map<String, dynamic>>(
@@ -43,6 +45,8 @@ class AuthRepository {
           'password': password,
           'display_name': displayName,
           'country_id': countryId,
+          'phone': phone,
+          'customer_type': customerType,
         },
       );
       await login(email: email, password: password);
@@ -53,8 +57,9 @@ class AuthRepository {
 
   Future<Map<String, dynamic>?> me() async {
     try {
-      final response =
-          await _client.dio.get<Map<String, dynamic>>('/customers/me');
+      final response = await _client.dio.get<Map<String, dynamic>>(
+        '/customers/me',
+      );
       return response.data;
     } on DioException {
       return null;
