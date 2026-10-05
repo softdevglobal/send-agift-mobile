@@ -26,9 +26,9 @@ const int _maxFileBytes = 15 * 1024 * 1024;
 /// Opened with a [conversationId] from the inbox; with a [productId] from a
 /// gift's "Ask" button; or with an [orderItemId] from an order. In the last
 /// two cases the customer's existing thread is reused when there is one;
-/// otherwise the thread is started by the first message — `POST
+/// otherwise the thread is started by the first message. `POST
 /// /conversations` carrying the `product_id` or `order_item_id` and the
-/// message together — so shops never see empty threads.
+/// message together. So shops never see empty threads.
 class ChatScreen extends ConsumerStatefulWidget {
   const ChatScreen({
     super.key,
@@ -238,7 +238,7 @@ class _ChatScreenState extends ConsumerState<ChatScreen> {
                 : id == null
                 ? _ThreadHint(
                     text: widget.orderItemId != null
-                        ? 'Message the shop about this item — delivery, '
+                        ? 'Message the shop about this item. Delivery, '
                               'changes, or a problem with the gift. You can '
                               'attach photos.'
                         : 'Ask about sizes, delivery dates, or personalising '

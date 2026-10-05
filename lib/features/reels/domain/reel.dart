@@ -1,7 +1,7 @@
 import '../../../core/utils/money.dart';
 import 'reel_social.dart';
 
-/// One reel from `GET /reels` — a seller's short video (or photo post),
+/// One reel from `GET /reels`. A seller's short video (or photo post),
 /// optionally tagged to a product.
 ///
 /// A reel with a [product] is the whole point of the feed: it is a gift you
@@ -37,7 +37,7 @@ class Reel {
   /// First playable video on the reel, if it has one.
   final String? videoUrl;
 
-  /// The still shown while a video loads — and the first frame of a photo
+  /// The still shown while a video loads. And the first frame of a photo
   /// post. Falls back through thumbnail → first image → the product's photo.
   final String? imageUrl;
 
@@ -98,7 +98,7 @@ class Reel {
   /// The same reel with a fresh view count, after the API has counted a view.
   Reel withViewCount(int count) => copyWith(viewCount: count);
 
-  /// True when there is something to send — drives the gift CTA.
+  /// True when there is something to send. Drives the gift CTA.
   bool get isShoppable => product != null;
 
   /// Hashtags as one displayable line, each back in `#tag` form (the API
@@ -212,7 +212,7 @@ String compactCount(int count) {
   return '${millions.toStringAsFixed(millions < 10 ? 1 : 0)}M';
 }
 
-/// The product tagged on a reel — enough to show a price and open the gift.
+/// The product tagged on a reel. Enough to show a price and open the gift.
 class ReelProduct {
   const ReelProduct({
     required this.id,

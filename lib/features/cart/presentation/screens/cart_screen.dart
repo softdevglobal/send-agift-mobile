@@ -78,7 +78,7 @@ class CartScreen extends ConsumerWidget {
                       icon: Icons.shopping_bag_outlined,
                       title: 'Your cart is empty',
                       description:
-                          'Browse the catalog and add a gift to get started — '
+                          'Browse the catalog and add a gift to get started. '
                           'no account needed.',
                       action: ElevatedButton(
                         onPressed: () => context.go(AppRoutes.explore),
@@ -287,7 +287,7 @@ class _SummaryRow extends StatelessWidget {
           )
         : const TextStyle(fontSize: 13.5, color: AppColors.mutedForeground);
 
-    // The value is flexible because it is not always a short amount — the
+    // The value is flexible because it is not always a short amount. The
     // delivery row carries a phrase, which overflowed a narrow phone when both
     // sides were unconstrained.
     return Row(

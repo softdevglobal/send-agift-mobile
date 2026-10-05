@@ -62,7 +62,7 @@ class WhackMole {
 /// the round goes on. Consecutive hits pay a growing bonus; an empty hole
 /// costs, so spamming scores worse than watching.
 ///
-/// Mirrors `internal/games/whack.go` exactly — the whole schedule is drawn
+/// Mirrors `internal/games/whack.go` exactly. The whole schedule is drawn
 /// from the seed up front, which is what makes the round replayable.
 class WhackAMole implements TickGame {
   WhackAMole({required String seed, required this.config})
@@ -100,7 +100,7 @@ class WhackAMole implements TickGame {
   int get misses => _misses;
   int get bestStreak => _bestStreak;
 
-  /// When the last mole drops — the length of the whole round.
+  /// When the last mole drops. The length of the whole round.
   int get lastTick => moles.isEmpty ? 0 : moles.last.down;
 
   /// The mole up right now, or null when every hole is empty.

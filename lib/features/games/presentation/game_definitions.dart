@@ -40,7 +40,7 @@ import 'widgets/whack_board.dart';
 /// Everything the shared game screen needs to run one game.
 ///
 /// Adding a game means adding an engine that mirrors the backend's, a board
-/// widget, and an entry here — the screen, menu and results come for free.
+/// widget, and an entry here. The screen, menu and results come for free.
 class GameDefinition {
   const GameDefinition({
     required this.slug,
@@ -73,7 +73,7 @@ class GameDefinition {
 ///
 /// A getter rather than a top-level `final`: Flutter keeps globals as state
 /// across a hot reload, so a `final` map would keep the games it held when
-/// the app started — newly added games would show in the list but refuse to
+/// the app started. Newly added games would show in the list but refuse to
 /// open until a full restart.
 Map<String, GameDefinition> get gameDefinitions => {
   '2048': GameDefinition(

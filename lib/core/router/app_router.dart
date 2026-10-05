@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/app_shell.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/domain/social_signup.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/cart/presentation/screens/checkout_screen.dart';
@@ -98,12 +99,12 @@ class AppRoutes {
   /// One play of a chance game (spin, scratch, treasure, instant win, draw).
   static String competitionChancePath(String id) => '$competitions/$id/chance';
 
-  /// Asks a shop about a gift — reopens the customer's existing thread about
+  /// Asks a shop about a gift. Reopens the customer's existing thread about
   /// it when there is one, otherwise the thread starts on the first send.
   static String askAboutGiftPath(String productId) =>
       '$messages/new?product=${Uri.encodeComponent(productId)}';
 
-  /// Messages the shop about one order item — reopens that item's thread when
+  /// Messages the shop about one order item. Reopens that item's thread when
   /// there is one. [productId] only labels the chat before it exists.
   static String askAboutOrderItemPath(String orderItemId, {String? productId}) {
     final query = {
@@ -126,7 +127,7 @@ class AppRoutes {
 final _rootNavigatorKey = GlobalKey<NavigatorState>();
 
 /// Fade-and-rise transition for every pushed (non-tab) route, so moving
-/// deeper into the app — a gift, checkout, sign-in — feels like a step
+/// deeper into the app. A gift, checkout, sign-in. Feels like a step
 /// forward rather than the platform's default hard slide.
 CustomTransitionPage<void> _fadePage(GoRouterState state, Widget child) {
   return CustomTransitionPage(
@@ -179,7 +180,7 @@ CustomTransitionPage<void> _gameWindowPage(GoRouterState state, Widget child) {
 }
 
 /// Slide-in panel from the right, dimming (rather than replacing) whatever
-/// tab is behind it — the cart is a quick check, not a new destination.
+/// tab is behind it. The cart is a quick check, not a new destination.
 CustomTransitionPage<void> _rightSheetPage(GoRouterState state, Widget child) {
   return CustomTransitionPage(
     key: state.pageKey,
@@ -221,7 +222,7 @@ CustomTransitionPage<void> _rightSheetPage(GoRouterState state, Widget child) {
   );
 }
 
-/// The app opens straight onto the storefront — browsing, search, cart and
+/// The app opens straight onto the storefront. Browsing, search, cart and
 /// saved gifts all work without an account, so there is no auth redirect here.
 /// Sign-in is requested only at checkout and for order history.
 final appRouterProvider = Provider<GoRouter>((ref) {
@@ -478,8 +479,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.register,
         parentNavigatorKey: _rootNavigatorKey,
-        pageBuilder: (context, state) =>
-            _fadePage(state, const RegisterScreen()),
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          RegisterScreen(
+            social: state.extra is SocialSignup
+                ? state.extra! as SocialSignup
+                : null,
+          ),
+        ),
       ),
     ],
   );

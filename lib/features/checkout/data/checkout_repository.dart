@@ -13,7 +13,7 @@ class CheckoutRepository {
 
   final ApiClient _client;
 
-  /// Saved recipients. Names only — addresses come from [getRecipient].
+  /// Saved recipients. Names only. Addresses come from [getRecipient].
   Future<List<Recipient>> listRecipients() async {
     try {
       final response = await _client.dio.get<dynamic>(

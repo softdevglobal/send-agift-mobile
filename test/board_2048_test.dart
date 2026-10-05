@@ -122,7 +122,7 @@ void main() {
     }
 
     // Once the dust settles the drawn tiles are the engine's board, no more
-    // and no fewer — a slide left behind would be a tile that does not exist.
+    // and no fewer. A slide left behind would be a tile that does not exist.
     final drawn = tester
         .widgetList<Text>(find.byType(Text))
         .map((t) => int.parse(t.data!))

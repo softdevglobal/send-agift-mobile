@@ -10,7 +10,7 @@ import '../../domain/competition.dart';
 import '../competition_format.dart';
 
 /// The customer's SendAgift Points: the balance plays are paid from, where
-/// it came from, and every change to it. Nothing here is hidden — a purchase
+/// it came from, and every change to it. Nothing here is hidden. A purchase
 /// reward, a gift, a play and a refund each show with the balance after it.
 class PointsScreen extends ConsumerStatefulWidget {
   const PointsScreen({super.key});

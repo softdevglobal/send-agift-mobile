@@ -20,7 +20,7 @@ const _slideDuration = Duration(milliseconds: 110);
 /// The 2048 grid.
 ///
 /// Purely a view of the engine: what is drawn is always exactly what the
-/// engine — and therefore the server — thinks the position is. The tiles
+/// engine. And therefore the server. Thinks the position is. The tiles
 /// slide to their new squares rather than appearing there, following the
 /// route the engine reports, so the animation can never show a move the
 /// engine did not make.
@@ -116,7 +116,7 @@ class _Board2048State extends State<Board2048>
         aspectRatio: 1,
         // No perspective tilt: it scales the board down and leans it, so a
         // square is drawn narrower along one edge than the other. A grid of
-        // squares has to be square — the depth is in how the tiles are drawn.
+        // squares has to be square. The depth is in how the tiles are drawn.
         child: Container(
           padding: const EdgeInsets.all(10),
           decoration: glassDecoration(radius: 26, alpha: 0.2),
@@ -236,7 +236,7 @@ class _Tile extends StatelessWidget {
   final int value;
   final double extent;
 
-  /// Drawn without the arrival pop, for a tile still in flight — and stacked
+  /// Drawn without the arrival pop, for a tile still in flight. And stacked
   /// above the tile it is about to merge with.
   final bool elevated;
 

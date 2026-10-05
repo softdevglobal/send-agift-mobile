@@ -143,7 +143,7 @@ class _Address extends ConsumerWidget {
                     const SizedBox(height: 2),
                     Text(
                       address?.formatted ??
-                          'No saved address — add one before sending.',
+                          'No saved address. Add one before sending.',
                       style: theme.textTheme.bodySmall?.copyWith(
                         color: AppColors.mutedForeground,
                         height: 1.35,

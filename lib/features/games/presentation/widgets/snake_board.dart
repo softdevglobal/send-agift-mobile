@@ -11,7 +11,7 @@ import 'tilt_3d.dart';
 /// The Snake board and its controls.
 ///
 /// This widget owns the clock. Each tick it asks the engine to step, and the
-/// engine logs which tick every turn landed on — the clock only decides when
+/// engine logs which tick every turn landed on. The clock only decides when
 /// ticks happen, never what they do, so the server's replay is unaffected by
 /// how smooth the phone is.
 class SnakeBoard extends StatefulWidget {
@@ -37,7 +37,7 @@ class _SnakeBoardState extends State<SnakeBoard>
   List<int> _wasBody = const [];
 
   /// How far through the current tick the drawing is. It is only ever a view
-  /// of the move the engine has already made — the clock decides when a tick
+  /// of the move the engine has already made. The clock decides when a tick
   /// happens, never what it does.
   late final AnimationController _motion;
 
@@ -137,7 +137,7 @@ class _SnakeBoardState extends State<SnakeBoard>
               _drag = Offset.zero;
               _dragFired = false;
             },
-            // Fire as soon as the finger has clearly moved, not on release —
+            // Fire as soon as the finger has clearly moved, not on release.
             // Snake has to feel instant.
             onPanUpdate: (details) {
               if (_dragFired) return;
@@ -152,7 +152,7 @@ class _SnakeBoardState extends State<SnakeBoard>
             },
             // No perspective tilt on this one. Snake is played by judging
             // the gap between a head and a wall, and leaning the board turns
-            // square cells into trapezoids — the depth here comes from how
+            // square cells into trapezoids. The depth here comes from how
             // the snake itself is drawn, not from tipping the grid over.
             child: AspectRatio(
               aspectRatio: 1,
@@ -327,7 +327,7 @@ class _SnakePainter extends CustomPainter {
       }
     }
 
-    // Grid lines, faint, receding — enough to judge a gap by without the
+    // Grid lines, faint, receding. Enough to judge a gap by without the
     // board turning into graph paper.
     final line = Paint()
       ..color = Colors.white.withValues(alpha: 0.05)

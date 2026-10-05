@@ -8,7 +8,7 @@ import '../../domain/game_engine.dart';
 /// Each frame adds the real time that passed and advances the engine one
 /// tick per whole [TickGame.tickMs]. [fraction] is how far into the next
 /// tick we are, so boards can draw smooth motion between ticks while the
-/// engine — and the server — only ever see whole ticks.
+/// engine. And the server. Only ever see whole ticks.
 ///
 /// A long stall (the app in the background) is not banked as a burst of
 /// ticks: game time simply pauses with the phone.
@@ -33,7 +33,7 @@ class TickClock extends ChangeNotifier {
   double get fraction =>
       game.isOver ? 0 : (_pendingMs / game.tickMs).clamp(0.0, 1.0);
 
-  /// The current tick plus [fraction] — for drawing only.
+  /// The current tick plus [fraction]. For drawing only.
   double get smoothTick => game.tick + fraction;
 
   /// Milliseconds the clock has run, for purely decorative animation.

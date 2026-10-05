@@ -10,7 +10,7 @@ import '../game_visuals.dart';
 import 'game_art.dart';
 import 'leaderboard_list.dart';
 
-/// Opens a game's leaderboard as a sheet over whatever is on screen — from
+/// Opens a game's leaderboard as a sheet over whatever is on screen. From
 /// the game menu the round stays paused underneath, so checking the board
 /// never costs a run. An official attempt shows its competition's board.
 Future<void> showGameLeaderboard(

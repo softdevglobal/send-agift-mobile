@@ -100,7 +100,7 @@ class _SlingShotBoardState extends State<SlingShotBoard>
     final result = _game.shoot(pull.$1, pull.$2);
     if (result == null) return;
 
-    // Replay the shot on screen, then let the game screen know — so the
+    // Replay the shot on screen, then let the game screen know. So the
     // score and the next level only change once the dust has settled.
     _playMs =
         result.path.length * _game.config.tickMs +

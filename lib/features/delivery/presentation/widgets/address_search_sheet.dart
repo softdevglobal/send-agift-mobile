@@ -303,7 +303,7 @@ class _AddressSearchSheetState extends ConsumerState<_AddressSearchSheet> {
                     Padding(
                       padding: const EdgeInsets.all(12),
                       child: Text(
-                        'Start typing an address — at least 3 letters.',
+                        'Start typing an address. At least 3 letters.',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: AppColors.mutedForeground,
                         ),

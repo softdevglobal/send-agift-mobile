@@ -16,7 +16,7 @@ import '../../../messages/data/messages_providers.dart';
 import '../../../orders/data/orders_repository.dart';
 import '../../../saved/data/saved_controller.dart';
 
-/// Customer account hub. The mobile app is customer-only — there are no
+/// Customer account hub. The mobile app is customer-only. There are no
 /// seller or admin surfaces here; those stay on the web app.
 class AccountScreen extends ConsumerWidget {
   const AccountScreen({super.key});
@@ -92,7 +92,7 @@ class AccountScreen extends ConsumerWidget {
                     Expanded(
                       child: _StatTile(
                         icon: Icons.receipt_long_rounded,
-                        value: orderCount?.toString() ?? '—',
+                        value: orderCount?.toString() ?? '-',
                         label: 'Orders',
                         tint: AppColors.categoryTints[0],
                         iconColor: AppColors.primary,
@@ -103,7 +103,7 @@ class AccountScreen extends ConsumerWidget {
                     Expanded(
                       child: _StatTile(
                         icon: Icons.stars_rounded,
-                        value: points == null ? '—' : _compact(points),
+                        value: points == null ? '-' : _compact(points),
                         label: 'Points',
                         tint: AppColors.categoryTints[1],
                         iconColor: AppColors.purple,
@@ -173,7 +173,7 @@ class AccountScreen extends ConsumerWidget {
                     icon: Icons.card_giftcard_rounded,
                     color: const Color(0xFFDB2777),
                     label: 'Gifts received',
-                    subtitle: 'Gifts sent to you — review them here',
+                    subtitle: 'Gifts sent to you. Review them here',
                     onTap: () => signedInOnly(AppRoutes.receivedGifts),
                   ),
                   _MenuItem(

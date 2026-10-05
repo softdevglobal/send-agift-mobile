@@ -1,10 +1,10 @@
-/// Hill Rider — a mirror of `internal/games/hillrider.go`.
+/// Hill Rider. A mirror of `internal/games/hillrider.go`.
 ///
 /// Drive as far as you can over rolling hills. Crest a hill too fast and
 /// the car takes off; land at an angle that does not match the ground and it
 /// crashes. Gas burns fuel; cans along the way refill the tank. Every
-/// quantity is a whole number stepped on fixed ticks — positions and speeds
-/// in sixteenths of a unit, heights in whole units — so the server replays
+/// quantity is a whole number stepped on fixed ticks. Positions and speeds
+/// in sixteenths of a unit, heights in whole units. So the server replays
 /// the drive exactly.
 library;
 

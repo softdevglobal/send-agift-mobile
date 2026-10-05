@@ -14,7 +14,7 @@ const double _minSwipeVelocity = 90;
 
 /// The sliding puzzle: a picture cut into tiles, one square short.
 ///
-/// The picture is the player's to choose and is drawn locally — it decides
+/// The picture is the player's to choose and is drawn locally. It decides
 /// nothing about the puzzle. The scramble comes from the server's seed and
 /// the moves are what gets scored, so two players on the same seed solve the
 /// identical board whichever picture they picked.
@@ -97,7 +97,7 @@ class _SlideBoardState extends State<SlideBoard> {
             aspectRatio: 1,
             // No perspective tilt: it scales the board down and leans it, so a
             // square is drawn narrower along one edge than the other. A grid of
-            // squares has to be square — the depth is in how the tiles are drawn.
+            // squares has to be square. The depth is in how the tiles are drawn.
             child: Container(
               padding: const EdgeInsets.all(10),
               decoration: glassDecoration(radius: 26, alpha: 0.2),

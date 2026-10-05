@@ -1,8 +1,8 @@
-/// Sling Shot — a mirror of `internal/games/sling.go`.
+/// Sling Shot. A mirror of `internal/games/sling.go`.
 ///
 /// Pull back the sling and knock the target blocks off their structure.
 /// Wood breaks and slows the shot, stone stops it, and anything left
-/// unsupported falls — far enough, and it breaks. The flight and the
+/// unsupported falls. Far enough, and it breaks. The flight and the
 /// collapse are integer physics, so the server replays exactly the shot the
 /// player took.
 library;
@@ -136,7 +136,7 @@ class SlingShot implements GameEngine {
   static const int startY = 150;
   static const int worldWidth = 1000;
 
-  /// Structures, rows top to bottom — the same list, in the same order, as
+  /// Structures, rows top to bottom. The same list, in the same order, as
   /// `slingTemplates` on the backend.
   static const List<List<String>> templates = [
     ['.T.', '.W.', 'WWW'],
@@ -363,7 +363,7 @@ class SlingShot implements GameEngine {
     return falls;
   }
 
-  /// Alive block indices, lowest first, then left to right — the same
+  /// Alive block indices, lowest first, then left to right. The same
   /// insertion sort as the backend.
   List<int> _byHeight() {
     final order = <int>[

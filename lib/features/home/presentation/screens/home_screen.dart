@@ -61,7 +61,7 @@ class HomeScreen extends ConsumerWidget {
                 ),
               ),
               // The hero animates its own entrance in sequence, so it isn't
-              // wrapped again here — everything after it cascades in behind.
+              // wrapped again here. Everything after it cascades in behind.
               const HomeHero(),
               const FadeSlideIn(
                 delay: Duration(milliseconds: 60),
@@ -181,7 +181,7 @@ class _HomeTopBar extends ConsumerWidget {
                 tooltip: 'Notifications',
               ),
               const SizedBox(width: 8),
-              // Cart isn't a tab — this is the one place it's always in
+              // Cart isn't a tab. This is the one place it's always in
               // reach, opening as a panel over whatever's on screen.
               IconButton(
                 onPressed: () => context.push(AppRoutes.cart),

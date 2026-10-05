@@ -16,7 +16,7 @@ class CartController extends StateNotifier<List<CartItem>> {
   final CartStorage _storage;
 
   /// Loads the saved cart. Reading storage is asynchronous, so a customer can
-  /// tap "add to cart" before it lands — the restore must not then overwrite
+  /// tap "add to cart" before it lands. The restore must not then overwrite
   /// what they just added, so anything already in state wins and is merged
   /// back into storage.
   Future<void> _restore() async {
@@ -74,7 +74,7 @@ final cartProvider =
   return CartController(ref.watch(cartStorageProvider));
 });
 
-/// Total number of units in the cart — drives the bottom-nav badge.
+/// Total number of units in the cart. Drives the bottom-nav badge.
 final cartCountProvider = Provider<int>((ref) {
   return ref
       .watch(cartProvider)

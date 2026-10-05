@@ -45,7 +45,7 @@ class ReelFeedState {
 }
 
 /// Loads the first page of the feed, then appends the next one as the viewer
-/// nears the end — the feed should never dead-end while the API still has
+/// nears the end. The feed should never dead-end while the API still has
 /// reels to give.
 class ReelFeedController extends StateNotifier<AsyncValue<ReelFeedState>> {
   ReelFeedController(this._repository, this._social)
@@ -82,7 +82,7 @@ class ReelFeedController extends StateNotifier<AsyncValue<ReelFeedState>> {
   /// view.
   ///
   /// The feed lives for as long as the app does, so counts otherwise freeze
-  /// at whatever they were when the tab was first opened — and drift away
+  /// at whatever they were when the tab was first opened. And drift away
   /// from what another client (or the website) shows. Listing reels does not
   /// increment anything, so this is safe to call whenever the tab is opened.
   Future<void> refreshViewCounts() async {
@@ -140,7 +140,7 @@ class ReelFeedController extends StateNotifier<AsyncValue<ReelFeedState>> {
     return null;
   }
 
-  /// Swaps one reel for an updated copy — a like, a new comment — without
+  /// Swaps one reel for an updated copy. A like, a new comment. Without
   /// reloading the page it sits on.
   void patchReel(String reelId, Reel Function(Reel reel) update) {
     final current = state.valueOrNull;
@@ -157,7 +157,7 @@ class ReelFeedController extends StateNotifier<AsyncValue<ReelFeedState>> {
   }
 
   /// Fills in the heart for a reel now on screen. Only call it for a signed-in
-  /// customer — for anyone else the answer is always "not liked".
+  /// customer. For anyone else the answer is always "not liked".
   Future<void> syncLikes(String reelId) async {
     if (!_likesSynced.add(reelId)) return;
     try {
@@ -176,7 +176,7 @@ class ReelFeedController extends StateNotifier<AsyncValue<ReelFeedState>> {
     }
   }
 
-  /// Forgets every heart — on sign-out they belong to nobody, and on sign-in
+  /// Forgets every heart. On sign-out they belong to nobody, and on sign-in
   /// they have to be asked for again under the new account.
   void resetLikes() {
     _likesSynced.clear();
@@ -222,7 +222,7 @@ class ReelFeedController extends StateNotifier<AsyncValue<ReelFeedState>> {
       );
     } on AppException catch (error) {
       if (!like && error.statusCode == 404) {
-        // Already unliked elsewhere — an empty heart is right.
+        // Already unliked elsewhere. An empty heart is right.
         patchReel(reelId, (current) => current.copyWith(likedByMe: false));
       } else {
         patchReel(

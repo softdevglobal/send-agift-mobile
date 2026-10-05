@@ -669,7 +669,7 @@ class _StatPill extends StatelessWidget {
 }
 
 /// One burst of confetti. Purely decorative, so an ordinary random source is
-/// fine here — it has nothing to do with the game's seeded randomness.
+/// fine here. It has nothing to do with the game's seeded randomness.
 class _Confetti extends StatefulWidget {
   const _Confetti({required this.colors});
 

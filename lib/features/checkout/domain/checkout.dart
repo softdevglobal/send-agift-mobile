@@ -209,7 +209,7 @@ class DeliveryQuote {
   final int amount;
   final String currency;
 
-  /// False when at least one shop cannot deliver there — the address is
+  /// False when at least one shop cannot deliver there. The address is
   /// outside its delivery zones, or the shop or address has no map point.
   /// The order cannot be placed until that is fixed.
   final bool complete;

@@ -71,14 +71,14 @@ abstract interface class GameEngine {
   /// The move log exactly as the backend expects it.
   List<String> get moves;
 
-  /// True once no more play is possible — the round submits itself.
+  /// True once no more play is possible. The round submits itself.
   bool get isOver;
 
   /// Whether anything has been played, i.e. whether quitting would bank a run.
   bool get hasProgress;
 }
 
-/// A game whose score the device cannot know — the quiz, whose answers stay
+/// A game whose score the device cannot know. The quiz, whose answers stay
 /// on the server. Its [GameEngine.score] is progress only, and no client
 /// score is sent with it.
 abstract interface class UnscoredGame implements GameEngine {}

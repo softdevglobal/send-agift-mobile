@@ -27,7 +27,7 @@ const _slugs = [
 void main() {
   test('every game in the catalog can actually be opened', () {
     // A slug the server offers but the app cannot build is a tile that shows
-    // up and then refuses to open — the exact failure this guards.
+    // up and then refuses to open. The exact failure this guards.
     for (final slug in _slugs) {
       expect(
         gameDefinitions.containsKey(slug),

@@ -7,17 +7,17 @@ import 'package:flutter/material.dart';
 class AppColors {
   AppColors._();
 
-  /// The gift box — primary brand colour, used for CTAs, headings-on-fill,
+  /// The gift box. Primary brand colour, used for CTAs, headings-on-fill,
   /// and anywhere the app needs to feel unmistakably "Send A Gift".
   static const Color primary = Color(0xFF0F1B45);
   static const Color primaryForeground = Color(0xFFFAFAFF);
 
-  /// The ribbon bow — secondary accent for highlights, gradients, and the
+  /// The ribbon bow. Secondary accent for highlights, gradients, and the
   /// bottom nav's active pill.
   static const Color purple = Color(0xFF6D28D9);
   static const Color purpleForeground = Color(0xFFFFFFFF);
 
-  /// The paper plane in flight — tertiary accent, used sparingly for motion
+  /// The paper plane in flight. Tertiary accent, used sparingly for motion
   /// and "in progress" moments (delivery, tracking, the send action itself).
   static const Color teal = Color(0xFF14B8B8);
   static const Color tealForeground = Color(0xFF06302F);
@@ -34,7 +34,7 @@ class AppColors {
   static const Color muted = Color(0xFFEEF0F8);
   static const Color mist = Color(0xFFE4E7F3);
 
-  /// Soft violet tint for panels that want to feel branded without shouting —
+  /// Soft violet tint for panels that want to feel branded without shouting.
   /// delivery notes, info banners, feature tiles.
   static const Color cream = Color(0xFFF1EDFB);
 
@@ -59,11 +59,11 @@ class AppColors {
     Color(0xFFF3EAF9), // violet × teal
   ];
 
-  /// Shadow used on cards — a soft navy-tinted lift, not a grey drop shadow.
+  /// Shadow used on cards. A soft navy-tinted lift, not a grey drop shadow.
   static const Color cardShadow = Color(0x1E0F1B45);
 
   /// Box-navy into ribbon-violet. Used once, deliberately: the bottom nav's
-  /// active pill. Everywhere else reaches for a flat brand colour instead —
+  /// active pill. Everywhere else reaches for a flat brand colour instead.
   /// gradients read as decoration fast when repeated.
   static const List<Color> brandGradient = [
     Color(0xFF16225A),

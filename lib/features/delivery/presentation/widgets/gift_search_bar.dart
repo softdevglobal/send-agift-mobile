@@ -8,7 +8,7 @@ import '../../data/delivery_providers.dart';
 import '../../domain/delivery_intent.dart';
 import 'address_search_sheet.dart';
 
-/// "Deliver to" and "Arrive by", then Find gifts — the same search as the
+/// "Deliver to" and "Arrive by", then Find gifts. The same search as the
 /// top of the web home page.
 ///
 /// Edits stay a draft until Find gifts, so half-made choices never reload
@@ -16,7 +16,7 @@ import 'address_search_sheet.dart';
 class GiftSearchBar extends ConsumerStatefulWidget {
   const GiftSearchBar({super.key, this.onSubmitted});
 
-  /// Runs after Find gifts saved the search — home uses it to open Explore.
+  /// Runs after Find gifts saved the search. Home uses it to open Explore.
   final VoidCallback? onSubmitted;
 
   @override

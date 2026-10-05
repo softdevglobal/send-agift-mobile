@@ -9,7 +9,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 /// simply always attached: signed-in players are still recorded as themselves,
 /// and everyone else keeps their scores and personal best on this device.
 ///
-/// It is not a security boundary — it only decides whose score is whose. The
+/// It is not a security boundary. It only decides whose score is whose. The
 /// server still validates every round on its own.
 class GuestPlayerId {
   GuestPlayerId._();

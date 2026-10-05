@@ -7,7 +7,7 @@ import 'package:send_agift_mobile/features/games/domain/game.dart';
 class FakeGamesRepository implements GamesRepository {
   FakeGamesRepository({this.seed = 'cafebabe'});
 
-  /// Fixed so every board — and which moves do something — is predictable.
+  /// Fixed so every board. And which moves do something. Is predictable.
   final String seed;
 
   int startCount = 0;

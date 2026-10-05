@@ -14,7 +14,7 @@ class MessagesRepository {
 
   final ApiClient _client;
 
-  /// Talks to the presigned storage URL directly — no base URL, and no API
+  /// Talks to the presigned storage URL directly. No base URL, and no API
   /// token (the signature in the URL is the permission).
   final Dio _storage = Dio(
     BaseOptions(
@@ -91,7 +91,7 @@ class MessagesRepository {
   /// `POST /conversations` carrying the first message, as the API docs show.
   ///
   /// When the API hands back a thread that already existed (a product
-  /// question that was still open), it doesn't store the message — so if the
+  /// question that was still open), it doesn't store the message. So if the
   /// thread's last message predates this request, it's posted separately.
   Future<ChatConversation> _startWithMessage(
     Map<String, dynamic> target, {

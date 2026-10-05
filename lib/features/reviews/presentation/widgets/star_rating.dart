@@ -17,7 +17,7 @@ const _ratingWords = <String>[
 
 String ratingWord(int value) => _ratingWords[value.clamp(0, 5)];
 
-/// The gold a lit star is filled with — warmer at the tip than the base, so a
+/// The gold a lit star is filled with. Warmer at the tip than the base, so a
 /// row of stars has some depth instead of reading as flat colour.
 const _starGradient = LinearGradient(
   begin: Alignment.topCenter,
@@ -28,8 +28,8 @@ const _starGradient = LinearGradient(
 /// Read-only stars with a *fractional* fill: 4.3 looks like 4.3 rather than
 /// rounding to a flat 4, which is the whole point of showing a decimal.
 ///
-/// Two identical rows are stacked — outlines underneath, gold on top clipped
-/// to the score's width — so any fraction is exact at any size without needing
+/// Two identical rows are stacked. Outlines underneath, gold on top clipped
+/// to the score's width. So any fraction is exact at any size without needing
 /// half-star icons.
 class StarMeter extends StatelessWidget {
   const StarMeter({
@@ -164,7 +164,7 @@ class _StarPickerState extends State<StarPicker>
     duration: const Duration(milliseconds: 420),
   );
 
-  /// Which star is mid-spring. Only the star that was chosen animates —
+  /// Which star is mid-spring. Only the star that was chosen animates.
   /// popping the whole row on every change turns a small confirmation into
   /// noise.
   int _popIndex = -1;
@@ -228,7 +228,7 @@ class _StarPickerState extends State<StarPicker>
                       builder: (context, child) {
                         final active = _popIndex == index && !reduceMotion;
                         final t = active ? _pop.value : 1.0;
-                        // Overshoot then settle — a spring, not a fade.
+                        // Overshoot then settle. A spring, not a fade.
                         final scale = active ? 1 + _spring(t) : 1.0;
                         return Stack(
                           alignment: Alignment.center,

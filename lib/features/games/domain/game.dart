@@ -92,7 +92,7 @@ class GameSession {
 
 /// The outcome of a submitted game.
 ///
-/// [score] is the server's own number, recomputed from the submitted moves —
+/// [score] is the server's own number, recomputed from the submitted moves.
 /// not whatever the app had on screen. They match when everything is healthy.
 class GameScoreResult {
   const GameScoreResult({

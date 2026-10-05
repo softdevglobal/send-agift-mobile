@@ -48,7 +48,7 @@ class CatalogRepository {
       _cachedAt = DateTime.now();
       return gifts;
     } on DioException {
-      // The backend is unreachable — show the clearly-placeholder sample shelf
+      // The backend is unreachable. Show the clearly-placeholder sample shelf
       // rather than an empty app.
       _cache = sampleGifts;
       _cachedAt = DateTime.now();
@@ -58,7 +58,7 @@ class CatalogRepository {
 
   /// Resolves one product for a detail screen.
   ///
-  /// The catalog usually already holds it — detail screens are opened from a
+  /// The catalog usually already holds it. Detail screens are opened from a
   /// list. A reel is the exception: it links straight to a product that may
   /// not be on the loaded shelf, so a miss falls through to the public
   /// product endpoint rather than showing "gift not found".

@@ -1,7 +1,7 @@
 /// Likes and comments on a reel, as the public API shapes them.
 ///
-/// The API never exposes who is behind a like or comment — no customer ids,
-/// no guest tokens — only a type and a display name.
+/// The API never exposes who is behind a like or comment. No customer ids,
+/// no guest tokens. Only a type and a display name.
 library;
 
 /// Someone who liked a reel.

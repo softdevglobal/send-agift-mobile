@@ -18,7 +18,7 @@ const _bubbleColors = [
 Color _colorOf(int value) => _bubbleColors[value % _bubbleColors.length];
 
 /// The playing surface, which takes the aim. Named so a test can convert a
-/// cell into a screen point through the board's own render box — the tilt
+/// cell into a screen point through the board's own render box. The tilt
 /// makes that mapping anything but linear.
 const bubbleSurfaceKey = ValueKey('bubble-board-surface');
 
@@ -37,8 +37,8 @@ class _Burst {
 
 /// Bubble Shooter: drag anywhere to aim, let go to fire.
 ///
-/// The aim line is the engine's own flight — the same integer steps the server
-/// replays — so the dotted path, the bounces off the walls and the ghost at the
+/// The aim line is the engine's own flight. The same integer steps the server
+/// replays. So the dotted path, the bounces off the walls and the ghost at the
 /// end show exactly where the bubble is going to end up, not an approximation
 /// of it.
 class BubbleBoard extends StatefulWidget {
@@ -54,7 +54,7 @@ class BubbleBoard extends StatefulWidget {
 class _BubbleBoardState extends State<BubbleBoard>
     with SingleTickerProviderStateMixin {
   /// The aim being held, in sideways units per 1000 of rise, or null when the
-  /// player is not touching the board. Aiming only previews — nothing is
+  /// player is not touching the board. Aiming only previews. Nothing is
   /// fired until the finger lifts.
   int? _aim;
 
@@ -103,8 +103,8 @@ class _BubbleBoardState extends State<BubbleBoard>
 
   /// Turns a touch anywhere in the widget into an aim.
   ///
-  /// Above the launcher the shot points at the finger. Below it — holding the
-  /// ball and pulling down — it works like a catapult and points the opposite
+  /// Above the launcher the shot points at the finger. Below it. Holding the
+  /// ball and pulling down. It works like a catapult and points the opposite
   /// way, so the ball itself can be dragged to aim with.
   void _aimTo(Offset global) {
     if (!_live) return;
@@ -214,7 +214,7 @@ class _BubbleBoardState extends State<BubbleBoard>
     // than a GestureDetector: a tap recognizer and a drag recognizer would
     // compete in the arena and the tap's down callback is held back until
     // that resolves, so the aim would not appear until the finger moved or
-    // lifted — too late to aim with.
+    // lifted. Too late to aim with.
     return Listener(
       behavior: HitTestBehavior.opaque,
       onPointerDown: _onDown,
@@ -505,7 +505,7 @@ class _Launcher extends StatelessWidget {
               mainAxisSize: MainAxisSize.min,
               children: [
                 // The loaded bubble, big enough to read its colour at a
-                // glance — knowing what is about to be fired is the game.
+                // glance. Knowing what is about to be fired is the game.
                 _Loaded(value: game.next, size: 52, tint: tint),
                 const SizedBox(width: 8),
                 Icon(
@@ -583,7 +583,7 @@ class _Loaded extends StatelessWidget {
         ],
       ),
       // The switcher lays its children out in a Stack, which hands them loose
-      // constraints — and a bubble is a childless DecoratedBox with no size of
+      // constraints. And a bubble is a childless DecoratedBox with no size of
       // its own, so it would collapse to its padding and show as an empty
       // ring. The SizedBox inside gives it one.
       child: AnimatedSwitcher(

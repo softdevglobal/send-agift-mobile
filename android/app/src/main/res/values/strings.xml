@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Facebook sign-in. The client token is in the Facebook developer
+         console: App settings > Advanced > Security > Client token.
+         It is not a secret (it ships in every app build). -->
+    <string name="facebook_app_id">1745907156491235</string>
+    <string name="facebook_client_token">REPLACE_WITH_FACEBOOK_CLIENT_TOKEN</string>
+    <string name="fb_login_protocol_scheme">fb1745907156491235</string>
+</resources>

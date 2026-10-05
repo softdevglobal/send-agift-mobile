@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 ///
 /// Painted rather than photographed: a vector picture is sharp at any tile
 /// size, weighs nothing in the bundle, and each one is drawn to fill its
-/// square edge to edge so no tile comes out blank — a blank tile in a picture
+/// square edge to edge so no tile comes out blank. A blank tile in a picture
 /// puzzle is a tile you cannot place.
 class PuzzlePicture {
   const PuzzlePicture({

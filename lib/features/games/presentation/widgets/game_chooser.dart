@@ -21,7 +21,7 @@ class GameChoice {
 }
 
 /// The screen a game shows before the first move, for picking what to play
-/// with — a picture to rebuild, a vehicle to drive.
+/// with. A picture to rebuild, a vehicle to drive.
 ///
 /// The choice is the player's and is drawn locally. It decides nothing about
 /// the round: the board still comes from the server's seed and the moves are

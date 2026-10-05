@@ -16,7 +16,7 @@ const doodleSurfaceKey = ValueKey('doodle-board-surface');
 const _hopDuration = Duration(milliseconds: 260);
 
 /// A sprung hop covers several ledges, so it is given time per ledge rather
-/// than a flat figure — being flung three should not finish as quickly as
+/// than a flat figure. Being flung three should not finish as quickly as
 /// being flung two.
 const _springRungDuration = Duration(milliseconds: 220);
 
@@ -29,7 +29,7 @@ const _springContact = 0.32;
 /// The tower is drawn in perspective and scrolls under the jumper as it
 /// climbs, rather than snapping a rung at a time, so a hop reads as a jump
 /// rather than a redraw. Lanes out of reach stay visible but fall back into
-/// the haze, so the rule — your lane and the two beside it — can be seen
+/// the haze, so the rule. Your lane and the two beside it. Can be seen
 /// instead of learned by falling.
 class DoodleBoard extends StatefulWidget {
   const DoodleBoard({required this.game, required this.controls, super.key});
@@ -105,7 +105,7 @@ class _DoodleBoardState extends State<DoodleBoard>
 
     final fromLane = _game.lane;
     final fromHeight = _game.height;
-    // A hop that misses reports false, but the round still has to move on —
+    // A hop that misses reports false, but the round still has to move on.
     // that is the fall that ends it, and the screen only hears about it
     // through onChanged below.
     _game.hop(lane);
@@ -494,7 +494,7 @@ class _CoilPainter extends CustomPainter {
 }
 
 /// The climber: a figure that tucks its legs on the way up, reaches overhead
-/// at the top of the arc and lands on bent knees — drawn rather than assembled
+/// at the top of the arc and lands on bent knees. Drawn rather than assembled
 /// from boxes, so the limbs can actually move with the jump.
 class _Jumper extends StatelessWidget {
   const _Jumper({required this.arc, required this.lean, required this.sprung});
@@ -583,7 +583,7 @@ class _JumperPainter extends CustomPainter {
       canvas.drawPath(path, limb);
     }
 
-    // Arms: swung down by the sides on a ledge, thrown overhead in the air —
+    // Arms: swung down by the sides on a ledge, thrown overhead in the air.
     // which is what makes the jump read as effort rather than a float.
     final shoulderY = unit * 36;
     final handY = shoulderY - lift * unit * 26 + (1 - lift) * unit * 26;

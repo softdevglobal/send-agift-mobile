@@ -62,7 +62,7 @@ class AccountRepository {
 
   final ApiClient _client;
 
-  /// Talks to the presigned storage URL directly — no base URL and no API
+  /// Talks to the presigned storage URL directly. No base URL and no API
   /// auth header, which the storage service would reject.
   final Dio _storage = Dio(
     BaseOptions(

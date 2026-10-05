@@ -10,7 +10,7 @@ import '../../../../core/widgets/pressable_scale.dart';
 /// Entry point from the storefront into the skill games.
 ///
 /// Deliberately reads as a game, not a prize draw: no jackpot, no entry fee,
-/// no "chance to win" — the app-store and competition rules require that the
+/// no "chance to win". The app-store and competition rules require that the
 /// framing stay about skill.
 class GamesTeaser extends StatelessWidget {
   const GamesTeaser({super.key});

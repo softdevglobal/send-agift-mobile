@@ -122,7 +122,7 @@ class CompetitionCard extends StatelessWidget {
   }
 }
 
-/// The spec's game card (§6.1): "WIN UP TO $348 — +$1 a play · 10 points ·
+/// The spec's game card (§6.1): "WIN UP TO $348. +$1 a play · 10 points ·
 /// 248 plays", in the space one line of prize text used to take.
 class _GrowingPrize extends StatelessWidget {
   const _GrowingPrize({required this.competition});

@@ -15,7 +15,7 @@ const double _fieldRadius = 520;
 double _lerp(double a, double b, double t) => a + (b - a) * t;
 
 /// The stadium in perspective, seen from behind the batter. Tap to swing;
-/// where you tap aims the shot — left of the batter goes left.
+/// where you tap aims the shot. Left of the batter goes left.
 class CricketPitch extends StatefulWidget {
   const CricketPitch({required this.game, required this.controls, super.key});
 

@@ -12,7 +12,7 @@ import '../../../../core/widgets/pressable_scale.dart';
 import '../../../products/data/catalog_providers.dart';
 import '../../../products/domain/gift_category.dart';
 
-/// Horizontally scrolling occasion cards — a photo with the occasion's
+/// Horizontally scrolling occasion cards. A photo with the occasion's
 /// name over a soft fade. Tapping one jumps to Explore with that filter
 /// already applied.
 class CategoryStrip extends ConsumerWidget {

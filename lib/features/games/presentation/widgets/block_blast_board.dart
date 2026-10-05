@@ -75,7 +75,7 @@ void _paintJewel(Canvas canvas, Rect rect, Color color, [double alpha = 1]) {
     );
 }
 
-/// Block Blast: drag a piece from the tray onto the board — or tap a piece,
+/// Block Blast: drag a piece from the tray onto the board. Or tap a piece,
 /// then tap the square for its top-left corner.
 class BlockBlastBoard extends StatefulWidget {
   const BlockBlastBoard({

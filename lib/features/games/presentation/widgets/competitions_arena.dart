@@ -15,7 +15,7 @@ import 'countdown.dart';
 /// The competitions at the top of the game zone: a swipeable stage of big
 /// prize cards with live countdowns. Customers are only sent live
 /// competitions (and any prize they have yet to claim). Stays out of the way
-/// when there are none — the games still work.
+/// when there are none. The games still work.
 class CompetitionsArena extends ConsumerStatefulWidget {
   const CompetitionsArena({super.key});
 

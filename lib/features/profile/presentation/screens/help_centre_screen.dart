@@ -32,7 +32,7 @@ const _topics = [
     ),
     (
       'Can I cancel an order?',
-      'Yes, from the order page, until the shop sends it out — while it is '
+      'Yes, from the order page, until the shop sends it out. While it is '
           'awaiting payment, paid, accepted or being prepared. Once it is on '
           'its way it can no longer be cancelled.',
     ),
@@ -51,7 +51,7 @@ const _topics = [
     (
       'How is delivery priced?',
       'From the distance between the shop and the recipient\'s address. '
-          'That is why an address has to be picked from the search list — '
+          'That is why an address has to be picked from the search list. '
           'it gives the exact spot on the map.',
     ),
     (
@@ -75,7 +75,7 @@ const _topics = [
     (
       'What happens to points if an order is cancelled or refunded?',
       'Points that were not paid yet are never paid. Points already paid '
-          'are taken back — a cancellation is refused if you have already '
+          'are taken back. A cancellation is refused if you have already '
           'spent them.',
     ),
     (

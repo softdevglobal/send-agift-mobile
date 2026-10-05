@@ -28,8 +28,8 @@ class QuizQuestion {
 
 /// The quiz: answer each question before its timer runs out.
 ///
-/// The device never learns which answers are right — the server keeps them
-/// and scores the answers itself — so this engine only records what was
+/// The device never learns which answers are right. The server keeps them
+/// and scores the answers itself. So this engine only records what was
 /// chosen and how long it took, as `question:option:ms` (option -1
 /// when the time ran out). Its [score] is progress, not points.
 class QuizGame implements UnscoredGame {

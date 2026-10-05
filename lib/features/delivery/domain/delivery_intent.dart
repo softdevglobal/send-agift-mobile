@@ -20,7 +20,7 @@ class DeliveryIntent {
   });
 
   /// What to show the shopper, e.g. "12 Galle Road, Colombo". Null when only
-  /// a date was given — a date alone is still worth remembering.
+  /// a date was given. A date alone is still worth remembering.
   final String? address;
 
   /// Street line copied onto the checkout recipient form.
@@ -47,7 +47,7 @@ class DeliveryIntent {
 
   bool get isEmpty => !hasAddress && date == null;
 
-  /// "Colombo, Sri Lanka · arrives 5 Oct" — the one-line summary.
+  /// "Colombo, Sri Lanka · arrives 5 Oct". The one-line summary.
   String describe() {
     final parts = <String>[];
     if (hasAddress) parts.add(address!.trim());

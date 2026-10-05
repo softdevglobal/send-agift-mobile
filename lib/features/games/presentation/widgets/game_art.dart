@@ -141,7 +141,7 @@ class _GameArtPainter extends CustomPainter {
     }
   }
 
-  /// A filled shape with a shadow copy beneath it — the whole 3D trick.
+  /// A filled shape with a shadow copy beneath it. The whole 3D trick.
   void _solid(Canvas canvas, Path path, Color ink, Color fill) {
     canvas.save();
     canvas.translate(2.5, 3);
@@ -382,7 +382,7 @@ class _GameArtPainter extends CustomPainter {
       ..color = body;
     canvas.drawLine(const Offset(48, 36), const Offset(38, 50), handle);
 
-    // Helmet, torso and front leg — simplified to stay legible small.
+    // Helmet, torso and front leg. Simplified to stay legible small.
     _solidCircle(canvas, const Offset(40, 42), 11, ink, body);
     final torso = Path()
       ..moveTo(36, 52)

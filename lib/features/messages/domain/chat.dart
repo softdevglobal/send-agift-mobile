@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 /// One person in a thread. `userId` is a customer, seller, or admin id
-/// depending on [role] — the API has no single users table.
+/// depending on [role]. The API has no single users table.
 class ChatParticipant {
   const ChatParticipant({
     required this.id,
@@ -40,7 +40,7 @@ class ChatSupportCase {
   }
 }
 
-/// A chat thread — about a gift (`product_inquiry`), an order item
+/// A chat thread. About a gift (`product_inquiry`), an order item
 /// (`order`), or a support ticket (`support`).
 class ChatConversation {
   const ChatConversation({
@@ -73,7 +73,7 @@ class ChatConversation {
   bool get isSupport => type == 'support';
   bool get isOrder => type == 'order';
 
-  /// When the thread last moved — inbox order and the row timestamp.
+  /// When the thread last moved. Inbox order and the row timestamp.
   DateTime get activityAt => lastMessageAt ?? createdAt;
 
   factory ChatConversation.fromJson(Map<String, dynamic> json) {
@@ -164,7 +164,7 @@ class ChatMessage {
   final String body;
   final DateTime createdAt;
 
-  /// The timestamp exactly as the API sent it — used as the `before` cursor
+  /// The timestamp exactly as the API sent it. Used as the `before` cursor
   /// so paging never skips a message over lost sub-second precision.
   final String createdAtRaw;
   final List<ChatAttachment> attachments;

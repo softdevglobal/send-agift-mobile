@@ -104,7 +104,7 @@ class _ProductReviewsScreenState extends ConsumerState<ProductReviewsScreen> {
     }
   }
 
-  /// Votes are applied to the row first and rolled back if the call fails — a
+  /// Votes are applied to the row first and rolled back if the call fails. A
   /// thumbs-up that waits for a round trip feels broken at this size.
   Future<void> _vote(ProductReview review) async {
     final signedIn = ref.read(authProvider).isSignedIn;

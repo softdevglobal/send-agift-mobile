@@ -4,7 +4,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_typography.dart';
 
 /// The top of every bottom sheet: a grab bar, the title, and a close button,
-/// so a sheet can always be dismissed with a visible tap — not only by
+/// so a sheet can always be dismissed with a visible tap. Not only by
 /// swiping down or tapping outside, which many people never try.
 class SheetHeader extends StatelessWidget {
   const SheetHeader({

@@ -39,7 +39,7 @@ class _HillRiderBoardState extends State<HillRiderBoard>
   bool _started = false;
 
   /// Null until one is picked, which is what starts the run. It changes
-  /// nothing about the drive — the hills, the fuel and the scoring are the
+  /// nothing about the drive. The hills, the fuel and the scoring are the
   /// engine's, and the same seed drives the same course whichever is chosen.
   HillVehicle? _vehicle;
 
@@ -217,7 +217,7 @@ class _HillRiderBoardState extends State<HillRiderBoard>
   }
 }
 
-/// A chunky 3D pedal. Press and hold — it tracks the finger, not taps.
+/// A chunky 3D pedal. Press and hold. It tracks the finger, not taps.
 class _Pedal extends StatelessWidget {
   const _Pedal({
     required this.label,

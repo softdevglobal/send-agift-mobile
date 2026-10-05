@@ -17,7 +17,7 @@ import 'package:send_agift_mobile/features/reels/presentation/screens/reels_scre
 
 /// The reels screen reads who is signed in. The real session is built on an
 /// API client that reads dotenv, which tests do not load, so the screen runs
-/// against a fake one — a guest unless [customer] is given.
+/// against a fake one. A guest unless [customer] is given.
 Override _auth({Map<String, dynamic>? customer}) => authProvider
     .overrideWith((ref) => AuthController(_FakeAuthRepository(customer)));
 
@@ -174,7 +174,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // Only the reel actually on screen is counted — not every reel in the
+    // Only the reel actually on screen is counted. Not every reel in the
     // page of results the API returned.
     expect(repository.viewed, ['reel-1']);
   });
@@ -207,7 +207,7 @@ void main() {
     await tester.pump();
     await tester.pump(const Duration(milliseconds: 100));
 
-    // Counts and names are public — no account needed to read them.
+    // Counts and names are public. No account needed to read them.
     expect(find.text('3'), findsOneWidget);
     expect(find.text('2'), findsOneWidget);
     expect(find.text('Liked by Aisha and 2 others'), findsOneWidget);

@@ -239,7 +239,7 @@ class _OrdersState extends ConsumerState<_Orders> {
   /// added up, so they show as a count instead.
   static String _spent(List<CustomerOrder> orders) {
     final counted = orders.where((o) => !o.isCancelled).toList();
-    if (counted.isEmpty) return '—';
+    if (counted.isEmpty) return '-';
     final currency = counted.first.currency;
     if (counted.any((o) => o.currency != currency)) {
       return '${counted.length} orders';
@@ -506,7 +506,7 @@ class _Dot extends StatelessWidget {
   }
 }
 
-/// Order status as a small pill — teal while it's moving, muted once done.
+/// Order status as a small pill. Teal while it's moving, muted once done.
 class OrderStatusChip extends StatelessWidget {
   const OrderStatusChip({super.key, required this.order});
 

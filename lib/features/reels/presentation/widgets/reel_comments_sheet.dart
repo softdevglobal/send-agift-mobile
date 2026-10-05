@@ -766,7 +766,7 @@ class _EmptyComments extends StatelessWidget {
   }
 }
 
-/// Stands in for the composer when nobody is signed in — comments are still
+/// Stands in for the composer when nobody is signed in. Comments are still
 /// readable above it.
 class _SignInRow extends StatelessWidget {
   const _SignInRow();

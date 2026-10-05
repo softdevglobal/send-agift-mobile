@@ -14,8 +14,8 @@ import 'guest_player_id.dart';
 /// The skill-game collection.
 ///
 /// Reading the catalog is public. Playing needs a player identity, which is
-/// either the signed-in customer's bearer token — [ApiClient] attaches that on
-/// its own — or this device's guest id. Both are sent; the API prefers the
+/// either the signed-in customer's bearer token. [ApiClient] attaches that on
+/// its own. Or this device's guest id. Both are sent; the API prefers the
 /// token, so signing in later does not cost anyone their identity mid-session.
 class GamesRepository {
   GamesRepository(this._client);
@@ -45,7 +45,7 @@ class GamesRepository {
   /// dealt an easy board, and so the same game can be replayed at scoring time.
   ///
   /// [level] asks for a harder board on games with level progression (only
-  /// Memory Match, currently) — the server scales the config and bakes it
+  /// Memory Match, currently). The server scales the config and bakes it
   /// into the session, so it plays back exactly as dealt regardless of level.
   Future<GameSession> startSession(String slug, {int level = 1}) =>
       _guard(() async {
@@ -60,7 +60,7 @@ class GamesRepository {
   /// Submits the moves that were played and returns the server's score.
   ///
   /// [clientScore] is what the app had on screen. It is sent only so the
-  /// backend can spot a disagreement — the score that counts is the one the
+  /// backend can spot a disagreement. The score that counts is the one the
   /// server computes by replaying [moves] itself. Null for a game whose score
   /// only the server can know (the quiz).
   Future<GameScoreResult> submitScore(
@@ -93,7 +93,7 @@ class GamesRepository {
   // [ApiClient]) adds their attempts, eligibility and rank. Entering and
   // claiming need a signed-in, verified customer.
 
-  /// Published competitions — the customer's own country when signed in.
+  /// Published competitions. The customer's own country when signed in.
   Future<List<Competition>> listCompetitions() => _guard(() async {
     final response = await _client.dio.get<dynamic>('/competitions');
     return Competition.listFromJson(_map(response.data)['items']);
@@ -129,7 +129,7 @@ class GamesRepository {
   /// through [submitScore] like any other game.
   ///
   /// [playKey] identifies this one intended play. Retrying with the same key
-  /// — after a timeout, say — returns the original play and never charges
+  /// (after a timeout, say) returns the original play and never charges
   /// twice, so a caller keeps the key until the play has come back.
   Future<AttemptStart> startAttempt(
     String competitionId, {

@@ -36,7 +36,7 @@ class _ReelsScreenState extends ConsumerState<ReelsScreen> {
   }
 
   /// The API counts a view when the reel is fetched by id, so that call is
-  /// made when a reel actually reaches the screen — not when the page of
+  /// made when a reel actually reaches the screen. Not when the page of
   /// results was loaded.
   void _countView(List<Reel> reels, int index) {
     if (index < 0 || index >= reels.length) return;

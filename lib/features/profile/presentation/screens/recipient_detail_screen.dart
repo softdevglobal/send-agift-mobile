@@ -484,7 +484,7 @@ class _RoundAction extends StatelessWidget {
   }
 }
 
-/// "Find a gift for Amaya" — the reason a recipient is saved at all.
+/// "Find a gift for Amaya". The reason a recipient is saved at all.
 class _GiftShortcut extends StatelessWidget {
   const _GiftShortcut({
     required this.firstName,

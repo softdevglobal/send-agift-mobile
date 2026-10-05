@@ -17,7 +17,7 @@ class ReelPage {
   static const empty = ReelPage(reels: []);
 }
 
-/// Reads `GET /reels` — the public, unauthenticated reel feed.
+/// Reads `GET /reels`. The public, unauthenticated reel feed.
 ///
 /// Only published, public reels from active shops come back, so the feed is
 /// safe to show a guest. Paging is by keyset cursor, which means a reel posted

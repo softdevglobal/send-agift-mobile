@@ -4,7 +4,7 @@
 /// backend. When a game ends the app sends only the moves that were played;
 /// the server replays them from the same seed and computes the score itself.
 /// If these two implementations ever drift apart, honest players get their
-/// scores flagged — so any change here must be made on both sides, behind a
+/// scores flagged. So any change here must be made on both sides, behind a
 /// new game version.
 library;
 
@@ -92,7 +92,7 @@ class Game2048 implements GameEngine {
   int _score = 0;
 
   /// Every move that changed the board, in order. This is what gets
-  /// submitted — the server derives the score from it.
+  /// submitted. The server derives the score from it.
   final List<String> _moves = <String>[];
 
   List<Tile2048Slide> _slides = const [];
@@ -198,7 +198,7 @@ class Game2048 implements GameEngine {
   ///
   /// [travel] collects, for each tile that survived, the position it started
   /// at, the position it ended at, and whether it merged on arrival. The
-  /// values and the score are worked out exactly as before — the bookkeeping
+  /// values and the score are worked out exactly as before. The bookkeeping
   /// only watches.
   List<int> _collapse(List<int> input, [List<List<int>>? travel]) {
     final packed = <int>[];

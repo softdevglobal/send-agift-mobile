@@ -288,7 +288,7 @@ class _RangePainter extends CustomPainter {
         ).createShader(Rect.fromCircle(center: sun, radius: size.width * 0.3)),
     );
 
-    // Clouds drift slowly — decoration only.
+    // Clouds drift slowly. Decoration only.
     for (var i = 0; i < 3; i++) {
       final x =
           (size.width * (0.2 + i * 0.35) + clock.wallMs * 0.006 * (i + 1)) %

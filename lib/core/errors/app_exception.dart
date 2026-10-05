@@ -4,8 +4,8 @@ class AppException implements Exception {
   final String message;
   final int? statusCode;
 
-  /// The API's machine code for the failure, when it sends one — e.g.
-  /// `INSUFFICIENT_POINTS` — so a screen can react to the reason rather than
+  /// The API's machine code for the failure, when it sends one. E.g.
+  /// `INSUFFICIENT_POINTS`. So a screen can react to the reason rather than
   /// parse the message.
   final String? code;
 

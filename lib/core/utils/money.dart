@@ -30,8 +30,8 @@ class Money {
   ///
   /// Currencies whose symbol is unique keep it; ones sharing a symbol are
   /// rendered with the ISO code instead (`AUD 25.00`). The rule is generic
-  /// rather than a symbol table because admins can add countries — and
-  /// therefore currencies — at any time.
+  /// rather than a symbol table because admins can add countries. And
+  /// therefore currencies. At any time.
   static String format(int minorAmount, String currency) {
     final code = currency.isEmpty ? 'USD' : currency.toUpperCase();
     final digits = fractionDigits(code);

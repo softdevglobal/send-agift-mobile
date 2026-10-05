@@ -354,7 +354,7 @@ class _CourtPainter extends CustomPainter {
       );
     }
 
-    // The crowd: rows of heads above the far baseline. A fixed pattern —
+    // The crowd: rows of heads above the far baseline. A fixed pattern.
     // decoration only.
     final crowdTop = cam.horizon - size.height * 0.17;
     const perRow = 26;

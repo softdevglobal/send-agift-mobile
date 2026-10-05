@@ -75,8 +75,8 @@ const _slides = [
   ),
 ];
 
-/// A swipeable carousel of the app's three promises — gifts, points and
-/// games — that moves on by itself every few seconds.
+/// A swipeable carousel of the app's three promises. Gifts, points and
+/// games. That moves on by itself every few seconds.
 ///
 /// The games slide stays about skill, like the games teaser: no prizes or
 /// "chance to win" in the storefront's own wording.

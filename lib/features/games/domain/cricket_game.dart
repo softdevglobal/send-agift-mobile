@@ -1,4 +1,4 @@
-/// Cricket — a mirror of `internal/games/cricket.go`.
+/// Cricket. A mirror of `internal/games/cricket.go`.
 ///
 /// Twelve balls, three wickets. Every delivery (pace and line) and the field
 /// for each over are drawn from the seed before the first ball and shown on
@@ -118,7 +118,7 @@ class CricketOutcome {
   final bool swung;
   final int angle;
 
-  /// When it was decided — the swing, or the end of the ball's window.
+  /// When it was decided. The swing, or the end of the ball's window.
   final int tick;
 }
 

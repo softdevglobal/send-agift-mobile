@@ -30,7 +30,7 @@ const List<Gift> sampleGifts = [
     categoryId: 'hampers',
     shopName: 'Sunday Pour',
     description:
-        'A handmade ceramic dripper, carafe, and filters — ready to wrap as a '
+        'A handmade ceramic dripper, carafe, and filters. Ready to wrap as a '
         'slow-morning coffee ritual.',
     image:
         'https://images.unsplash.com/photo-1514228742587-6b1558fcca3d?auto=format&fit=crop&w=900&q=80',
@@ -92,7 +92,7 @@ const List<Gift> sampleGifts = [
     categoryId: 'flowers',
     shopName: 'Bloom Atelier',
     description:
-        'A lasting dried bouquet of oats, ruscus, and strawflowers — no vase '
+        'A lasting dried bouquet of oats, ruscus, and strawflowers. No vase '
         'required, just unwrap and display.',
     image:
         'https://images.unsplash.com/photo-1487530811176-3780de880c2d?auto=format&fit=crop&w=900&q=80',

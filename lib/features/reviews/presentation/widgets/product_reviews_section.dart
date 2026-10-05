@@ -31,7 +31,7 @@ class ProductReviewsSection extends ConsumerWidget {
 
     return summary.when(
       // A gift page should not wait on its reviews, and a failed summary
-      // should not break it — both fall back to showing nothing.
+      // should not break it. Both fall back to showing nothing.
       loading: () => const SizedBox.shrink(),
       error: (_, _) => const SizedBox.shrink(),
       data: (data) {

@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../saved/data/saved_controller.dart';
 
-/// Heart toggle. Saving works for guests — the list lives on the device until
+/// Heart toggle. Saving works for guests. The list lives on the device until
 /// there is an account to sync it to.
 class SaveGiftButton extends ConsumerWidget {
   const SaveGiftButton({super.key, required this.giftId, this.compact = true});

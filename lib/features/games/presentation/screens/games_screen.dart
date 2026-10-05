@@ -123,7 +123,7 @@ class _Header extends StatelessWidget {
         const SizedBox(height: 4),
         Text(
           'Pure-skill games. Every board comes from a server seed and every '
-          'score is replayed on our servers — chance plays no part.',
+          'score is replayed on our servers. Chance plays no part.',
           style: Theme.of(context).textTheme.bodyMedium,
         ),
       ],
@@ -131,7 +131,7 @@ class _Header extends StatelessWidget {
   }
 }
 
-/// The player's available points, at the top of the zone — just the
+/// The player's available points, at the top of the zone. Just the
 /// balance, so it reads at a glance before they pick a game.
 class _PointsBanner extends ConsumerWidget {
   const _PointsBanner();

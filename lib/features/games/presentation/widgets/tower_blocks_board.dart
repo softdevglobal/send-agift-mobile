@@ -10,7 +10,7 @@ const _queuedColor = Color(0xFFBFDBFE);
 /// Tower Blocks: tap a column to drop the queued slab into the well.
 ///
 /// The slab is drawn hovering over the column it would land in, with a ghost
-/// showing where it comes to rest — the stack is the whole read, so showing
+/// showing where it comes to rest. The stack is the whole read, so showing
 /// the landing is what makes a considered drop possible.
 class TowerBlocksBoard extends StatefulWidget {
   const TowerBlocksBoard({

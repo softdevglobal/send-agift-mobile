@@ -9,7 +9,7 @@ void main() {
     final puzzle = SlidePuzzle(seed: 'cafebabe');
     expect(puzzle.board, [9, 14, 1, 11, 10, 0, 4, 3, 8, 6, 2, 7, 13, 5, 15, 12]);
 
-    // The optimal solution for this scramble — no shorter one exists — so the
+    // The optimal solution for this scramble. No shorter one exists. So the
     // score is the most this board can pay.
     const solution =
         'down,left,left,up,right,up,right,up,left,down,right,down,left,up,up,'

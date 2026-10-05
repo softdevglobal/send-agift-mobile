@@ -46,7 +46,7 @@ class OrdersRepository {
     }
   }
 
-  /// One order with its items — each item's id is what an order chat needs.
+  /// One order with its items. Each item's id is what an order chat needs.
   Future<CustomerOrder> getOrder(String id) async {
     try {
       final response = await _client.dio.get<Map<String, dynamic>>(

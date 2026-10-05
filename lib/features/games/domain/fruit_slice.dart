@@ -128,7 +128,7 @@ class FruitThrow {
   final bool bomb;
   final int kind;
 
-  /// Where the throw is at a tick inside its flight, in whole units — the
+  /// Where the throw is at a tick inside its flight, in whole units. The
   /// exact position the server tests a swipe against.
   (int, int) pos(int tick) {
     final f = exit - enter;
@@ -205,7 +205,7 @@ class FruitSlice implements TickGame {
   late final List<bool> _landed;
   final List<String> _moves = [];
 
-  /// When the final throw lands — the length of the whole round.
+  /// When the final throw lands. The length of the whole round.
   late final int lastTick;
 
   int _tick = 0;
@@ -344,7 +344,7 @@ class FruitSlice implements TickGame {
   }
 
   /// Draws one piece of blade stroke [stroke] from (x1,y1) to (x2,y2) at the
-  /// current tick. The piece is only logged when it cuts something — a swipe
+  /// current tick. The piece is only logged when it cuts something. A swipe
   /// through thin air changes nothing, so the server needn't see it.
   List<FruitCut> slice(int stroke, int x1, int y1, int x2, int y2) {
     if (isOver || stroke < _stroke) return const [];

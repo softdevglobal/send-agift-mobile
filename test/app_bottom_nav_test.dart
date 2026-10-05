@@ -43,7 +43,7 @@ void main() {
   ) async {
     // The orb's slot is a fixed width, so once the rail is narrow enough there
     // is less than nothing left for the flat tabs. A negative width is not a
-    // tight squeeze to a SizedBox — it asserts, and the whole screen goes with
+    // tight squeeze to a SizedBox. It asserts, and the whole screen goes with
     // it. This is the crash seen on a real device mid-transition.
     await _pumpAt(tester, 0);
     expect(tester.takeException(), isNull);

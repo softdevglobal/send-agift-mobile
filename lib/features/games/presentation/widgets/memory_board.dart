@@ -49,7 +49,7 @@ const memoryFaces = <(IconData, Color)>[
 /// Memory Match: a grid of cards that flip in 3D.
 ///
 /// The flip is a real Y rotation rather than a cross-fade, so the card turns
-/// the way a card does — which is also what makes a pair reading as "the same"
+/// the way a card does. Which is also what makes a pair reading as "the same"
 /// obvious at a glance.
 class MemoryBoard extends StatefulWidget {
   const MemoryBoard({required this.game, required this.controls, super.key});
@@ -117,7 +117,7 @@ class _MemoryBoardState extends State<MemoryBoard> {
     final columns = game.config.columns;
     // A deal that does not divide evenly into the columns leaves the last row
     // short. Rather than a hole at the end of the grid, the spare slot sits in
-    // the middle as an emblem — that is what lets a 48-card deal fill a whole
+    // the middle as an emblem. That is what lets a 48-card deal fill a whole
     // 7x7 square, which 49 cards could never do while every card has a pair.
     final slots = columns * game.rows;
     final spare = slots - game.cardCount;
@@ -194,7 +194,7 @@ class _Card extends StatelessWidget {
         curve: Curves.easeOutCubic,
         builder: (context, t, _) {
           // Past the halfway point the card has turned edge-on, so the front
-          // takes over — the same trick a real flip plays on the eye.
+          // takes over. The same trick a real flip plays on the eye.
           final showFront = t > 0.5;
           return Transform(
             alignment: Alignment.center,

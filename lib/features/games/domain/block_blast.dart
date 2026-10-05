@@ -1,7 +1,7 @@
-/// Block Blast — a mirror of `internal/games/blockblast.go`.
+/// Block Blast. A mirror of `internal/games/blockblast.go`.
 ///
 /// Place pieces from a hand of three; full rows and columns clear. A new
-/// hand is dealt from the seed when the last piece is placed — like 2048's
+/// hand is dealt from the seed when the last piece is placed. Like 2048's
 /// tile spawns, identical for everyone who shares the seed.
 library;
 
@@ -46,7 +46,7 @@ class BlockBlastConfig {
   final int maxMoves;
 }
 
-/// The piece catalog as (row, col) cells — the same list, in the same order,
+/// The piece catalog as (row, col) cells. The same list, in the same order,
 /// as `BlockShapes` on the backend. The seed picks pieces by index.
 const List<List<(int, int)>> blockShapes = [
   [(0, 0)],

@@ -1,4 +1,4 @@
-/// The sliding-tile puzzle — a mirror of `internal/games/slide.go`.
+/// The sliding-tile puzzle. A mirror of `internal/games/slide.go`.
 ///
 /// Perfect information: every tile is visible from the first move. The
 /// scramble is built by playing legal moves from the solved board, so every

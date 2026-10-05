@@ -18,7 +18,7 @@ import '../game_visuals.dart';
 ///
 /// The server decides the outcome when the play is made, with a secure
 /// random draw, and sends it back with the receipt. Everything on this
-/// screen only reveals that result — no tap, swipe or timing changes it, and
+/// screen only reveals that result. No tap, swipe or timing changes it, and
 /// the screen says so.
 class ChancePlayScreen extends ConsumerStatefulWidget {
   const ChancePlayScreen({required this.competitionId, super.key});
@@ -271,7 +271,7 @@ class _Receipt extends StatelessWidget {
         '−${play.pointsSpent} pts · ${play.walletPointsRemaining} left',
       if (currency != null && play.prizeIncrementCents > 0)
         'prize +${formatMoneyCents(play.prizeIncrementCents, currency)}',
-      if (play.replayed) 'already played — not charged again',
+      if (play.replayed) 'already played. Not charged again',
     ];
     if (parts.isEmpty) return const SizedBox.shrink();
     return Center(

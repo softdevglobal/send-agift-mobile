@@ -1,6 +1,6 @@
 // Verified-purchase product reviews.
 //
-// A review always belongs to a delivered order line — the API refuses to
+// A review always belongs to a delivered order line. The API refuses to
 // create one any other way, and UNIQUE(order_item_id) stops the same purchase
 // being reviewed twice. That is why writing one is addressed by order item
 // rather than by product.
@@ -39,7 +39,7 @@ class ReviewMedia {
   }
 }
 
-/// How a review's author is shown — already "Anonymous" when they asked for it.
+/// How a review's author is shown. Already "Anonymous" when they asked for it.
 class ReviewAuthor {
   const ReviewAuthor({this.displayName, this.imageUrl});
 

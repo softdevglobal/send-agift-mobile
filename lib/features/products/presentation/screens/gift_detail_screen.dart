@@ -163,7 +163,7 @@ class _Content extends StatelessWidget {
                         const Expanded(
                           child: Text(
                             'per item, added to your points when you '
-                            'order — spend them on games.',
+                            'order. Spend them on games.',
                             style: TextStyle(
                               fontSize: 12,
                               color: AppColors.mutedForeground,

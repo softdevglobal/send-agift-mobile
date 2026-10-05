@@ -14,7 +14,7 @@ final messagesRepositoryProvider = Provider<MessagesRepository>((ref) {
 /// The customer's conversations, newest activity first.
 ///
 /// The API has no push channel, so the list is re-read on a timer for as long
-/// as something is watching — the account tab's badge keeps it warm.
+/// as something is watching. The account tab's badge keeps it warm.
 class InboxController
     extends StateNotifier<AsyncValue<List<ChatConversation>>> {
   InboxController(this._repository, {required bool enabled})

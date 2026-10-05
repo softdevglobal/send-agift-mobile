@@ -157,7 +157,7 @@ class RingAvatar extends StatelessWidget {
   }
 }
 
-/// A little drawn map — a few streets and a pin — so each address card has
+/// A little drawn map. A few streets and a pin. So each address card has
 /// a sense of place. The streets are seeded by [seed], so an address always
 /// gets the same map.
 class MiniMap extends StatelessWidget {

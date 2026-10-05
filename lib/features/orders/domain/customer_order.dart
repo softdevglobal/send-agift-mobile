@@ -64,7 +64,7 @@ class OrderItemTracking {
   }
 }
 
-/// One line of an order — a gift from one shop. Its [id] is the
+/// One line of an order. A gift from one shop. Its [id] is the
 /// `order_item_id` an order chat with that shop is about.
 class CustomerOrderItem {
   const CustomerOrderItem({
@@ -100,7 +100,7 @@ class CustomerOrderItem {
     return switch (rewardStatus) {
       'reserved' => 'Earns $rewardPoints points when delivered',
       'awarded' => '$rewardPoints points added to your balance',
-      'released' => '$rewardPoints points not earned — item cancelled',
+      'released' => '$rewardPoints points not earned. Item cancelled',
       'reversed' => '$rewardPoints points taken back after a refund',
       _ => '$rewardPoints points',
     };
@@ -172,7 +172,7 @@ class CustomerOrder {
       'held' => '$giftPoints points are travelling with this gift.',
       'delivered' => '$giftPoints points reached the recipient\'s account.',
       'returned' =>
-        '$giftPoints points came back to you — the recipient has no '
+        '$giftPoints points came back to you. The recipient has no '
             'SendAGift account, or the gift was cancelled.',
       'reversed' => '$giftPoints points were returned after a refund.',
       _ => '$giftPoints points sent with this gift.',

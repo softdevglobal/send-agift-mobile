@@ -63,7 +63,7 @@ class BubbleTrace {
   final bool ok;
 }
 
-/// Fixed-point units used to fly a shot. These mirror `bubble.go` — the flight
+/// Fixed-point units used to fly a shot. These mirror `bubble.go`. The flight
 /// has to be integer arithmetic, because a float could round differently here
 /// than on the server and put the bubble in another cell.
 const _bubbleScale = 1000;
@@ -77,7 +77,7 @@ const bubbleSwapMove = 's';
 /// Bubble Shooter: aim the loaded colour anywhere across the board and fire.
 /// The bubble flies until it meets the wall or the ceiling, banking off the
 /// sides on the way. Landing it against enough of its own colour pops the
-/// cluster, and anything left unsupported falls with it — which is where the
+/// cluster, and anything left unsupported falls with it. Which is where the
 /// chains come from. Two colours are queued and may be swapped.
 ///
 /// Mirrors `internal/games/bubble.go` exactly.

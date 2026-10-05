@@ -6,8 +6,8 @@ import '../theme/app_colors.dart';
 /// Floating nav rail.
 ///
 /// The tab you are on lights up in ribbon-violet and grows a touch; the rest
-/// sit quiet in muted ink. Nothing is drawn behind the glyphs — the colour is
-/// the whole signal — and the bar carries no wording, only names for screen
+/// sit quiet in muted ink. Nothing is drawn behind the glyphs. The colour is
+/// the whole signal. And the bar carries no wording, only names for screen
 /// readers. One item may be marked [AppBottomNavItem.orb]: it becomes a
 /// filled brand circle seated in the middle of the rail, the anchor the eye
 /// lands on first.
@@ -118,7 +118,7 @@ class AppBottomNav extends StatelessWidget {
   ///
   /// The share is floored at zero. The rail is laid out with no width at all
   /// during some transitions, and the orb's fixed slot then leaves less than
-  /// nothing to share out — a negative width is not a tight squeeze to a
+  /// nothing to share out. A negative width is not a tight squeeze to a
   /// SizedBox, it is an assertion that takes the screen down.
   List<double> _slotWidths(double flatWidth, int orbIndex) {
     final flatCount = items.length - (orbIndex >= 0 ? 1 : 0);
@@ -144,7 +144,7 @@ class AppBottomNavItem {
 
   final IconData icon;
 
-  /// Never drawn — the bar is glyphs only — but read out by screen readers
+  /// Never drawn. The bar is glyphs only. But read out by screen readers
   /// and used as the tap target's accessible name.
   final String label;
 
@@ -156,7 +156,7 @@ class AppBottomNavItem {
 }
 
 /// The brand circle at the centre of the rail. It keeps its fill whether or
-/// not it is the current tab — it is the bar's anchor, not just another tab —
+/// not it is the current tab. It is the bar's anchor, not just another tab.
 /// and shows selection as a lift in glow and scale.
 class _OrbSlot extends StatelessWidget {
   const _OrbSlot({

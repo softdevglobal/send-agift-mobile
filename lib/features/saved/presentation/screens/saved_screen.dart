@@ -15,7 +15,7 @@ import '../../data/saved_controller.dart';
 
 enum _Sort { saved, priceLow, priceHigh, rating }
 
-/// Wishlist. Works for guests — the list lives on the device and syncs once
+/// Wishlist. Works for guests. The list lives on the device and syncs once
 /// there is an account.
 class SavedScreen extends ConsumerStatefulWidget {
   const SavedScreen({super.key});
@@ -301,7 +301,7 @@ class _EmptyHint extends StatelessWidget {
           Text('Nothing saved yet', style: theme.textTheme.titleLarge),
           const SizedBox(height: 6),
           Text(
-            'Collect gift ideas as you browse — no account needed. Tap the '
+            'Collect gift ideas as you browse. No account needed. Tap the '
             'heart on any gift and it lands here.',
             textAlign: TextAlign.center,
             style: theme.textTheme.bodyMedium,

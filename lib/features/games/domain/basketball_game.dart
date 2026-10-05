@@ -1,4 +1,4 @@
-/// Basketball — a mirror of `internal/games/basketball.go`.
+/// Basketball. A mirror of `internal/games/basketball.go`.
 ///
 /// A timed shoot-out. Each shot is aimed sideways and thrown with a power,
 /// both whole numbers. The ball flies for a fixed number of ticks, so once
@@ -76,7 +76,7 @@ class BasketballShot {
 
   final int tick;
 
-  /// The level when the ball was thrown — the hoop moves to that level's
+  /// The level when the ball was thrown. The hoop moves to that level's
   /// rhythm until the ball has landed.
   final int level;
   final int aim;

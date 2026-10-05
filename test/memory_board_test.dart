@@ -11,7 +11,7 @@ void main() {
   test('every pair on the board gets a look of its own', () {
     // The grid deals one face value per pair, and the board draws a face by
     // indexing this palette. Fewer looks than pairs means two different pairs
-    // are drawn identically — you would turn over a matching-looking card and
+    // are drawn identically. You would turn over a matching-looking card and
     // be told it is not a match, which no amount of memory can beat.
     const config = MemoryConfig();
     expect(
@@ -117,7 +117,7 @@ void main() {
       ),
     );
 
-    // Only the real cards are tappable — the emblem is not one of them.
+    // Only the real cards are tappable. The emblem is not one of them.
     expect(find.byType(GestureDetector), findsNWidgets(game.cardCount));
 
     // The card after the emblem's slot must still be its own card, not the

@@ -11,14 +11,14 @@ import '../domain/product_review.dart';
 ///
 /// Photos never travel through the API itself: each file is presigned into the
 /// `review-photo` / `review-video` folder, PUT straight to storage, and then
-/// referenced by its key when the review is saved — the same path chat
+/// referenced by its key when the review is saved. The same path chat
 /// attachments take.
 class ReviewsRepository {
   ReviewsRepository(this._client);
 
   final ApiClient _client;
 
-  /// Talks to the presigned storage URL directly — no base URL and no API
+  /// Talks to the presigned storage URL directly. No base URL and no API
   /// token, because the signature in the URL is the permission.
   final Dio _storage = Dio(
     BaseOptions(
@@ -215,7 +215,7 @@ final reviewsRepositoryProvider = Provider<ReviewsRepository>((ref) {
   return ReviewsRepository(ref.watch(apiClientProvider));
 });
 
-/// A product's rating summary — the headline above its reviews.
+/// A product's rating summary. The headline above its reviews.
 final productReviewSummaryProvider = FutureProvider.autoDispose
     .family<ReviewSummary, String>((ref, productId) {
       return ref.watch(reviewsRepositoryProvider).summaryForProduct(productId);

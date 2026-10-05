@@ -33,7 +33,7 @@ const _defaultDialIso = 'LK';
 }
 
 /// The customer's own details: photo, name and phone. Email is shown but
-/// locked — it is what they sign in with.
+/// locked. It is what they sign in with.
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
 
@@ -370,7 +370,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    "Your email can't be changed — it's how you sign in.",
+                    "Your email can't be changed. It's how you sign in.",
                     style: theme.textTheme.bodySmall,
                   ),
                 ),

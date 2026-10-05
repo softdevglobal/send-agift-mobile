@@ -23,7 +23,7 @@ class ReviewCard extends StatelessWidget {
 
   final ProductReview review;
 
-  /// Tapping "Helpful". Omit for signed-out viewers — the count still shows,
+  /// Tapping "Helpful". Omit for signed-out viewers. The count still shows,
   /// but the button would only earn a 401.
   final ValueChanged<ProductReview>? onVote;
   final VoidCallback? onEdit;

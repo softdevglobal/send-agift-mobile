@@ -67,7 +67,7 @@ class DoodlePlatform {
 /// Doodle Jump: hop up a tower of ledges, choosing a lane each time. You can
 /// only reach the lane you are in or the ones beside it, so a ledge two across
 /// is a miss. Springs throw you two rungs up, and every tenth rung pays a
-/// height bonus — so the climb rewards reading ahead.
+/// height bonus. So the climb rewards reading ahead.
 ///
 /// Mirrors `internal/games/doodlejump.go` exactly, including the generator
 /// that keeps every rung within reach so the tower is always climbable.
@@ -165,7 +165,7 @@ class DoodleJump implements GameEngine {
       _springs++;
       _score += config.springBonus;
       // A spring carries the climber clear over the ledges above it. Each one
-      // is skipped outright, so nothing there has to be landed on — it is the
+      // is skipped outright, so nothing there has to be landed on. It is the
       // reward for reaching the spring in the first place.
       for (var lift = 1; lift < config.springLift && !topped; lift++) {
         _height++;

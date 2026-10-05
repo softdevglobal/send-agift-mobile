@@ -46,7 +46,7 @@ String _chanceDisclosure(Competition c) => c.isDraw
           'ends the round.';
 
 /// One skill competition: the prize, the rules and disclosures, the player's
-/// attempts and eligibility, the live leaderboard, and — for a winner — the
+/// attempts and eligibility, the live leaderboard, and. For a winner. The
 /// prize claim.
 class CompetitionScreen extends ConsumerWidget {
   const CompetitionScreen({required this.competitionId, super.key});

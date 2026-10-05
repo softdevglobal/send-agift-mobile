@@ -248,7 +248,7 @@ void _paintVan(Canvas canvas, double s, double squash) {
     );
 }
 
-/// Draws [vehicle] whole — wheels and all — for the chooser's preview.
+/// Draws [vehicle] whole. Wheels and all. For the chooser's preview.
 void paintHillVehiclePreview(Canvas canvas, Size size, HillVehicle vehicle) {
   // A strip of sky over a strip of ground, so the preview reads as a vehicle
   // standing somewhere rather than floating.

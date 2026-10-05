@@ -28,11 +28,11 @@ class AuthScaffold extends StatelessWidget {
   final Widget footer;
 
   /// Width of the [BrandLockup]. Register passes something smaller than
-  /// login's — its form runs longer, so a full-size lockup pushes the first
+  /// login's. Its form runs longer, so a full-size lockup pushes the first
   /// field too far down.
   final double logoWidth;
 
-  /// Optional extra content between the subtitle and the form — register
+  /// Optional extra content between the subtitle and the form. Register
   /// uses this for its "why sign up" row.
   final Widget? header;
 
@@ -47,7 +47,7 @@ class AuthScaffold extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Two soft brand-colour blobs behind the header — quiet enough not
+          // Two soft brand-colour blobs behind the header. Quiet enough not
           // to fight the form, present enough that sign-in doesn't open on a
           // blank page.
           Positioned(
@@ -88,7 +88,7 @@ class AuthScaffold extends StatelessWidget {
                   // constraint, which would otherwise force the image wider
                   // than `logoWidth` and stretch it back up regardless of
                   // what's asked for. Align relaxes that back to loose so
-                  // the requested width actually takes effect — and centers
+                  // the requested width actually takes effect. And centers
                   // it, since a lockup floating at the left edge reads as
                   // unfinished rather than deliberate.
                   child: Align(child: BrandLockup(width: logoWidth)),

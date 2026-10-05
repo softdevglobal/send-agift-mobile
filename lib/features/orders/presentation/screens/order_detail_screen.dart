@@ -23,7 +23,7 @@ import '../../domain/customer_order.dart';
 import 'order_list_screen.dart';
 
 /// One order and its gifts. Each gift comes from one shop, so this is where a
-/// customer messages that shop about their item — a delivery question, a
+/// customer messages that shop about their item. A delivery question, a
 /// change, or photos of a gift that arrived damaged.
 class OrderDetailScreen extends ConsumerWidget {
   const OrderDetailScreen({super.key, required this.orderId});
@@ -106,7 +106,7 @@ class _OrderBody extends StatelessWidget {
               Expanded(
                 child: Text(
                   'Something wrong with a gift? Message its shop and attach '
-                  'photos — they reply in Messages.',
+                  'photos. They reply in Messages.',
                   style: textTheme.bodySmall,
                 ),
               ),
@@ -236,7 +236,7 @@ class _OrderHero extends StatelessWidget {
                   label: 'Points',
                   value: order.rewardPointsTotal > 0
                       ? '${order.rewardsEarned ? '+' : ''}${order.rewardPointsTotal}'
-                      : '—',
+                      : '-',
                   highlight: order.rewardPointsTotal > 0,
                 ),
               ),

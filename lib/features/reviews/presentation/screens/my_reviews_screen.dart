@@ -78,7 +78,7 @@ class _MyReviewsScreenState extends ConsumerState<MyReviewsScreen> {
                 title: 'No reviews yet',
                 description:
                     'Once a gift is delivered you can review it from the '
-                    'order — your rating helps the next person choose.',
+                    'order. Your rating helps the next person choose.',
                 action: OutlinedButton(
                   onPressed: () => context.push(AppRoutes.orders),
                   child: const Text('Go to my orders'),

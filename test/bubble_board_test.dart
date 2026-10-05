@@ -40,12 +40,12 @@ Offset _at(WidgetTester tester, double col, double row) {
   return box.localToGlobal(Offset(col * cell, row * cell));
 }
 
-/// The middle of the queue under the board — the ball itself.
+/// The middle of the queue under the board. The ball itself.
 Offset _queueCentre(WidgetTester tester) =>
     tester.getRect(find.byKey(bubbleSwapKey)).center;
 
 /// The point to drag to so the board reads off a particular aim. The board
-/// takes the line from the launcher — bottom centre — out to the finger, so
+/// takes the line from the launcher. Bottom centre. Out to the finger, so
 /// this inverts that at a height chosen to keep the point on the board even
 /// for the flattest aims.
 Offset _dragFor(WidgetTester tester, int aim) {
@@ -92,7 +92,7 @@ int? _widestPoppingAim(List<int> played) {
 }
 
 /// Plays the engine forward until a shot pops something, and returns the aims
-/// that got there — a pop needs real play, so a single repeated aim will not
+/// that got there. A pop needs real play, so a single repeated aim will not
 /// find one.
 List<int> _aimsUntilAPop() {
   final game = BubbleShooter(seed: 'cafebabe', config: _config);
@@ -224,7 +224,7 @@ void main() {
       final gesture = await tester.startGesture(_at(tester, 5.5, 6));
       await tester.pump();
 
-      // Holding an aim must not spend a shot — firing on touch-down would
+      // Holding an aim must not spend a shot. Firing on touch-down would
       // make aiming impossible.
       expect(game.shots, 0);
       expect(find.text('Release to fire'), findsOneWidget);

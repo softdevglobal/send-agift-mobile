@@ -8,7 +8,7 @@ import '../../domain/quiz_game.dart';
 import '../game_controls.dart';
 
 /// The quiz board: one question at a time with a countdown. The answer is
-/// locked in straight away — right or wrong is only known to the server, and
+/// locked in straight away. Right or wrong is only known to the server, and
 /// shows in the score once the quiz is submitted.
 class QuizBoard extends StatefulWidget {
   const QuizBoard({required this.game, required this.controls, super.key});

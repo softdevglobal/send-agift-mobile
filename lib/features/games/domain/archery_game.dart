@@ -1,7 +1,7 @@
-/// Archery — a mirror of `internal/games/archery.go`.
+/// Archery. A mirror of `internal/games/archery.go`.
 ///
 /// Ten arrows at a target. The player aims by dragging and shoots by letting
-/// go. The sight sways in a fixed figure — a pure function of the tick — and
+/// go. The sight sways in a fixed figure. A pure function of the tick. And
 /// the wind for each arrow is shown before it is shot, so reading the wind
 /// and releasing at a steady moment are the skill.
 library;
@@ -75,7 +75,7 @@ class ArcheryArrow {
   final int impactY;
   final int points;
 
-  /// Inside the inner ten — the tie-breaking "X".
+  /// Inside the inner ten. The tie-breaking "X".
   final bool inner;
 }
 

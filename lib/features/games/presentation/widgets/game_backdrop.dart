@@ -55,7 +55,7 @@ class _BackdropPainter extends CustomPainter {
   final List<Color> colors;
   final Animation<double> t;
 
-  // Fixed sparkle layout — decoration only, nothing to do with gameplay.
+  // Fixed sparkle layout. Decoration only, nothing to do with gameplay.
   static final List<Offset> _sparkles = List.generate(18, (i) {
     final a = math.sin(i * 12.9898) * 43758.5453;
     final b = math.sin(i * 78.233) * 12345.6789;

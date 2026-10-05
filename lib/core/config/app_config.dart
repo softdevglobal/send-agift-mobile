@@ -17,7 +17,21 @@ class AppConfig {
     return _resolveHost(raw);
   }
 
-  /// On the Android emulator, `localhost` is the emulated device itself — the
+  /// Google OAuth web client ID. Google issues the app an ID token for this
+  /// client, which the API checks. Empty hides the Google button.
+  static String get googleWebClientId => _env('GOOGLE_WEB_CLIENT_ID');
+
+  /// iOS OAuth client ID; only needed on iOS.
+  static String get googleIosClientId => _env('GOOGLE_IOS_CLIENT_ID');
+
+  /// Facebook App ID. Empty hides the Facebook button.
+  static String get facebookAppId => _env('FACEBOOK_APP_ID');
+
+  /// A value from `.env`, or empty before it has loaded (as in widget tests).
+  static String _env(String key) =>
+      dotenv.isInitialized ? (dotenv.env[key] ?? '').trim() : '';
+
+  /// On the Android emulator, `localhost` is the emulated device itself. The
   /// host machine is reachable at the 10.0.2.2 alias. Without this rewrite a
   /// backend on the developer's Mac is simply unreachable from Android.
   ///

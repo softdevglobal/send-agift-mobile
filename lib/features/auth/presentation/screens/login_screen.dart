@@ -8,8 +8,9 @@ import '../../../../core/widgets/fade_slide_in.dart';
 import '../../data/auth_controller.dart';
 import '../widgets/auth_header_parts.dart';
 import '../widgets/auth_scaffold.dart';
+import '../widgets/social_sign_in_buttons.dart';
 
-/// Customer sign-in. Reached only when the customer chooses to — from
+/// Customer sign-in. Reached only when the customer chooses to. From
 /// checkout, order history, or the account tab.
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
@@ -118,6 +119,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
             ),
+            if (SocialSignInButtons.enabled) ...[
+              const SizedBox(height: 22),
+              const SocialDivider(label: 'or continue with'),
+              const SizedBox(height: 18),
+              SocialSignInButtons(
+                onSignedIn: () => context.canPop()
+                    ? context.pop()
+                    : context.go(AppRoutes.account),
+                // A new customer finishes signing up (country and phone) first.
+                onNeedsProfile: (signup) =>
+                    context.pushReplacement(AppRoutes.register, extra: signup),
+                onError: (message) => setState(() => _error = message),
+              ),
+            ],
           ],
         ),
       ),

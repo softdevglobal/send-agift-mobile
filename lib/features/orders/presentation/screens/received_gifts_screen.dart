@@ -12,7 +12,7 @@ import '../../../reviews/presentation/screens/write_review_screen.dart';
 import '../../data/orders_repository.dart';
 import '../../domain/received_gift.dart';
 
-/// Gifts other people sent you, once delivered — each line can be reviewed.
+/// Gifts other people sent you, once delivered. Each line can be reviewed.
 class ReceivedGiftsScreen extends ConsumerWidget {
   const ReceivedGiftsScreen({super.key});
 
@@ -164,7 +164,7 @@ class _GiftCard extends StatelessWidget {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    '— ${gift.senderName}',
+                    ',  ${gift.senderName}',
                     style: const TextStyle(
                       color: Color(0xFF9D174D),
                       fontWeight: FontWeight.w700,

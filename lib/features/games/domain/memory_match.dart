@@ -40,8 +40,8 @@ class MemoryConfig {
 /// Memory Match: a grid of face-down gift cards holding pairs. Two flips make
 /// a turn; matches stay up and a run of them pays a growing bonus.
 ///
-/// Mirrors `internal/games/memory.go` exactly — same deal from the seed, same
-/// scoring — so the score shown while playing matches the server's replay.
+/// Mirrors `internal/games/memory.go` exactly. Same deal from the seed, same
+/// scoring. So the score shown while playing matches the server's replay.
 class MemoryMatch implements GameEngine {
   MemoryMatch({required String seed, required this.config})
     : _cards = _deal(seed, config) {
@@ -61,7 +61,7 @@ class MemoryMatch implements GameEngine {
   int _score = 0;
 
   /// Fisher-Yates from the seed, walking downwards exactly as the Go deal
-  /// does — the draw order is what has to match, not just the shuffle.
+  /// does. The draw order is what has to match, not just the shuffle.
   static List<int> _deal(String seed, MemoryConfig config) {
     final count = config.pairs * 2;
     final cards = List<int>.generate(count, (i) => i ~/ 2);
@@ -78,7 +78,7 @@ class MemoryMatch implements GameEngine {
   int get cardCount => _cards.length;
 
   /// How many rows the grid occupies. Rounded up, because a deal that does
-  /// not divide evenly into the columns still takes a final, partial row —
+  /// not divide evenly into the columns still takes a final, partial row.
   /// a 7-wide board of 48 cards is seven rows, not six.
   int get rows => (_cards.length + config.columns - 1) ~/ config.columns;
   int get matches => _matches;

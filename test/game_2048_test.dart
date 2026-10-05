@@ -87,7 +87,7 @@ void main() {
 
     test('records only the moves that changed the board', () {
       // Swiping into a wall changes nothing, and those no-op swipes must not
-      // reach the move log — the server would just replay them as no-ops.
+      // reach the move log. The server would just replay them as no-ops.
       final game = Game2048(seed: 'cafebabe');
 
       var accepted = 0;
@@ -146,7 +146,7 @@ void main() {
       // The backend runs this same seed and direction cycle in
       // internal/games/game2048_test.go (TestCrossLanguageGolden) and asserts
       // the same numbers. If these two ever disagree, the server will start
-      // flagging honest scores — fix the drift rather than the constants.
+      // flagging honest scores. Fix the drift rather than the constants.
       final game = Game2048(seed: 'cafebabe');
       const dirs = [
         Move.up,
@@ -210,7 +210,7 @@ void main() {
         }
 
         // Laying every tile down at the end of its journey has to reproduce
-        // the new board exactly — a merged pair summing to its double —
+        // the new board exactly. A merged pair summing to its double.
         // except at the square the new tile appeared on.
         final rebuilt = List<int>.filled(before.length, 0);
         for (final slide in slides) {

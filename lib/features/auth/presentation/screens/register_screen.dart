@@ -13,12 +13,17 @@ import '../../data/auth_controller.dart';
 import '../../data/countries_provider.dart';
 import '../widgets/auth_header_parts.dart';
 import '../widgets/auth_scaffold.dart';
+import '../widgets/social_sign_in_buttons.dart';
+import '../../domain/social_signup.dart';
 
-/// Customer registration — just enough to start gifting. A photo and
+/// Customer registration. Just enough to start gifting. A photo and
 /// delivery addresses are added later from the Account tab. Sellers and
 /// admins register on the web app only.
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key});
+  const RegisterScreen({super.key, this.social});
+
+  /// A Google or Facebook sign-up handed over from the sign-in screen.
+  final SocialSignup? social;
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -63,9 +68,16 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   /// The email the server said already has an account.
   String? _takenEmail;
 
+  /// Someone who chose Google or Facebook: the provider vouched for their
+  /// email, so only a country and phone are still needed.
+  SocialSignup? _social;
+  final _socialCardKey = GlobalKey();
+
   @override
   void initState() {
     super.initState();
+    _social = widget.social;
+    _nameController.text = widget.social?.name ?? '';
     // The strength meter and the match tick follow every keystroke.
     _passwordController.addListener(_refresh);
     _confirmController.addListener(_refresh);
@@ -83,6 +95,30 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
     super.dispose();
   }
 
+  void _leave() =>
+      context.canPop() ? context.pop() : context.go(AppRoutes.account);
+
+  void _useSocial(SocialSignup signup) {
+    setState(() {
+      _social = signup;
+      _error = null;
+      if (_nameController.text.trim().isEmpty) {
+        _nameController.text = signup.name ?? '';
+      }
+    });
+    // The buttons sit under the form; bring the "Almost there" card into view.
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      final card = _socialCardKey.currentContext;
+      if (card != null) {
+        Scrollable.ensureVisible(
+          card,
+          duration: const Duration(milliseconds: 350),
+          alignment: 0.2,
+        );
+      }
+    });
+  }
+
   Future<void> _submit() async {
     if (!_formKey.currentState!.validate()) return;
     if (_countryId == null) {
@@ -96,6 +132,36 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       _takenEmail = null;
     });
 
+    final social = _social;
+    if (social != null) {
+      try {
+        await ref
+            .read(authProvider.notifier)
+            .completeSocialSignup(
+              signup: social,
+              countryId: _countryId!,
+              phone: '$_dial ${_phoneController.text.trim()}',
+              displayName: _nameController.text.trim(),
+              customerType: _customerType,
+            );
+        if (mounted) _leave();
+      } on AppException catch (error) {
+        if (!mounted) return;
+        setState(() {
+          _error = error.message;
+          // An expired sign-up starts again with the buttons.
+          if (error.statusCode == 401) _social = null;
+        });
+      } catch (_) {
+        if (mounted) {
+          setState(() => _error = 'Could not create your account. Try again.');
+        }
+      } finally {
+        if (mounted) setState(() => _submitting = false);
+      }
+      return;
+    }
+
     try {
       await ref
           .read(authProvider.notifier)
@@ -108,10 +174,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             customerType: _customerType,
           );
       if (!mounted) return;
-      context.canPop() ? context.pop() : context.go(AppRoutes.account);
+      _leave();
     } on AppException catch (error) {
       if (!mounted) return;
-      // 409: this email already has an account — offer sign-in, not an error.
+      // 409: this email already has an account. Offer sign-in, not an error.
       if (error.statusCode == 409) {
         setState(() => _takenEmail = _emailController.text.trim());
       } else {
@@ -168,6 +234,14 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ),
               const SizedBox(height: 18),
             ],
+            if (_social != null) ...[
+              _SocialSignupCard(
+                key: _socialCardKey,
+                signup: _social!,
+                onUseEmail: () => setState(() => _social = null),
+              ),
+              const SizedBox(height: 18),
+            ],
             FadeSlideIn(
               delay: const Duration(milliseconds: 160),
               child: Column(
@@ -216,25 +290,27 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     : null,
               ),
             ),
-            const SizedBox(height: 16),
-            FadeSlideIn(
-              delay: const Duration(milliseconds: 230),
-              child: AuthField(
-                label: 'Email',
-                prefixIcon: Icons.mail_outline_rounded,
-                controller: _emailController,
-                hintText: 'you@example.com',
-                keyboardType: TextInputType.emailAddress,
-                textInputAction: TextInputAction.next,
-                validator: (value) =>
-                    (value == null ||
-                        !RegExp(
-                          r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
-                        ).hasMatch(value.trim()))
-                    ? 'Enter a valid email address'
-                    : null,
+            if (_social == null) ...[
+              const SizedBox(height: 16),
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 230),
+                child: AuthField(
+                  label: 'Email',
+                  prefixIcon: Icons.mail_outline_rounded,
+                  controller: _emailController,
+                  hintText: 'you@example.com',
+                  keyboardType: TextInputType.emailAddress,
+                  textInputAction: TextInputAction.next,
+                  validator: (value) =>
+                      (value == null ||
+                          !RegExp(
+                            r'^[^\s@]+@[^\s@]+\.[^\s@]+$',
+                          ).hasMatch(value.trim()))
+                      ? 'Enter a valid email address'
+                      : null,
+                ),
               ),
-            ),
+            ],
             const SizedBox(height: 16),
             FadeSlideIn(
               delay: const Duration(milliseconds: 260),
@@ -250,7 +326,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                     loading: () =>
                         const _CountryPlaceholder(label: 'Loading countries…'),
                     error: (error, stack) => const _CountryPlaceholder(
-                      label: 'Countries unavailable — try again later',
+                      label: 'Countries unavailable. Try again later',
                     ),
                     data: (list) => DropdownButtonFormField<String>(
                       initialValue: _countryId,
@@ -335,65 +411,67 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 ],
               ),
             ),
-            const SizedBox(height: 16),
-            FadeSlideIn(
-              delay: const Duration(milliseconds: 290),
-              child: AuthField(
-                label: 'Create a password',
-                controller: _passwordController,
-                hintText: 'At least 8 characters',
-                obscureText: true,
-                textInputAction: TextInputAction.next,
-                validator: (value) => (value == null || value.length < 8)
-                    ? 'Use at least 8 characters'
-                    : null,
+            if (_social == null) ...[
+              const SizedBox(height: 16),
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 290),
+                child: AuthField(
+                  label: 'Create a password',
+                  controller: _passwordController,
+                  hintText: 'At least 8 characters',
+                  obscureText: true,
+                  textInputAction: TextInputAction.next,
+                  validator: (value) => (value == null || value.length < 8)
+                      ? 'Use at least 8 characters'
+                      : null,
+                ),
               ),
-            ),
-            if (password.isNotEmpty) ...[
-              const SizedBox(height: 8),
-              _StrengthMeter(password: password),
-            ],
-            const SizedBox(height: 16),
-            FadeSlideIn(
-              delay: const Duration(milliseconds: 320),
-              child: Stack(
-                children: [
-                  AuthField(
-                    label: 'Confirm password',
-                    controller: _confirmController,
-                    hintText: 'Type it once more',
-                    obscureText: true,
-                    textInputAction: TextInputAction.done,
-                    validator: (value) => value != _passwordController.text
-                        ? "The passwords don't match"
-                        : null,
-                  ),
-                  if (matches)
-                    const Positioned(
-                      top: 0,
-                      right: 0,
-                      child: Row(
-                        children: [
-                          Icon(
-                            Icons.check_circle_rounded,
-                            size: 16,
-                            color: Color(0xFF10B981),
-                          ),
-                          SizedBox(width: 4),
-                          Text(
-                            'Matches',
-                            style: TextStyle(
-                              fontSize: 12,
-                              fontWeight: FontWeight.w600,
-                              color: Color(0xFF047857),
-                            ),
-                          ),
-                        ],
-                      ),
+              if (password.isNotEmpty) ...[
+                const SizedBox(height: 8),
+                _StrengthMeter(password: password),
+              ],
+              const SizedBox(height: 16),
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 320),
+                child: Stack(
+                  children: [
+                    AuthField(
+                      label: 'Confirm password',
+                      controller: _confirmController,
+                      hintText: 'Type it once more',
+                      obscureText: true,
+                      textInputAction: TextInputAction.done,
+                      validator: (value) => value != _passwordController.text
+                          ? "The passwords don't match"
+                          : null,
                     ),
-                ],
+                    if (matches)
+                      const Positioned(
+                        top: 0,
+                        right: 0,
+                        child: Row(
+                          children: [
+                            Icon(
+                              Icons.check_circle_rounded,
+                              size: 16,
+                              color: Color(0xFF10B981),
+                            ),
+                            SizedBox(width: 4),
+                            Text(
+                              'Matches',
+                              style: TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w600,
+                                color: Color(0xFF047857),
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
               ),
-            ),
+            ],
             const SizedBox(height: 26),
             FadeSlideIn(
               delay: const Duration(milliseconds: 350),
@@ -404,6 +482,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 label: 'Create my account',
               ),
             ),
+            if (_social == null && SocialSignInButtons.enabled) ...[
+              const SizedBox(height: 22),
+              const SocialDivider(label: 'or sign up with'),
+              const SizedBox(height: 18),
+              SocialSignInButtons(
+                verb: 'Sign up',
+                onSignedIn: _leave,
+                onNeedsProfile: _useSocial,
+                onError: (message) => setState(() => _error = message),
+              ),
+            ],
           ],
         ),
       ),
@@ -418,6 +507,80 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
           TextButton(
             onPressed: () => context.pushReplacement(AppRoutes.login),
             child: const Text('Sign in'),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// A Google or Facebook sign-up in progress: who it is, and a way back to
+/// signing up with email.
+class _SocialSignupCard extends StatelessWidget {
+  const _SocialSignupCard({
+    super.key,
+    required this.signup,
+    required this.onUseEmail,
+  });
+
+  final SocialSignup signup;
+  final VoidCallback onUseEmail;
+
+  @override
+  Widget build(BuildContext context) {
+    final name = signup.name?.split(' ').first;
+    return Container(
+      key: const Key('social-signup'),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+        gradient: const LinearGradient(
+          colors: [AppColors.cream, Color(0xFFFDEEF6)],
+        ),
+        border: Border.all(color: AppColors.purple.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        children: [
+          CircleAvatar(
+            radius: 22,
+            backgroundColor: AppColors.purple,
+            foregroundImage: signup.imageUrl == null
+                ? null
+                : NetworkImage(signup.imageUrl!),
+            child: Text(
+              (signup.name ?? signup.email).characters.first.toUpperCase(),
+              style: const TextStyle(color: Colors.white),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  name == null ? 'Almost there!' : 'Almost there, $name!',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'Signing up as ${signup.email}. Just add your country '
+                  'and phone.',
+                  style: const TextStyle(
+                    color: AppColors.mutedForeground,
+                    fontSize: 13,
+                  ),
+                ),
+                TextButton(
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    minimumSize: Size.zero,
+                    tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                  ),
+                  onPressed: onUseEmail,
+                  child: const Text('Use email instead'),
+                ),
+              ],
+            ),
           ),
         ],
       ),
@@ -473,7 +636,7 @@ class _EmailTakenCard extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Welcome back — you’re already in!',
+                      'Welcome back, you’re already in!',
                       style: AppTypography.display(18),
                     ),
                     const SizedBox(height: 4),

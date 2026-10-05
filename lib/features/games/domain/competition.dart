@@ -38,7 +38,7 @@ String formatMoneyCents(int cents, String? currency) {
 
 /// A skill competition: one game, one country, fixed rules and a pre-funded
 /// prize. Every entrant plays the identical board, and the highest verified
-/// score wins — ties go to the fastest verified time.
+/// score wins. Ties go to the fastest verified time.
 ///
 /// The prize is either fixed or growing: a growing prize starts at
 /// [startPrizeCents] and every eligible play adds [incrementPerPlayCents], up
@@ -207,7 +207,7 @@ class Competition {
   final String id;
   final String title;
 
-  /// scheduled, live, closed, frozen, finalised or cancelled — as decided by
+  /// scheduled, live, closed, frozen, finalised or cancelled. As decided by
   /// the server clock.
   final String status;
   final String gameSlug;
@@ -533,7 +533,7 @@ class DeliveryAddress {
 }
 
 /// An official attempt the server has opened. Its session carries the
-/// competition's shared seed — the same board every entrant gets.
+/// competition's shared seed. The same board every entrant gets.
 ///
 /// It is also the play's receipt: what it cost, what is left, and what it
 /// added to the prize.

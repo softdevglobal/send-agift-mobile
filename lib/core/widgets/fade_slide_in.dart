@@ -3,12 +3,12 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 
 /// Entrance animation: fades in while easing up a few pixels. This is the
-/// app's one animation primitive — sections, list rows, and grid cards all
+/// app's one animation primitive. Sections, list rows, and grid cards all
 /// use it with a small per-item delay so a screen feels like it arrives
 /// rather than simply appears, without leaning on colour to read as
 /// "creative".
 ///
-/// Runs once, the moment this widget is first built — not on every rebuild —
+/// Runs once, the moment this widget is first built. Not on every rebuild.
 /// so an unrelated state change (a provider tick, a filter change reusing the
 /// same list slot) won't replay it.
 class FadeSlideIn extends StatefulWidget {

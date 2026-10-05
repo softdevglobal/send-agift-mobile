@@ -1,4 +1,4 @@
-/// Tick-driven Snake — a mirror of `internal/games/snake.go`.
+/// Tick-driven Snake. A mirror of `internal/games/snake.go`.
 ///
 /// The board only changes on numbered ticks. A turn is logged against the
 /// tick it takes effect on, so the server can replay the exact same game from
@@ -83,7 +83,7 @@ class SnakeConfig {
 ///
 /// The server works the pace out the same way and derives from it the least
 /// time a round could have taken. If the two drifted apart, the faster of the
-/// pair would have its scores thrown out for arriving too quickly — so this
+/// pair would have its scores thrown out for arriving too quickly. So this
 /// mirrors `SnakeGame.TickIntervalMs` in internal/games/snake.go exactly.
 int snakeTickIntervalMs(
   SnakeConfig config, {
@@ -154,7 +154,7 @@ class SnakeGame implements GameEngine {
       snakeTickIntervalMs(config, foods: _foods, ticks: _ticks);
 
   /// Queues a turn for the next tick. Going the way you already are, or
-  /// reversing into yourself, is ignored — exactly as the server ignores it.
+  /// reversing into yourself, is ignored. Exactly as the server ignores it.
   bool turn(String dir) {
     if (isOver || !Move.isDirection(dir)) return false;
     if (dir == _heading || dir == Move.opposite(_heading)) return false;

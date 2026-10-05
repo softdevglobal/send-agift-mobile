@@ -5,9 +5,9 @@ import 'package:flutter/material.dart';
 /// Three variants ship as assets so each placement uses artwork drawn at the
 /// right proportions rather than a squashed crop of one file:
 ///
-/// * [BrandMark] — the gift graphic alone, for tight square slots.
-/// * [BrandWordmark] — "Send A Gift" set as drawn, for horizontal bars.
-/// * [BrandLockup] — mark stacked over wordmark, for splash-style moments.
+/// * [BrandMark]. The gift graphic alone, for tight square slots.
+/// * [BrandWordmark]. "Send A Gift" set as drawn, for horizontal bars.
+/// * [BrandLockup]. Mark stacked over wordmark, for splash-style moments.
 class BrandMark extends StatelessWidget {
   const BrandMark({super.key, this.size = 32});
 

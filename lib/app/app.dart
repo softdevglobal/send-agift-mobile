@@ -41,8 +41,8 @@ class _SendAGiftAppState extends ConsumerState<SendAGiftApp> {
   Widget build(BuildContext context) {
     final router = ref.watch(appRouterProvider);
 
-    // Once a customer is signed in — on login, sign-up, or when a saved
-    // session is restored at launch — this device gets their push
+    // Once a customer is signed in. On login, sign-up, or when a saved
+    // session is restored at launch. This device gets their push
     // notifications.
     ref.listen<AuthState>(authProvider, (previous, next) {
       if (next.isSignedIn && previous?.isSignedIn != true) {

@@ -27,7 +27,7 @@ class ReelCard extends ConsumerStatefulWidget {
 
   final Reel reel;
 
-  /// True only for the reel filling the screen — everything else is paused so
+  /// True only for the reel filling the screen. Everything else is paused so
   /// off-screen pages are neither playing nor decoding.
   final bool isActive;
 
@@ -232,8 +232,8 @@ class _ReelCardState extends ConsumerState<ReelCard>
 }
 
 /// A photo reel: the still drifts slowly so it reads as footage rather than a
-/// picture someone forgot to animate. A carousel — the API allows up to ten
-/// images on one post — is swiped sideways, with dots showing where you are.
+/// picture someone forgot to animate. A carousel. The API allows up to ten
+/// images on one post. Is swiped sideways, with dots showing where you are.
 class _PhotoReel extends StatefulWidget {
   const _PhotoReel({required this.urls, required this.progress});
 
@@ -488,7 +488,7 @@ class _RailButton extends StatelessWidget {
 }
 
 /// Everything the viewer needs to act on the clip: who posted it, what it
-/// says, and — when a product is tagged — the price and the way to send it.
+/// says, and. When a product is tagged. The price and the way to send it.
 class _ReelDetails extends StatelessWidget {
   const _ReelDetails({
     required this.reel,

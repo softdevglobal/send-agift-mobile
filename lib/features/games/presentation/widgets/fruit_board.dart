@@ -113,7 +113,7 @@ class _View {
 /// the blade.
 ///
 /// Every flying thing is drawn from its own flight in the engine, so what is
-/// on screen is exactly what the server has in the air — the halves, juice
+/// on screen is exactly what the server has in the air. The halves, juice
 /// and pop-ups that follow a cut are pure decoration on top.
 class FruitBoard extends StatefulWidget {
   const FruitBoard({required this.game, required this.controls, super.key});
@@ -913,7 +913,7 @@ class _ScenePainter extends CustomPainter {
     canvas.restore();
 
     // Ambient shading: dark round the far rim, a bounced light along the
-    // bottom — this is what makes a flat disc read as a ball.
+    // bottom. This is what makes a flat disc read as a ball.
     canvas.drawRect(
       box,
       Paint()

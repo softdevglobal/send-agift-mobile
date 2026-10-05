@@ -1,5 +1,5 @@
 /// A delivered gift another customer sent to the signed-in one. It carries
-/// no prices — it's a gift.
+/// no prices. It's a gift.
 class ReceivedGift {
   const ReceivedGift({
     required this.orderId,
@@ -60,7 +60,7 @@ class ReceivedGiftItem {
   final String fulfilmentStatus;
   final String? imageUrl;
 
-  /// Set once the line has a review — the recipient's, or the sender's.
+  /// Set once the line has a review. The recipient's, or the sender's.
   final String? reviewId;
 
   bool get delivered => fulfilmentStatus == 'delivered';

@@ -73,7 +73,7 @@ void main() {
       ..step()
       ..step();
     expect(game.turn(Move.up), isTrue);
-    // Queued, but not played yet — so not in the log.
+    // Queued, but not played yet. So not in the log.
     expect(game.moves, ['2:end']);
 
     game.step();

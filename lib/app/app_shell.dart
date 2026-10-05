@@ -9,7 +9,7 @@ import '../features/saved/data/saved_controller.dart';
 
 /// Scaffold for the five customer tabs, using the floating pill nav bar.
 ///
-/// Reels sits in the middle as the raised button — it is the most-swiped
+/// Reels sits in the middle as the raised button. It is the most-swiped
 /// surface once someone is browsing, so it gets the spot the thumb reaches
 /// first.
 ///

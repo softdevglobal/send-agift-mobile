@@ -27,7 +27,7 @@ import '../widgets/game_overlays.dart';
 /// quitting, submitting the move log, and the result card. Each game only
 /// brings its engine and board through its [GameDefinition].
 ///
-/// The app is never the authority on the result — when a round ends the move
+/// The app is never the authority on the result. When a round ends the move
 /// log goes to the server, which replays it from the seed it issued.
 class GamePlayScreen extends ConsumerStatefulWidget {
   const GamePlayScreen({

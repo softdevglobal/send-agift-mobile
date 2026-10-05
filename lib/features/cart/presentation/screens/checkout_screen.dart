@@ -24,8 +24,8 @@ import '../../../delivery/domain/delivery_intent.dart';
 import '../../data/cart_controller.dart';
 import '../../domain/cart_item.dart';
 
-/// The one place the app asks for an account. Everything up to here — search,
-/// product pages, cart, saved gifts — works as a guest.
+/// The one place the app asks for an account. Everything up to here. Search,
+/// product pages, cart, saved gifts. Works as a guest.
 class CheckoutScreen extends ConsumerStatefulWidget {
   const CheckoutScreen({super.key});
 
@@ -508,8 +508,8 @@ class _SignInGate extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Your cart is saved on this device. Sign in — or create an account '
-            'in a minute — to place the order and track delivery.',
+            'Your cart is saved on this device. Sign in. Or create an account '
+            'in a minute. To place the order and track delivery.',
             style: Theme.of(context).textTheme.bodyMedium,
           ),
           const SizedBox(height: 16),

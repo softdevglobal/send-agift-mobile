@@ -44,7 +44,7 @@ class GiftGrid extends StatelessWidget {
 
   /// Cards ease in as they're built, staggered by column so the two-up grid
   /// arrives as a small cascade rather than popping in as one block. Capped
-  /// at eight cards' worth of delay — everything after that is already off
+  /// at eight cards' worth of delay. Everything after that is already off
   /// the first screen, so there is no visible queue to sit through.
   Widget _animatedCard(int index) {
     final delay = Duration(milliseconds: 45 * (index % 8));

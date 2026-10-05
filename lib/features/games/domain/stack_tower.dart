@@ -1,4 +1,4 @@
-/// Stack Tower — a mirror of `internal/games/stack.go`.
+/// Stack Tower. A mirror of `internal/games/stack.go`.
 ///
 /// A floor slides back and forth over the tower and the player drops it.
 /// Whatever overhangs is sliced off; a drop inside the perfect window snaps
@@ -134,7 +134,7 @@ class StackDrop {
   /// The floor that stayed on the tower; null when it fell.
   final StackBlock? placed;
 
-  /// The piece that was sliced off — or the whole floor, when it fell.
+  /// The piece that was sliced off. Or the whole floor, when it fell.
   final StackBlock? cut;
 }
 
@@ -184,7 +184,7 @@ class StackTower implements TickGame {
   @override
   bool get hasProgress => _log.isNotEmpty;
 
-  /// Over once the tower has fallen — after a moment to watch it go.
+  /// Over once the tower has fallen. After a moment to watch it go.
   @override
   bool get isOver =>
       (_fell && _tick >= _fellTick + 30) ||
@@ -222,7 +222,7 @@ class StackTower implements TickGame {
   StackBlock movingAt(int atTick) =>
       top.shifted(alongX: slidesAlongX, by: offsetAt(atTick));
 
-  /// Drops the moving floor now. Null when a drop is not possible yet — a
+  /// Drops the moving floor now. Null when a drop is not possible yet. A
   /// second tap inside the same tick, say.
   StackDrop? drop() {
     if (_fell ||

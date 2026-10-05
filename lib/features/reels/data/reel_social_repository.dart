@@ -8,7 +8,7 @@ import '../domain/reel_social.dart';
 /// Likes and comments on reels.
 ///
 /// Reads are public. Writes ride on the signed-in customer's bearer token,
-/// which [ApiClient] attaches on its own — the API also takes an
+/// which [ApiClient] attaches on its own. The API also takes an
 /// `X-Guest-Token`, but the app only lets signed-in customers like and
 /// comment.
 class ReelSocialRepository {
@@ -55,7 +55,7 @@ class ReelSocialRepository {
         );
       });
 
-  /// Posts as the customer — or, with [anonymous], under [nickname] (the API
+  /// Posts as the customer. Or, with [anonymous], under [nickname] (the API
   /// falls back to "Anonymous" when it is blank).
   Future<ReelComment> createComment(
     String reelId, {
@@ -91,7 +91,7 @@ class ReelSocialRepository {
         return ReelComment.fromJson(_map(response.data));
       });
 
-  /// Author only. A soft delete — the comment drops out of every list.
+  /// Author only. A soft delete. The comment drops out of every list.
   Future<void> deleteComment(String reelId, String commentId) =>
       _guard(() async {
         await _client.dio.delete<dynamic>('/reels/$reelId/comments/$commentId');

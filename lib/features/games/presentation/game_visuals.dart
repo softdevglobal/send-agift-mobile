@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 /// Each game's look: its colours, icon and short copy.
 ///
-/// Kept on the client because it is presentation only — the rules themselves
+/// Kept on the client because it is presentation only. The rules themselves
 /// come from the server with every session.
 class GameVisual {
   const GameVisual({
@@ -79,7 +79,7 @@ const Map<String, GameVisual> _visuals = {
     hint: 'Swipe to slide every tile. Equal tiles merge.',
     howToPlay: [
       'Swipe in any direction to slide every tile.',
-      'Two equal tiles merge into one — their sum is your points.',
+      'Two equal tiles merge into one. Their sum is your points.',
       'The round ends when the board is full and nothing can merge.',
     ],
   ),
@@ -92,7 +92,7 @@ const Map<String, GameVisual> _visuals = {
     hint: 'Swipe or use the arrows. Every gift speeds you up.',
     howToPlay: [
       'Swipe or tap the arrows to steer.',
-      'Each gift box is 10 points and makes you longer — and faster.',
+      'Each gift box is 10 points and makes you longer. And faster.',
       'Hitting a wall or your own tail ends the round.',
     ],
   ),
@@ -104,12 +104,12 @@ const Map<String, GameVisual> _visuals = {
     accent: Color(0xFFE8590C),
     hint: 'Swipe up from the ball. Lead the hoop once it moves.',
     howToPlay: [
-      'Swipe up from the ball — sideways aims, the length sets the power.',
+      'Swipe up from the ball. Sideways aims, the length sets the power.',
       'Farther spots need more power; the green band on the meter is the '
           'sweet spot.',
       'Three baskets in a row and you are on fire: every basket counts '
           'double.',
-      'Every few baskets the hoop starts moving — aim where it will be.',
+      'Every few baskets the hoop starts moving. Aim where it will be.',
     ],
   ),
   'stack-tower': GameVisual(
@@ -135,7 +135,7 @@ const Map<String, GameVisual> _visuals = {
     hint: 'Drag to aim, let go to shoot. Mind the wind.',
     howToPlay: [
       'Drag to move your sight, let go to loose the arrow.',
-      'The sight sways — release when it is steady on the gold.',
+      'The sight sways. Release when it is steady on the gold.',
       'The windsock and the wind chip show how hard it is blowing; aim '
           'into it.',
       'Ten arrows. The gold scores 10, down to 1 on the outer ring.',
@@ -149,7 +149,7 @@ const Map<String, GameVisual> _visuals = {
     accent: Color(0xFF1B7A3A),
     hint: 'Tap to swing. Tap left or right of the batter to aim.',
     howToPlay: [
-      'Tap as the ball reaches the bat — perfect timing clears the rope.',
+      'Tap as the ball reaches the bat. Perfect timing clears the rope.',
       'Where you tap aims the shot. Red on the ring means a fielder is '
           'there; green is a gap.',
       'Miss a ball on the stumps and you are bowled. Edge it to a fielder '
@@ -163,7 +163,7 @@ const Map<String, GameVisual> _visuals = {
     icon: Icons.grid_on_rounded,
     colors: [Color(0xFF1E1B4B), Color(0xFF4338CA), Color(0xFF22D3EE)],
     accent: Color(0xFF4338CA),
-    hint: 'Drag a piece onto the board — or tap it, then tap a square.',
+    hint: 'Drag a piece onto the board. Or tap it, then tap a square.',
     howToPlay: [
       'Drag a piece from the tray onto the board.',
       'Fill a whole row or column and it blasts away.',
@@ -173,7 +173,7 @@ const Map<String, GameVisual> _visuals = {
   ),
   'sling-shot': GameVisual(
     name: 'Sling Shot',
-    tagline: 'Pull, aim, release — topple the towers.',
+    tagline: 'Pull, aim, release. Topple the towers.',
     icon: Icons.rocket_launch_rounded,
     colors: [Color(0xFF3A1C71), Color(0xFFD76D77), Color(0xFFFFAF7B)],
     accent: Color(0xFFD76D77),
@@ -181,20 +181,20 @@ const Map<String, GameVisual> _visuals = {
     howToPlay: [
       'Drag back and down to pull the sling; the dots show the flight.',
       'Knock out every grumpy gift box to clear the level.',
-      'Wood breaks, stone does not — and anything unsupported falls.',
+      'Wood breaks, stone does not. And anything unsupported falls.',
       'Three shots a level; the ones you save are a bonus.',
     ],
   ),
   'hill-rider': GameVisual(
     name: 'Hill Rider',
-    tagline: 'Gas, brake, balance — how far can you drive?',
+    tagline: 'Gas, brake, balance. How far can you drive?',
     icon: Icons.directions_car_filled_rounded,
     colors: [Color(0xFF0F4C75), Color(0xFF3282B8), Color(0xFFF9D56E)],
     accent: Color(0xFF3282B8),
     hint: 'Hold GAS to drive, BRAKE to slow down before a crest.',
     howToPlay: [
       'Hold GAS to drive and BRAKE to slow down.',
-      'Hit a crest too fast and you fly — land nose-first and you crash.',
+      'Hit a crest too fast and you fly. Land nose-first and you crash.',
       'Gas burns fuel. Drive through the red cans to fill up.',
       'Your score is how far you get, plus a bonus for air time.',
     ],
@@ -248,7 +248,7 @@ const Map<String, GameVisual> _visuals = {
     howToPlay: [
       'Tap a column to fire the colour waiting at the bottom.',
       'Three or more of a colour touching pops the whole cluster.',
-      'Anything left hanging falls with it — that is where the big chains are.',
+      'Anything left hanging falls with it. That is where the big chains are.',
     ],
   ),
   'tower-blocks': GameVisual(
@@ -272,10 +272,10 @@ const Map<String, GameVisual> _visuals = {
     accent: Color(0xFFBE123C),
     hint: 'Swipe through the fruit. Never touch a bomb.',
     howToPlay: [
-      'Swipe anywhere to slash — your finger is the blade.',
+      'Swipe anywhere to slash. Your finger is the blade.',
       'Cut three or more in one swipe for a fruit combo bonus.',
       'Let three fruit fall and the round is over.',
-      'Slice a bomb and it all ends in a bang — swipe around them.',
+      'Slice a bomb and it all ends in a bang. Swipe around them.',
     ],
   ),
   'doodle-jump': GameVisual(
@@ -314,7 +314,7 @@ const Map<String, GameVisual> _visuals = {
     hint: 'Your result is decided the moment you play.',
     howToPlay: [
       'Each play spins the wheel once.',
-      'Land on the jackpot and the prize is yours — the round ends there.',
+      'Land on the jackpot and the prize is yours. The round ends there.',
       'The server decides every spin fairly; the wheel just shows it.',
     ],
   ),
@@ -341,7 +341,7 @@ const Map<String, GameVisual> _visuals = {
     howToPlay: [
       'Each play opens one chest.',
       'Find the jackpot and the prize is yours.',
-      'Which chest you tap does not change the result — it was decided when '
+      'Which chest you tap does not change the result. It was decided when '
           'you played.',
     ],
   ),

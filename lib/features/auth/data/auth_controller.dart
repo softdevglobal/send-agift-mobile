@@ -2,7 +2,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/providers.dart';
 import '../../../core/notifications/push_notifications.dart';
+import '../domain/social_signup.dart';
 import 'auth_repository.dart';
+import 'social_sign_in.dart';
 
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
   return AuthRepository(
@@ -101,6 +103,32 @@ class AuthController extends StateNotifier<AuthState> {
       state = const AuthState();
       rethrow;
     }
+  }
+
+  /// Signs in with a provider token. Returns the sign-up still to finish for
+  /// a new customer, or null once they are signed in.
+  Future<SocialSignup?> socialSignIn(ProviderToken provider) async {
+    final pending = await _repository.socialSignIn(provider);
+    if (pending == null) state = AuthState(customer: await _repository.me());
+    return pending;
+  }
+
+  /// Finishes a social sign-up and signs the new customer in.
+  Future<void> completeSocialSignup({
+    required SocialSignup signup,
+    required String countryId,
+    required String phone,
+    required String displayName,
+    String customerType = 'individual',
+  }) async {
+    await _repository.completeSocialSignup(
+      signup: signup,
+      countryId: countryId,
+      phone: phone,
+      displayName: displayName,
+      customerType: customerType,
+    );
+    state = AuthState(customer: await _repository.me());
   }
 
   /// Re-reads the profile after it was edited, so every screen shows the
