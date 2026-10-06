@@ -284,10 +284,10 @@ class _Chip extends StatelessWidget {
         duration: const Duration(milliseconds: 180),
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
-          color: selected ? AppColors.purple : AppColors.surface,
-          borderRadius: BorderRadius.circular(999),
+          color: selected ? AppColors.foreground : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
           border: Border.all(
-            color: selected ? AppColors.purple : AppColors.border,
+            color: selected ? AppColors.foreground : AppColors.border,
           ),
         ),
         child: Row(
@@ -631,7 +631,7 @@ class _Pill extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
       decoration: BoxDecoration(
         color: background,
-        borderRadius: BorderRadius.circular(999),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

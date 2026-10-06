@@ -434,12 +434,16 @@ class _MessageBubble extends StatelessWidget {
                   ),
                   decoration: BoxDecoration(
                     color: own ? AppColors.purple : AppColors.surface,
-                    border: own ? null : Border.all(color: AppColors.border),
+                    border: own
+                        ? null
+                        : Border.all(
+                            color: AppColors.foreground.withValues(alpha: 0.2),
+                          ),
                     borderRadius: BorderRadius.only(
-                      topLeft: const Radius.circular(18),
-                      topRight: const Radius.circular(18),
-                      bottomLeft: Radius.circular(own ? 18 : 6),
-                      bottomRight: Radius.circular(own ? 6 : 18),
+                      topLeft: const Radius.circular(10),
+                      topRight: const Radius.circular(10),
+                      bottomLeft: Radius.circular(own ? 10 : 2),
+                      bottomRight: Radius.circular(own ? 2 : 10),
                     ),
                   ),
                   child: Text(
@@ -982,17 +986,30 @@ class _ComposerState extends State<_Composer> {
                           vertical: 10,
                         ),
                         border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(22),
-                          borderSide: const BorderSide(color: AppColors.border),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusMd,
+                          ),
+                          borderSide: BorderSide(
+                            color: AppColors.foreground.withValues(alpha: 0.2),
+                            width: 2,
+                          ),
                         ),
                         enabledBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(22),
-                          borderSide: const BorderSide(color: AppColors.border),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusMd,
+                          ),
+                          borderSide: BorderSide(
+                            color: AppColors.foreground.withValues(alpha: 0.2),
+                            width: 2,
+                          ),
                         ),
                         focusedBorder: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(22),
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusMd,
+                          ),
                           borderSide: const BorderSide(
                             color: AppColors.primary,
+                            width: 2,
                           ),
                         ),
                       ),
@@ -1002,9 +1019,14 @@ class _ComposerState extends State<_Composer> {
                   IconButton.filled(
                     onPressed: _canSend ? _submit : null,
                     style: IconButton.styleFrom(
-                      backgroundColor: AppColors.purple,
+                      backgroundColor: AppColors.foreground,
                       foregroundColor: AppColors.primaryForeground,
                       disabledBackgroundColor: AppColors.mist,
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.radiusButton,
+                        ),
+                      ),
                     ),
                     tooltip: 'Send',
                     icon: _sending
