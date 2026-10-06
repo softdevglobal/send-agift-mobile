@@ -46,6 +46,14 @@ class TestimonialCarousel extends StatelessWidget {
         itemCount: _testimonials.length,
         itemBuilder: (context, index) {
           final testimonial = _testimonials[index];
+          // Solid tones cycle so the row reads as a set; the middle is ink.
+          final onDark = index % 3 == 1;
+          final fill = const [
+            AppColors.cream,
+            AppColors.foreground,
+            AppColors.accent,
+          ][index % 3];
+          final ink = onDark ? Colors.white : AppColors.foreground;
           return Padding(
             padding: EdgeInsets.only(
               left: index == 0 ? AppTheme.gutter : 0,
@@ -54,9 +62,8 @@ class TestimonialCarousel extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.all(18),
               decoration: BoxDecoration(
-                color: AppColors.surface,
+                color: fill,
                 borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-                border: Border.all(color: AppColors.border),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -81,14 +88,14 @@ class TestimonialCarousel extends StatelessWidget {
                       Container(
                         height: 26,
                         width: 26,
-                        decoration: const BoxDecoration(
-                          color: AppColors.teal,
+                        decoration: BoxDecoration(
+                          color: onDark ? AppColors.teal : AppColors.purple,
                           shape: BoxShape.circle,
                         ),
-                        child: const Icon(
+                        child: Icon(
                           Icons.format_quote_rounded,
                           size: 14,
-                          color: Colors.white,
+                          color: onDark ? AppColors.foreground : Colors.white,
                         ),
                       ),
                     ],
@@ -100,7 +107,8 @@ class TestimonialCarousel extends StatelessWidget {
                       maxLines: 4,
                       overflow: TextOverflow.ellipsis,
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: AppColors.foreground,
+                            color: ink,
+                            fontWeight: FontWeight.w500,
                             height: 1.5,
                           ),
                     ),
@@ -118,7 +126,10 @@ class TestimonialCarousel extends StatelessWidget {
                       const SizedBox(width: 10),
                       Text(
                         testimonial.name,
-                        style: Theme.of(context).textTheme.titleSmall,
+                        style: Theme.of(context)
+                            .textTheme
+                            .titleSmall
+                            ?.copyWith(color: ink, fontWeight: FontWeight.w800),
                       ),
                     ],
                   ),

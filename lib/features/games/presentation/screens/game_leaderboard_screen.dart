@@ -9,7 +9,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../data/games_providers.dart';
 import '../game_definitions.dart';
 import '../game_visuals.dart';
-import '../widgets/game_gradient_button.dart';
+import '../widgets/game_action_button.dart';
 import '../widgets/leaderboard_list.dart';
 
 /// The practice board for one game: who holds the highest verified score.
@@ -39,11 +39,7 @@ class GameLeaderboardScreen extends ConsumerWidget {
               flexibleSpace: FlexibleSpaceBar(
                 background: DecoratedBox(
                   decoration: BoxDecoration(
-                    gradient: LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: visual.colors,
-                    ),
+                    color: visual.colors[1],
                   ),
                   child: Stack(
                     children: [
@@ -142,7 +138,7 @@ class GameLeaderboardScreen extends ConsumerWidget {
                   AppTheme.gutter,
                   12,
                 ),
-                child: GameGradientButton(
+                child: GameActionButton(
                   label: 'Play ${visual.name}',
                   colors: visual.colors,
                   onPressed: () => context.push(AppRoutes.gamePath(slug)),

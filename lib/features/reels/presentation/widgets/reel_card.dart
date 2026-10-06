@@ -159,23 +159,9 @@ class _ReelCardState extends ConsumerState<ReelCard>
             _PhotoReel(urls: [reel.imageUrl!], progress: _photoTimer)
           else
             const ColoredBox(color: Colors.black),
-          // Scrims top and bottom: the clip keeps its colour in the middle,
-          // and the text on either end stays readable whatever it sits on.
-          const DecoratedBox(
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                stops: [0, 0.28, 0.55, 1],
-                colors: [
-                  Color(0x8C000000),
-                  Color(0x1A000000),
-                  Color(0x59000000),
-                  Color(0xD9000000),
-                ],
-              ),
-            ),
-          ),
+          // One flat scrim, so the text on either end stays readable
+          // whatever it sits on.
+          const ColoredBox(color: Color(0x59000000)),
           _ProgressBar(
             value: _isVideo ? _videoProgress : null,
             photoTimer: _photoTimer,

@@ -197,7 +197,9 @@ class _Hero extends StatelessWidget {
           backgroundColor: Colors.white,
           foregroundColor: AppColors.primary,
           elevation: 0,
-          shape: const StadiumBorder(),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+          ),
         ),
         icon: const Icon(Icons.search_rounded, size: 18),
         label: Text(gifts.isEmpty ? 'Find gifts' : 'Find more'),

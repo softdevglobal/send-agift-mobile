@@ -147,19 +147,8 @@ class _OrderHero extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [Color(0xFF0F1B45), Color(0xFF3B1D8F), Color(0xFF6D28D9)],
-        ),
+        color: AppColors.foreground,
         borderRadius: BorderRadius.circular(26),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x406D28D9),
-            blurRadius: 22,
-            offset: Offset(0, 12),
-          ),
-        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -330,11 +319,8 @@ class _PointsCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFFF7E0), Color(0xFFFDE3A7)],
-        ),
+        color: const Color(0xFFFEF3C7),
         borderRadius: BorderRadius.circular(22),
-        border: Border.all(color: const Color(0xFFF4C872)),
       ),
       child: Row(
         children: [
@@ -342,10 +328,8 @@ class _PointsCard extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              gradient: const LinearGradient(
-                colors: [Color(0xFFFCD980), Color(0xFFF4B545)],
-              ),
-              borderRadius: BorderRadius.circular(15),
+              color: const Color(0xFFFBBF24),
+              borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
               Icons.stars_rounded,

@@ -2,10 +2,11 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 
-/// The big call-to-action on game screens, painted in the game's colours.
+/// The big call-to-action on game screens, a solid block of the game's
+/// main colour.
 /// Greys out when [onPressed] is null.
-class GameGradientButton extends StatelessWidget {
-  const GameGradientButton({
+class GameActionButton extends StatelessWidget {
+  const GameActionButton({
     required this.label,
     required this.colors,
     required this.onPressed,
@@ -30,18 +31,8 @@ class GameGradientButton extends StatelessWidget {
         child: Ink(
           height: 56,
           decoration: BoxDecoration(
-            gradient: enabled ? LinearGradient(colors: colors) : null,
-            color: enabled ? null : AppColors.muted,
+            color: enabled ? colors[colors.length > 1 ? 1 : 0] : AppColors.muted,
             borderRadius: BorderRadius.circular(18),
-            boxShadow: enabled
-                ? [
-                    BoxShadow(
-                      color: colors.last.withValues(alpha: 0.35),
-                      blurRadius: 16,
-                      offset: const Offset(0, 8),
-                    ),
-                  ]
-                : null,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,

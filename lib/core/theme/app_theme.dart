@@ -14,6 +14,9 @@ class AppTheme {
   static const double radiusXl = 22;
   static const double radius2xl = 28;
 
+  /// Buttons are solid blocks with barely rounded corners, not pills.
+  static const double radiusButton = 8;
+
   /// Horizontal page gutter used by every screen.
   static const double gutter = 20;
 
@@ -53,8 +56,8 @@ class AppTheme {
         titleTextStyle: TextStyle(
           fontFamily: AppTypography.displayFamily,
           fontSize: 20,
-          fontWeight: FontWeight.w600,
-          letterSpacing: -0.3,
+          fontWeight: FontWeight.w800,
+          letterSpacing: -0.6,
           color: AppColors.foreground,
         ),
         systemOverlayStyle: SystemUiOverlayStyle.dark,
@@ -71,15 +74,16 @@ class AppTheme {
           disabledBackgroundColor: AppColors.mist,
           disabledForegroundColor: AppColors.mutedForeground,
           elevation: 0,
-          minimumSize: const Size(0, 50),
+          minimumSize: const Size(0, 52),
           padding: const EdgeInsets.symmetric(horizontal: 22),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(radiusButton),
           ),
           textStyle: const TextStyle(
             fontFamily: AppTypography.sansFamily,
-            fontSize: 15,
-            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.4,
           ),
         ),
       ),
@@ -88,9 +92,9 @@ class AppTheme {
           foregroundColor: AppColors.foreground,
           minimumSize: const Size(0, 50),
           padding: const EdgeInsets.symmetric(horizontal: 22),
-          side: const BorderSide(color: AppColors.border),
+          side: const BorderSide(color: AppColors.foreground, width: 2),
           shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(radiusButton),
           ),
           textStyle: const TextStyle(
             fontFamily: AppTypography.sansFamily,
@@ -105,7 +109,22 @@ class AppTheme {
           textStyle: const TextStyle(
             fontFamily: AppTypography.sansFamily,
             fontSize: 14,
-            fontWeight: FontWeight.w600,
+            fontWeight: FontWeight.w700,
+          ),
+        ),
+      ),
+      filledButtonTheme: FilledButtonThemeData(
+        style: FilledButton.styleFrom(
+          backgroundColor: AppColors.primary,
+          foregroundColor: AppColors.primaryForeground,
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(radiusButton),
+          ),
+          textStyle: const TextStyle(
+            fontFamily: AppTypography.sansFamily,
+            fontSize: 14,
+            fontWeight: FontWeight.w800,
+            letterSpacing: 0.4,
           ),
         ),
       ),
@@ -140,7 +159,9 @@ class AppTheme {
           fontWeight: FontWeight.w500,
           color: AppColors.foreground,
         ),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(999)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusButton),
+        ),
       ),
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: AppColors.surface,

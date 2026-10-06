@@ -193,11 +193,7 @@ class _PodiumSpot extends StatelessWidget {
             child: Container(
               width: double.infinity,
               decoration: BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topCenter,
-                  end: Alignment.bottomCenter,
-                  colors: [medal, medal.withValues(alpha: 0.55)],
-                ),
+                color: medal,
                 borderRadius: const BorderRadius.vertical(
                   top: Radius.circular(14),
                 ),

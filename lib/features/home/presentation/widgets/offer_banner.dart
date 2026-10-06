@@ -6,8 +6,10 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../core/widgets/storefront_decor.dart';
 
-/// Seasonal promotion card, matching the web's "Special Offer" block.
+/// Seasonal promotion: a full-width solid teal band with a poster headline,
+/// matching the web's promo band.
 class OfferBanner extends StatelessWidget {
   const OfferBanner({super.key});
 
@@ -16,97 +18,111 @@ class OfferBanner extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: AppTheme.gutter),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(AppTheme.radius2xl),
-        child: Container(
-          color: AppColors.cream,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              SizedBox(
-                height: 150,
-                width: double.infinity,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    const AppNetworkImage(url: _image),
-                    Positioned(
-                      top: 14,
-                      right: 14,
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 11,
-                          vertical: 6,
+    final headline = AppTypography.poster(34);
+
+    return ColoredBox(
+      color: AppColors.teal,
+      child: Stack(
+        children: [
+          const Positioned(
+            right: 34,
+            top: 30,
+            child: Sparkle(size: 26, color: Colors.white),
+          ),
+          const Positioned(
+            right: 90,
+            top: 84,
+            child: Dot(size: 9, color: AppColors.foreground),
+          ),
+          Padding(
+            padding: const EdgeInsets.fromLTRB(
+              AppTheme.gutter,
+              30,
+              AppTheme.gutter,
+              30,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Marker(
+                  'GIFT SETS',
+                  style: headline,
+                  color: Colors.white,
+                  textColor: AppColors.foreground,
+                ),
+                const SizedBox(height: 4),
+                Text('UP TO 50% OFF', style: headline),
+                const SizedBox(height: 14),
+                Text(
+                  'Seasonal hampers, keepsakes, and wellness gifts, with bonus '
+                  'points on eligible checkouts.',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: AppColors.foreground.withValues(alpha: 0.75),
+                        fontWeight: FontWeight.w500,
+                      ),
+                ),
+                const SizedBox(height: 18),
+                SizedBox(
+                  height: 170,
+                  width: double.infinity,
+                  child: Stack(
+                    clipBehavior: Clip.none,
+                    children: [
+                      Positioned.fill(
+                        child: ClipRRect(
+                          borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+                          child: const AppNetworkImage(url: _image),
                         ),
-                        decoration: BoxDecoration(
-                          color: AppColors.primary,
-                          borderRadius:
-                              BorderRadius.circular(AppTheme.radiusSm),
-                        ),
-                        child: const Text(
-                          '50% OFF',
-                          style: TextStyle(
-                            fontSize: 12,
-                            fontWeight: FontWeight.w700,
-                            color: AppColors.primaryForeground,
+                      ),
+                      Positioned(
+                        right: 12,
+                        top: -18,
+                        child: Transform.rotate(
+                          angle: 0.2,
+                          child: Container(
+                            height: 72,
+                            width: 72,
+                            decoration: const BoxDecoration(
+                              color: AppColors.foreground,
+                              shape: BoxShape.circle,
+                            ),
+                            alignment: Alignment.center,
+                            child: Column(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                Text(
+                                  '50%',
+                                  style: AppTypography.poster(
+                                    20,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                                Text(
+                                  'OFF',
+                                  style: AppTypography.tag(
+                                    size: 9,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
-              ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(18, 18, 18, 20),
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 9,
-                        vertical: 4,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.primary.withValues(alpha: 0.10),
-                        borderRadius: BorderRadius.circular(AppTheme.radiusSm),
-                      ),
-                      child: const Text(
-                        'SPECIAL OFFER',
-                        style: TextStyle(
-                          fontSize: 10,
-                          fontWeight: FontWeight.w700,
-                          letterSpacing: 1.1,
-                          color: AppColors.primary,
-                        ),
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Up to 50% off curated gift sets',
-                      style: AppTypography.display(24),
-                    ),
-                    const SizedBox(height: 8),
-                    Text(
-                      'Seasonal hampers, keepsakes, and wellness gifts with '
-                      'promotional points on eligible country checkouts.',
-                      style: Theme.of(context).textTheme.bodyMedium,
-                    ),
-                    const SizedBox(height: 16),
-                    SizedBox(
-                      width: double.infinity,
-                      child: ElevatedButton(
-                        onPressed: () => context.go(AppRoutes.explore),
-                        child: const Text('Shop the sale'),
-                      ),
-                    ),
-                  ],
+                const SizedBox(height: 18),
+                ElevatedButton.icon(
+                  onPressed: () => context.go(AppRoutes.explore),
+                  icon: const Icon(Icons.arrow_forward_rounded, size: 18),
+                  iconAlignment: IconAlignment.end,
+                  label: const Text('SHOP THE SALE'),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
-        ),
+        ],
       ),
     );
   }

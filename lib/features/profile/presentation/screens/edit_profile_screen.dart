@@ -435,7 +435,7 @@ class _Avatar extends StatelessWidget {
       padding: const EdgeInsets.all(4),
       decoration: const BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(colors: [AppColors.teal, Colors.white]),
+        color: AppColors.teal,
       ),
       child: ClipOval(
         child: SizedBox(height: _size, width: _size, child: image),

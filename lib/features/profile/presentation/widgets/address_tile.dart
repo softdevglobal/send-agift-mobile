@@ -184,9 +184,7 @@ class AddressTile extends StatelessWidget {
       padding: EdgeInsets.all(isDefault ? 1.5 : 0),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-        gradient: isDefault
-            ? const LinearGradient(colors: [AppColors.teal, AppColors.purple])
-            : null,
+        color: isDefault ? AppColors.purple : null,
         boxShadow: AppTheme.cardShadow,
       ),
       child: card,

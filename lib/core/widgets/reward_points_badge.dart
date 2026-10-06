@@ -21,17 +21,8 @@ class RewardPointsBadge extends StatelessWidget {
         vertical: large ? 6 : 4,
       ),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFCD980), Color(0xFFF4B545)],
-        ),
-        borderRadius: BorderRadius.circular(999),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x33B7791F),
-            blurRadius: 6,
-            offset: Offset(0, 2),
-          ),
-        ],
+        color: const Color(0xFFFCD34D),
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

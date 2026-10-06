@@ -93,13 +93,7 @@ class _GiftCard extends StatelessWidget {
         children: [
           Container(
             padding: const EdgeInsets.fromLTRB(18, 18, 18, 16),
-            decoration: const BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: [Color(0xFFDB2777), Color(0xFFF59E0B)],
-              ),
-            ),
+            decoration: const BoxDecoration(color: AppColors.purple),
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [

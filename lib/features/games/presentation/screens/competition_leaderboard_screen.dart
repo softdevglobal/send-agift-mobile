@@ -11,7 +11,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../data/games_providers.dart';
 import '../../domain/competition.dart';
 import '../game_visuals.dart';
-import '../widgets/game_gradient_button.dart';
+import '../widgets/game_action_button.dart';
 import '../widgets/leaderboard_list.dart';
 
 /// A competition's full leaderboard: the top 100 on a podium and list, the
@@ -144,7 +144,7 @@ class _CompetitionLeaderboardScreenState
                   AppTheme.gutter,
                   12,
                 ),
-                child: GameGradientButton(
+                child: GameActionButton(
                   label: 'Play to climb the board',
                   colors: visual.colors,
                   onPressed: () => context.push(AppRoutes.competitionPath(id)),
@@ -180,11 +180,7 @@ class _Hero extends StatelessWidget {
 
     return DecoratedBox(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: visual.colors,
-        ),
+        color: visual.colors[1],
       ),
       child: Stack(
         children: [

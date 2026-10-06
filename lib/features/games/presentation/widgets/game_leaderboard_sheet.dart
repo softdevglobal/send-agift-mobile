@@ -63,7 +63,7 @@ class _LeaderboardSheet extends ConsumerWidget {
                 height: 44,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(colors: visual.colors),
+                  color: visual.colors[1],
                 ),
                 child: Center(child: GameArt(slug: slug, size: 30)),
               ),

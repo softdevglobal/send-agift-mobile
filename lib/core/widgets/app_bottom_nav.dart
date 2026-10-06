@@ -190,11 +190,7 @@ class _OrbSlot extends StatelessWidget {
             width: AppBottomNav._orbSize,
             decoration: BoxDecoration(
               shape: BoxShape.circle,
-              gradient: const LinearGradient(
-                begin: Alignment.topLeft,
-                end: Alignment.bottomRight,
-                colors: AppColors.brandGradient,
-              ),
+              color: AppColors.purple,
               boxShadow: [
                 // Violet close in, teal spreading past it: the ribbon and the
                 // paper plane, the same pairing the rest of the app uses.

@@ -18,7 +18,7 @@ import '../game_definitions.dart';
 import '../game_visuals.dart';
 import '../widgets/competition_card.dart';
 import '../widgets/countdown.dart';
-import '../widgets/game_gradient_button.dart';
+import '../widgets/game_action_button.dart';
 import '../widgets/leaderboard_list.dart';
 
 const _prizeDisclosure =
@@ -312,7 +312,7 @@ class _CompetitionViewState extends ConsumerState<_CompetitionView> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            GameGradientButton(
+            GameActionButton(
               label: label,
               icon: icon,
               colors: visual.colors,
@@ -391,11 +391,7 @@ class _Hero extends StatelessWidget {
     final c = competition;
     return Container(
       decoration: BoxDecoration(
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: visual.colors,
-        ),
+        color: visual.colors[1],
       ),
       child: Stack(
         children: [
@@ -1079,9 +1075,7 @@ class _WinCard extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFFFFB800), Color(0xFFFF7A45)],
-        ),
+        color: const Color(0xFFFFB800),
         borderRadius: BorderRadius.circular(20),
       ),
       child: Column(

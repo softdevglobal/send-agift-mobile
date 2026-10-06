@@ -28,11 +28,7 @@ class CompetitionCard extends StatelessWidget {
       child: Container(
         width: 290,
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: visual.colors,
-          ),
+          color: visual.colors[1],
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(

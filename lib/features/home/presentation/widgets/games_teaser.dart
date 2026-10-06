@@ -24,24 +24,11 @@ class GamesTeaser extends StatelessWidget {
         child: Container(
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(AppTheme.radius2xl),
-            boxShadow: [
-              BoxShadow(
-                color: AppColors.teal.withValues(alpha: 0.25),
-                blurRadius: 22,
-                offset: const Offset(0, 10),
-              ),
-            ],
           ),
           child: ClipRRect(
             borderRadius: BorderRadius.circular(AppTheme.radius2xl),
-            child: DecoratedBox(
-              decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [Color(0xFF0B6E68), Color(0xFF14B8B8)],
-                ),
-              ),
+            child: ColoredBox(
+              color: AppColors.foreground,
               child: Stack(
                 children: [
                   // Game pieces drifting across the card.
@@ -59,7 +46,7 @@ class GamesTeaser extends StatelessWidget {
                         child: Icon(
                           icon,
                           size: size,
-                          color: Colors.white.withValues(alpha: 0.22),
+                          color: AppColors.teal.withValues(alpha: 0.35),
                         ),
                       ),
                     ),
@@ -71,7 +58,7 @@ class GamesTeaser extends StatelessWidget {
                           width: 48,
                           height: 48,
                           decoration: BoxDecoration(
-                            color: Colors.white,
+                            color: AppColors.teal,
                             borderRadius: BorderRadius.circular(
                               AppTheme.radiusMd,
                             ),
@@ -79,7 +66,7 @@ class GamesTeaser extends StatelessWidget {
                           alignment: Alignment.center,
                           child: const Icon(
                             Icons.sports_esports_rounded,
-                            color: AppColors.accentForeground,
+                            color: AppColors.foreground,
                             size: 24,
                           ),
                         ),
@@ -89,12 +76,13 @@ class GamesTeaser extends StatelessWidget {
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
                               Text(
-                                'Take a break, play a game',
-                                style: AppTypography.display(
-                                  18,
+                                'TAKE A BREAK,\nPLAY A GAME',
+                                style: AppTypography.poster(
+                                  19,
                                   color: Colors.white,
                                 ),
                               ),
+                              const SizedBox(height: 3),
                               const SizedBox(height: 3),
                               Text(
                                 'Basketball, Stack Tower, Archery, 2048 and '
@@ -102,7 +90,7 @@ class GamesTeaser extends StatelessWidget {
                                 style: Theme.of(context).textTheme.bodySmall
                                     ?.copyWith(
                                       color: Colors.white.withValues(
-                                        alpha: 0.85,
+                                        alpha: 0.65,
                                       ),
                                     ),
                               ),
@@ -114,7 +102,7 @@ class GamesTeaser extends StatelessWidget {
                           height: 34,
                           width: 34,
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.2),
+                            color: AppColors.purple,
                             shape: BoxShape.circle,
                           ),
                           child: const Icon(

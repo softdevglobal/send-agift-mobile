@@ -12,8 +12,8 @@ class AppColors {
   static const Color primary = Color(0xFF0F1B45);
   static const Color primaryForeground = Color(0xFFFAFAFF);
 
-  /// The ribbon bow. Secondary accent for highlights, gradients, and the
-  /// bottom nav's active pill.
+  /// The ribbon bow. Secondary accent for highlights, marker blocks, and
+  /// the bottom nav's active pill.
   static const Color purple = Color(0xFF6D28D9);
   static const Color purpleForeground = Color(0xFFFFFFFF);
 
@@ -62,11 +62,6 @@ class AppColors {
   /// Shadow used on cards. A soft navy-tinted lift, not a grey drop shadow.
   static const Color cardShadow = Color(0x1E0F1B45);
 
-  /// Box-navy into ribbon-violet. Used once, deliberately: the bottom nav's
-  /// active pill. Everywhere else reaches for a flat brand colour instead.
-  /// gradients read as decoration fast when repeated.
-  static const List<Color> brandGradient = [
-    Color(0xFF16225A),
-    Color(0xFF6D28D9),
-  ];
+  /// Brand colours are always used flat: no gradients anywhere in the app.
+
 }

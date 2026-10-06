@@ -99,10 +99,9 @@ class _MenuButton extends StatelessWidget {
         child: Ink(
           height: 54,
           decoration: BoxDecoration(
-            gradient: gradient == null
-                ? null
-                : LinearGradient(colors: gradient),
-            color: gradient == null ? AppColors.muted : null,
+            color: gradient == null
+                ? AppColors.muted
+                : gradient[gradient.length > 1 ? 1 : 0],
             borderRadius: BorderRadius.circular(18),
           ),
           child: Row(
@@ -139,11 +138,7 @@ class _GameBadge extends StatelessWidget {
       height: 64,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: visual.colors,
-        ),
+        color: visual.colors[1],
         boxShadow: [
           BoxShadow(
             color: visual.accent.withValues(alpha: 0.45),
@@ -530,18 +525,13 @@ class GameResultOverlay extends StatelessWidget {
                 const SizedBox(height: 14),
                 Text('VERIFIED SCORE', style: AppTypography.eyebrow),
                 const SizedBox(height: 2),
-                ShaderMask(
-                  shaderCallback: (bounds) => LinearGradient(
-                    colors: visual.colors,
-                  ).createShader(bounds),
-                  child: TweenAnimationBuilder<double>(
-                    tween: Tween(begin: 0, end: result.score.toDouble()),
-                    duration: const Duration(milliseconds: 1100),
-                    curve: Curves.easeOutCubic,
-                    builder: (context, value, _) => Text(
-                      '${value.round()}',
-                      style: AppTypography.display(54, color: Colors.white),
-                    ),
+                TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: result.score.toDouble()),
+                  duration: const Duration(milliseconds: 1100),
+                  curve: Curves.easeOutCubic,
+                  builder: (context, value, _) => Text(
+                    '${value.round()}',
+                    style: AppTypography.poster(54, color: visual.colors[1]),
                   ),
                 ),
                 const SizedBox(height: 12),

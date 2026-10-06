@@ -49,13 +49,13 @@ void main() {
 
     expect(find.textContaining('Hi, '), findsOneWidget);
     expect(find.text('Orders'), findsNothing);
-    expect(find.text('The right gift, on the right day.'), findsOneWidget);
+    expect(find.text('UNFORGETTABLE'), findsOneWidget);
     await tester.scrollUntilVisible(
-      find.text('Gifts that pay you back'),
+      find.text('GIFTS THAT PAY YOU BACK'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('Gifts that pay you back'), findsOneWidget);
+    expect(find.text('GIFTS THAT PAY YOU BACK'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     // Let the carousel's timer go before the tree is torn down.

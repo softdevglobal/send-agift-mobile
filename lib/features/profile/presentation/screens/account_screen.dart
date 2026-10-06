@@ -296,18 +296,7 @@ class _HeroBackground extends StatelessWidget {
       borderRadius: BorderRadius.circular(AppTheme.radius2xl),
       child: Container(
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: AppColors.brandGradient,
-          ),
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.purple.withValues(alpha: 0.28),
-              blurRadius: 28,
-              offset: const Offset(0, 12),
-            ),
-          ],
+          color: AppColors.foreground,
         ),
         child: Stack(
           children: [
@@ -352,12 +341,8 @@ class _Glow extends StatelessWidget {
       width: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [
-            color.withValues(alpha: alpha),
-            color.withValues(alpha: 0),
-          ],
-        ),
+        // A flat translucent disc; no colour fade.
+        color: color.withValues(alpha: alpha * 0.5),
       ),
     );
   }
@@ -407,9 +392,7 @@ class _ProfileHero extends StatelessWidget {
                   padding: const EdgeInsets.all(2.5),
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [AppColors.teal, Colors.white],
-                    ),
+                    color: AppColors.teal,
                   ),
                   child: Container(
                     height: 58,

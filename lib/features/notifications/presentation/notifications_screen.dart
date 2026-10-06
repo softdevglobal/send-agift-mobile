@@ -196,13 +196,7 @@ class _NotificationTile extends StatelessWidget {
                 height: 44,
                 decoration: BoxDecoration(
                   shape: BoxShape.circle,
-                  gradient: LinearGradient(
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
-                    colors: overtaken
-                        ? const [Color(0xFF7C3AED), Color(0xFFEC4899)]
-                        : const [Color(0xFFFFB347), Color(0xFFFF5F6D)],
-                  ),
+                  color: overtaken ? AppColors.purple : const Color(0xFFF97316),
                 ),
                 child: Icon(
                   overtaken

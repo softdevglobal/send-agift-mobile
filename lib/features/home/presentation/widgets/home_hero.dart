@@ -10,27 +10,42 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_network_image.dart';
+import '../../../../core/widgets/storefront_decor.dart';
 import '../../../auth/data/auth_controller.dart';
 
 /// One slide of the hero: a promise, a photo, and where tapping goes.
 class _Slide {
   const _Slide({
     required this.eyebrow,
-    required this.title,
+    required this.lead,
+    required this.marker,
+    required this.tail,
     required this.cta,
     required this.icon,
     required this.image,
-    required this.colors,
+    required this.background,
+    required this.foreground,
+    required this.markerColor,
+    required this.markerText,
     required this.route,
     this.push = false,
   });
 
   final String eyebrow;
-  final String title;
+
+  /// Headline in three parts: the middle one sits on a marker block.
+  final String lead;
+  final String marker;
+  final String tail;
   final String cta;
   final IconData icon;
   final String image;
-  final List<Color> colors;
+
+  /// Every slide is one flat brand colour.
+  final Color background;
+  final Color foreground;
+  final Color markerColor;
+  final Color markerText;
   final String route;
 
   /// Pushed over the tabs rather than switching tab.
@@ -42,34 +57,49 @@ class _Slide {
 
 const _slides = [
   _Slide(
-    eyebrow: 'FROM MOMENTS TO MEMORIES',
-    title: 'The right gift, on the right day.',
-    cta: 'Browse gifts',
+    eyebrow: 'From moments to memories',
+    lead: "LET'S SEND",
+    marker: 'UNFORGETTABLE',
+    tail: 'GIFTS.',
+    cta: 'Shop now',
     icon: Icons.card_giftcard_rounded,
     image:
         'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=600&q=80',
-    colors: AppColors.brandGradient,
+    background: AppColors.purple,
+    foreground: Colors.white,
+    markerColor: Colors.white,
+    markerText: AppColors.foreground,
     route: AppRoutes.explore,
   ),
   _Slide(
-    eyebrow: 'EARN AS YOU GIFT',
-    title: 'Every gift pays you back in points.',
+    eyebrow: 'Earn as you gift',
+    lead: 'EVERY GIFT',
+    marker: 'PAYS YOU',
+    tail: 'BACK.',
     cta: 'See my points',
     icon: Icons.stars_rounded,
     image:
         'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=600&q=80',
-    colors: [Color(0xFF6D28D9), Color(0xFF0EA5A4)],
+    background: AppColors.teal,
+    foreground: AppColors.foreground,
+    markerColor: AppColors.foreground,
+    markerText: Colors.white,
     route: AppRoutes.points,
     push: true,
   ),
   _Slide(
-    eyebrow: 'PLAY A GAME',
-    title: 'Take a break with a quick game of skill.',
+    eyebrow: 'Play a game',
+    lead: 'TAKE A',
+    marker: 'QUICK',
+    tail: 'GAME BREAK.',
     cta: 'Play now',
     icon: Icons.emoji_events_rounded,
     image:
         'https://images.unsplash.com/photo-1490750967868-88aa4486c946?auto=format&fit=crop&w=600&q=80',
-    colors: [Color(0xFF0B6E68), Color(0xFF16225A)],
+    background: AppColors.foreground,
+    foreground: Colors.white,
+    markerColor: AppColors.teal,
+    markerText: AppColors.foreground,
     route: AppRoutes.games,
     push: true,
   ),
@@ -140,7 +170,7 @@ class _HomeHeroState extends ConsumerState<HomeHero> {
       child: Column(
         children: [
           SizedBox(
-            height: 212,
+            height: 236,
             child: NotificationListener<ScrollStartNotification>(
               // A finger on the carousel resets the clock.
               onNotification: (notification) {
@@ -177,7 +207,7 @@ class _HomeHeroState extends ConsumerState<HomeHero> {
                   width: i == _page ? 22 : 6,
                   decoration: BoxDecoration(
                     borderRadius: BorderRadius.circular(99),
-                    color: i == _page ? AppColors.purple : AppColors.mist,
+                    color: i == _page ? AppColors.foreground : AppColors.mist,
                   ),
                 ),
             ],
@@ -196,123 +226,112 @@ class _SlideCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final headline = AppTypography.poster(27, color: slide.foreground);
+
     return GestureDetector(
       onTap: onTap,
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppTheme.radius2xl),
-        child: DecoratedBox(
-          decoration: BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: slide.colors,
-            ),
-          ),
+        child: ColoredBox(
+          color: slide.background,
           child: Stack(
             children: [
               Positioned(
-                right: -50,
-                top: -60,
-                child: _Ring(size: 190, alpha: 0.10),
+                right: 122,
+                bottom: 22,
+                child: Sparkle(size: 16, color: slide.markerColor),
               ),
               Positioned(
-                left: -40,
-                bottom: -80,
-                child: _Ring(size: 160, alpha: 0.07),
+                right: 12,
+                bottom: 14,
+                child: Sparkle(size: 22, color: slide.markerColor),
               ),
               // A tilted photo, like a print tucked into the card.
               Positioned(
-                right: 14,
-                top: 22,
-                bottom: 22,
+                right: 16,
+                top: 24,
+                bottom: 40,
                 child: Transform.rotate(
                   angle: 6 * math.pi / 180,
                   child: Container(
-                    width: 104,
+                    width: 98,
                     padding: const EdgeInsets.all(5),
                     decoration: BoxDecoration(
                       color: Colors.white,
-                      borderRadius: BorderRadius.circular(16),
-                      boxShadow: const [
-                        BoxShadow(
-                          color: Color(0x33000000),
-                          blurRadius: 16,
-                          offset: Offset(0, 8),
-                        ),
-                      ],
+                      borderRadius: BorderRadius.circular(14),
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(10),
                       child: AppNetworkImage(url: slide.image),
                     ),
                   ),
                 ),
               ),
-              Positioned(
-                right: 96,
-                bottom: 18,
-                child: Container(
-                  height: 38,
-                  width: 38,
-                  decoration: BoxDecoration(
-                    color: Colors.white,
-                    shape: BoxShape.circle,
-                    boxShadow: const [
-                      BoxShadow(color: Color(0x26000000), blurRadius: 10),
-                    ],
-                  ),
-                  child: Icon(slide.icon, size: 20, color: slide.colors.last),
-                ),
-              ),
               Padding(
-                padding: const EdgeInsets.fromLTRB(20, 20, 140, 18),
+                padding: const EdgeInsets.fromLTRB(20, 20, 128, 18),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      slide.eyebrow,
+                      slide.eyebrow.toUpperCase(),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.eyebrow.copyWith(
-                        color: Colors.white.withValues(alpha: 0.8),
-                        fontSize: 10,
+                      style: AppTypography.tag(
+                        color: slide.foreground.withValues(alpha: 0.75),
                       ),
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 10),
                     Expanded(
-                      child: Text(
-                        slide.title,
-                        maxLines: 3,
-                        overflow: TextOverflow.ellipsis,
-                        style: AppTypography.display(22, color: Colors.white),
+                      child: FittedBox(
+                        fit: BoxFit.scaleDown,
+                        alignment: Alignment.topLeft,
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(slide.lead, style: headline),
+                            const SizedBox(height: 2),
+                            Marker(
+                              slide.marker,
+                              style: headline,
+                              color: slide.markerColor,
+                              textColor: slide.markerText,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(slide.tail, style: headline),
+                          ],
+                        ),
                       ),
                     ),
+                    const SizedBox(height: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(
                         horizontal: 14,
-                        vertical: 9,
+                        vertical: 10,
                       ),
                       decoration: BoxDecoration(
-                        color: Colors.white,
-                        borderRadius: BorderRadius.circular(999),
+                        color: slide.markerColor,
+                        borderRadius:
+                            BorderRadius.circular(AppTheme.radiusButton),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
                           Flexible(
                             child: Text(
-                              slide.cta,
+                              slide.cta.toUpperCase(),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: Theme.of(context).textTheme.labelLarge
-                                  ?.copyWith(color: AppColors.primary),
+                              style: AppTypography.tag(
+                                size: 11,
+                                color: slide.markerText,
+                              ),
                             ),
                           ),
                           const SizedBox(width: 6),
-                          const Icon(
+                          Icon(
                             Icons.arrow_forward_rounded,
-                            size: 16,
-                            color: AppColors.primary,
+                            size: 15,
+                            color: slide.markerText,
                           ),
                         ],
                       ),
@@ -323,25 +342,6 @@ class _SlideCard extends StatelessWidget {
             ],
           ),
         ),
-      ),
-    );
-  }
-}
-
-class _Ring extends StatelessWidget {
-  const _Ring({required this.size, required this.alpha});
-
-  final double size;
-  final double alpha;
-
-  @override
-  Widget build(BuildContext context) {
-    return Container(
-      height: size,
-      width: size,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        color: Colors.white.withValues(alpha: alpha),
       ),
     );
   }

@@ -534,9 +534,7 @@ class _SocialSignupCard extends StatelessWidget {
       padding: const EdgeInsets.all(14),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-        gradient: const LinearGradient(
-          colors: [AppColors.cream, Color(0xFFFDEEF6)],
-        ),
+        color: AppColors.cream,
         border: Border.all(color: AppColors.purple.withValues(alpha: 0.25)),
       ),
       child: Row(
@@ -607,11 +605,7 @@ class _EmailTakenCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-        gradient: const LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: [AppColors.cream, Color(0xFFFDEEF6)],
-        ),
+        color: AppColors.cream,
         border: Border.all(color: AppColors.purple.withValues(alpha: 0.25)),
       ),
       child: Column(

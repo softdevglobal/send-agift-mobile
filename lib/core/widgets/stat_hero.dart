@@ -45,11 +45,7 @@ class StatHero extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: Container(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              colors: [Color(0xFF6D28D9), Color(0xFF0EA5A4)],
-            ),
-          ),
+          decoration: const BoxDecoration(color: AppColors.purple),
           child: Stack(
             children: [
               Positioned(

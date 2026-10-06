@@ -9,6 +9,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
+import '../../../../core/widgets/storefront_decor.dart';
 import '../../../../core/widgets/quantity_stepper.dart';
 import '../../../auth/data/auth_controller.dart';
 import '../../../cart/data/cart_controller.dart';
@@ -77,7 +78,7 @@ class _Content extends StatelessWidget {
         SliverAppBar(
           expandedHeight: 340,
           pinned: true,
-          backgroundColor: AppColors.background,
+          backgroundColor: AppColors.cream,
           leading: _CircleAction(
             icon: Icons.arrow_back_rounded,
             onTap: () => context.pop(),
@@ -121,7 +122,7 @@ class _Content extends StatelessWidget {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  Text(gift.name, style: AppTypography.display(26)),
+                  Text(gift.name, style: AppTypography.display(30, height: 1.05)),
                   ProductRatingBadge(productId: gift.id),
                   const SizedBox(height: 12),
                   Row(
@@ -129,11 +130,7 @@ class _Content extends StatelessWidget {
                     children: [
                       Text(
                         gift.priceLabel,
-                        style: const TextStyle(
-                          fontSize: 25,
-                          fontWeight: FontWeight.w700,
-                          color: AppColors.foreground,
-                        ),
+                        style: AppTypography.poster(30, color: AppColors.purple),
                       ),
                       if (gift.compareAtLabel != null) ...[
                         const SizedBox(width: 10),
@@ -407,21 +404,10 @@ class _Tag extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
-      decoration: BoxDecoration(
-        color: highlighted ? AppColors.primary : AppColors.accent,
-        borderRadius: BorderRadius.circular(999),
-      ),
-      child: Text(
-        label,
-        style: TextStyle(
-          fontSize: 11,
-          fontWeight: FontWeight.w600,
-          color:
-              highlighted ? AppColors.primaryForeground : AppColors.accentForeground,
-        ),
-      ),
+    return TagChip(
+      label,
+      color: highlighted ? AppColors.purple : AppColors.teal,
+      textColor: highlighted ? Colors.white : AppColors.foreground,
     );
   }
 }

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../data/auth_controller.dart';
 import '../../data/social_sign_in.dart';
 import '../../domain/social_signup.dart';
@@ -146,7 +147,8 @@ class _ProviderButton extends StatelessWidget {
   Widget build(BuildContext context) {
     return Material(
       color: background,
-      shape: StadiumBorder(
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppTheme.radiusButton),
         side: border == null ? BorderSide.none : BorderSide(color: border!),
       ),
       clipBehavior: Clip.antiAlias,

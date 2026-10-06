@@ -67,9 +67,7 @@ class _CompetitionsArenaState extends ConsumerState<CompetitionsArena> {
                   height: 36,
                   decoration: const BoxDecoration(
                     shape: BoxShape.circle,
-                    gradient: LinearGradient(
-                      colors: [Color(0xFFFFD452), Color(0xFFFF8A3D)],
-                    ),
+                    color: Color(0xFFFFA63D),
                   ),
                   child: const Icon(
                     Icons.emoji_events_rounded,
@@ -232,11 +230,7 @@ class _PrizeCard extends StatelessWidget {
       child: DecoratedBox(
         decoration: BoxDecoration(
           borderRadius: BorderRadius.circular(28),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: visual.colors,
-          ),
+          color: visual.colors[1],
           boxShadow: [
             BoxShadow(
               color: visual.colors.last.withValues(alpha: 0.38),

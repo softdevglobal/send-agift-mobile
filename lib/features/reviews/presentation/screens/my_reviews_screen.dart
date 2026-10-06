@@ -346,17 +346,9 @@ class _Distribution extends StatelessWidget {
                               child: Container(
                                 height: 8,
                                 decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: selected == filterFor(stars)
-                                        ? const [
-                                            AppColors.purple,
-                                            AppColors.purple,
-                                          ]
-                                        : const [
-                                            AppColors.star,
-                                            Color(0xFFF6C66B),
-                                          ],
-                                  ),
+                                  color: selected == filterFor(stars)
+                                      ? AppColors.purple
+                                      : AppColors.star,
                                 ),
                               ),
                             ),

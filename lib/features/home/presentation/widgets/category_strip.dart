@@ -12,18 +12,16 @@ import '../../../../core/widgets/pressable_scale.dart';
 import '../../../products/data/catalog_providers.dart';
 import '../../../products/domain/gift_category.dart';
 
-/// Horizontally scrolling occasion cards. A photo with the occasion's
-/// name over a soft fade. Tapping one jumps to Explore with that filter
-/// already applied.
+/// Horizontally scrolling occasion cards: a tall photo, then the occasion's
+/// name and an "explore" cue under it. Tapping one jumps to Explore with
+/// that filter already applied.
 class CategoryStrip extends ConsumerWidget {
   const CategoryStrip({super.key});
-
-  static const _accents = [AppColors.purple, AppColors.teal, AppColors.star];
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return SizedBox(
-      height: 150,
+      height: 232,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         padding: const EdgeInsets.symmetric(horizontal: AppTheme.gutter),
@@ -31,7 +29,8 @@ class CategoryStrip extends ConsumerWidget {
         separatorBuilder: (context, index) => const SizedBox(width: 12),
         itemBuilder: (context, index) {
           final category = GiftCategory.all[index];
-          final accent = _accents[index % _accents.length];
+          final tint =
+              AppColors.categoryTints[index % AppColors.categoryTints.length];
 
           return FadeSlideIn(
             delay: Duration(milliseconds: 35 * index),
@@ -41,68 +40,52 @@ class CategoryStrip extends ConsumerWidget {
                 ref.read(exploreQueryProvider.notifier).state = '';
                 context.go(AppRoutes.explore);
               },
-              child: Container(
-                width: 116,
-                decoration: BoxDecoration(
-                  borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-                  boxShadow: AppTheme.cardShadow,
-                ),
-                child: ClipRRect(
-                  borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-                  child: Stack(
-                    fit: StackFit.expand,
-                    children: [
-                      AppNetworkImage(url: category.image),
-                      const DecoratedBox(
-                        decoration: BoxDecoration(
-                          gradient: LinearGradient(
-                            begin: Alignment.topCenter,
-                            end: Alignment.bottomCenter,
-                            stops: [0.35, 1],
-                            colors: [Color(0x00000000), Color(0xCC0F1B45)],
+              child: SizedBox(
+                width: 140,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: ClipRRect(
+                        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+                        child: ColoredBox(
+                          color: tint,
+                          child: SizedBox.expand(
+                            child: AppNetworkImage(url: category.image),
                           ),
                         ),
                       ),
-                      Positioned(
-                        left: 10,
-                        top: 10,
-                        child: Container(
-                          height: 8,
-                          width: 8,
-                          decoration: BoxDecoration(
-                            color: accent,
-                            shape: BoxShape.circle,
-                            border: Border.all(color: Colors.white, width: 1.5),
-                          ),
-                        ),
-                      ),
-                      Positioned(
-                        left: 12,
-                        right: 10,
-                        bottom: 12,
-                        child: Row(
-                          children: [
-                            Expanded(
-                              child: Text(
+                    ),
+                    const SizedBox(height: 10),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
                                 category.name,
-                                maxLines: 2,
+                                maxLines: 1,
                                 overflow: TextOverflow.ellipsis,
-                                style: AppTypography.display(
-                                  16,
-                                  color: Colors.white,
-                                ),
+                                style: AppTypography.display(14.5),
                               ),
-                            ),
-                            const Icon(
-                              Icons.arrow_outward_rounded,
-                              size: 16,
-                              color: Colors.white,
-                            ),
-                          ],
+                              const SizedBox(height: 2),
+                              Text(
+                                'Explore now',
+                                style: Theme.of(context).textTheme.bodySmall,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                        const Icon(
+                          Icons.arrow_forward_rounded,
+                          size: 17,
+                          color: AppColors.foreground,
+                        ),
+                      ],
+                    ),
+                  ],
                 ),
               ),
             ),

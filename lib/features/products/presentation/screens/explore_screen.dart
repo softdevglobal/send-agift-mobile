@@ -8,6 +8,7 @@ import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/app_search_field.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
+import '../../../../core/widgets/storefront_decor.dart';
 import '../../../delivery/data/delivery_providers.dart';
 import '../../../delivery/presentation/widgets/gift_search_bar.dart';
 import '../../data/catalog_providers.dart';
@@ -100,13 +101,7 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        Text('All gifts', style: AppTypography.display(28)),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Tell us where and when, and we only show gifts '
-                          'that can get there.',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
+                        _ShopBanner(categoryId: category),
                         const SizedBox(height: 16),
                         // The same search as home, so where and when can be
                         // changed without going back for them.
@@ -316,11 +311,8 @@ class _OccasionChip extends StatelessWidget {
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.fromLTRB(image == null ? 16 : 5, 5, 16, 5),
         decoration: BoxDecoration(
-          gradient: selected
-              ? const LinearGradient(colors: AppColors.brandGradient)
-              : null,
-          color: selected ? null : AppColors.surface,
-          borderRadius: BorderRadius.circular(999),
+          color: selected ? AppColors.foreground : AppColors.surface,
+          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
           border: Border.all(
             color: selected ? Colors.transparent : AppColors.border,
           ),
@@ -329,7 +321,8 @@ class _OccasionChip extends StatelessWidget {
           mainAxisSize: MainAxisSize.min,
           children: [
             if (image != null) ...[
-              ClipOval(
+              ClipRRect(
+                borderRadius: BorderRadius.circular(6),
                 child: SizedBox(
                   height: 34,
                   width: 34,
@@ -345,6 +338,7 @@ class _OccasionChip extends StatelessWidget {
               label,
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: selected ? Colors.white : AppColors.foreground,
+                fontWeight: FontWeight.w800,
               ),
             ),
           ],
@@ -393,6 +387,79 @@ class _SortButton extends StatelessWidget {
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
                 style: Theme.of(context).textTheme.labelLarge,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Flat lilac banner naming what is on the shelf, with the occasion (or
+/// "gifts") set on a violet marker block.
+class _ShopBanner extends StatelessWidget {
+  const _ShopBanner({required this.categoryId});
+
+  final String? categoryId;
+
+  @override
+  Widget build(BuildContext context) {
+    String? name;
+    for (final item in GiftCategory.all) {
+      if (item.id == categoryId) name = item.name;
+    }
+    final headline = AppTypography.poster(32);
+
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+      child: ColoredBox(
+        color: AppColors.cream,
+        child: Stack(
+          children: [
+            const Positioned(
+              right: 22,
+              top: 20,
+              child: Sparkle(size: 24, color: AppColors.purple),
+            ),
+            const Positioned(
+              right: 60,
+              bottom: 22,
+              child: Sparkle(size: 14, color: AppColors.teal),
+            ),
+            const Positioned(right: 64, top: 30, child: Dot(size: 8)),
+            Padding(
+              padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const TagChip('The gift shop'),
+                  const SizedBox(height: 14),
+                  FittedBox(
+                    fit: BoxFit.scaleDown,
+                    alignment: Alignment.centerLeft,
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: name == null
+                          ? [
+                              Text('ALL ', style: headline),
+                              Marker('GIFTS', style: headline),
+                            ]
+                          : [
+                              Marker(name.toUpperCase(), style: headline),
+                              Text(' GIFTS', style: headline),
+                            ],
+                    ),
+                  ),
+                  const SizedBox(height: 10),
+                  Text(
+                    'Tell us where and when, and we only show gifts that can '
+                    'get there.',
+                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: AppColors.foreground.withValues(alpha: 0.7),
+                    ),
+                  ),
+                ],
               ),
             ),
           ],

@@ -264,9 +264,7 @@ class _Balance extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        gradient: const LinearGradient(
-          colors: [Color(0xFF6D28D9), Color(0xFF0EA5A4)],
-        ),
+        color: const Color(0xFF6D28D9),
         borderRadius: BorderRadius.circular(24),
       ),
       child: Column(

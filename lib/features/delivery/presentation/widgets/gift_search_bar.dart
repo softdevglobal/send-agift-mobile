@@ -106,18 +106,14 @@ class _GiftSearchBarState extends ConsumerState<GiftSearchBar> {
         (ref.watch(deliveryIntentProvider)?.hasPoint ?? false);
 
     return Container(
-      padding: const EdgeInsets.all(1.5),
+      padding: const EdgeInsets.all(2),
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppTheme.radius2xl),
-        // A thin brand edge, enough to mark the bar out without it glowing.
-        gradient: LinearGradient(
-          colors: [
-            AppColors.purple.withValues(alpha: 0.45),
-            const Color(0xFFE879F9).withValues(alpha: 0.35),
-            const Color(0xFFFCD34D).withValues(alpha: 0.5),
-          ],
-        ),
-        boxShadow: AppTheme.cardShadow,
+        // A solid ink edge with a hard offset shadow: a flat block, no glow.
+        color: AppColors.foreground,
+        boxShadow: const [
+          BoxShadow(color: AppColors.foreground, offset: Offset(4, 4)),
+        ],
       ),
       child: Container(
         decoration: BoxDecoration(
@@ -157,7 +153,7 @@ class _GiftSearchBarState extends ConsumerState<GiftSearchBar> {
                   onPressed: finding ? null : _submit,
                   style: ElevatedButton.styleFrom(
                     shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(999),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusMd),
                     ),
                   ),
                   icon: finding

@@ -148,11 +148,7 @@ class _PointsBanner extends ConsumerWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
-          gradient: const LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [Color(0xFF0F1B45), Color(0xFF6D28D9), Color(0xFF0EA5A4)],
-          ),
+          color: const Color(0xFF0F1B45),
           borderRadius: BorderRadius.circular(20),
           boxShadow: const [
             BoxShadow(
@@ -262,11 +258,7 @@ class _GameTileState extends ConsumerState<_GameTile>
       },
       child: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: visual.colors,
-          ),
+          color: visual.colors[1],
           borderRadius: BorderRadius.circular(26),
           boxShadow: [
             BoxShadow(

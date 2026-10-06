@@ -438,12 +438,7 @@ class _Tracker extends StatelessWidget {
                     margin: const EdgeInsets.symmetric(horizontal: 3),
                     decoration: BoxDecoration(
                       borderRadius: BorderRadius.circular(2),
-                      gradient: i < step
-                          ? const LinearGradient(
-                              colors: [AppColors.purple, AppColors.teal],
-                            )
-                          : null,
-                      color: i < step ? null : AppColors.mist,
+                      color: i < step ? AppColors.purple : AppColors.mist,
                     ),
                   ),
                 ),

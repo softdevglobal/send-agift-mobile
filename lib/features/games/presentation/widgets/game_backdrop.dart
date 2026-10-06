@@ -68,11 +68,7 @@ class _BackdropPainter extends CustomPainter {
     canvas.drawRect(
       rect,
       Paint()
-        ..shader = LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: colors,
-        ).createShader(rect),
+        ..color = colors[colors.length > 1 ? 1 : 0],
     );
 
     final phase = t.value * 2 * math.pi;
@@ -89,12 +85,7 @@ class _BackdropPainter extends CustomPainter {
         center,
         radius,
         Paint()
-          ..shader = RadialGradient(
-            colors: [
-              Colors.white.withValues(alpha: 0.20),
-              Colors.white.withValues(alpha: 0),
-            ],
-          ).createShader(Rect.fromCircle(center: center, radius: radius)),
+          ..color = Colors.white.withValues(alpha: 0.05),
       );
     }
 

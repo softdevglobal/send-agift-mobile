@@ -42,13 +42,7 @@ class BrandHero extends StatelessWidget {
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppTheme.radius2xl),
         child: DecoratedBox(
-          decoration: const BoxDecoration(
-            gradient: LinearGradient(
-              begin: Alignment.topLeft,
-              end: Alignment.bottomRight,
-              colors: AppColors.brandGradient,
-            ),
-          ),
+          decoration: const BoxDecoration(color: AppColors.foreground),
           child: Stack(
             children: [
               Positioned(
@@ -93,12 +87,8 @@ class _Glow extends StatelessWidget {
       width: size,
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: RadialGradient(
-          colors: [
-            color.withValues(alpha: alpha),
-            color.withValues(alpha: 0),
-          ],
-        ),
+        // A flat translucent disc; no colour fade.
+        color: color.withValues(alpha: alpha * 0.5),
       ),
     );
   }
@@ -131,13 +121,7 @@ class RingAvatar extends StatelessWidget {
       padding: EdgeInsets.all(size * 0.05),
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        gradient: LinearGradient(
-          begin: Alignment.topLeft,
-          end: Alignment.bottomRight,
-          colors: onDark
-              ? const [AppColors.teal, Colors.white]
-              : const [AppColors.teal, AppColors.purple],
-        ),
+        color: onDark ? AppColors.teal : AppColors.purple,
       ),
       child: Container(
         height: size,
@@ -386,7 +370,9 @@ class HeroButton extends StatelessWidget {
         backgroundColor: Colors.white,
         foregroundColor: AppColors.primary,
         elevation: 0,
-        shape: const StadiumBorder(),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+        ),
         padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 12),
       ),
       icon: Icon(icon, size: 18),

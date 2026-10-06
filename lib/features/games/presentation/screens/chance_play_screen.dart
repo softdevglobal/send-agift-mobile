@@ -124,11 +124,7 @@ class _ChancePlayScreenState extends ConsumerState<ChancePlayScreen> {
       ),
       body: Container(
         decoration: BoxDecoration(
-          gradient: LinearGradient(
-            begin: Alignment.topCenter,
-            end: Alignment.bottomCenter,
-            colors: visual.colors,
-          ),
+          color: visual.colors[1],
         ),
         child: SafeArea(
           child: _loading
@@ -607,11 +603,6 @@ class _ScratchCardState extends State<_ScratchCard> {
                         ? Colors.white
                         : const Color(0xFFB8B8C8),
                     borderRadius: BorderRadius.circular(16),
-                    gradient: _scratched.contains(i)
-                        ? null
-                        : const LinearGradient(
-                            colors: [Color(0xFFD4D4DC), Color(0xFF9CA3AF)],
-                          ),
                   ),
                   child: Center(
                     child: _scratched.contains(i)

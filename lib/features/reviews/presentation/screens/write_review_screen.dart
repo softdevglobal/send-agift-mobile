@@ -241,13 +241,8 @@ class _WriteReviewScreenState extends ConsumerState<WriteReviewScreen> {
               width: double.infinity,
               padding: const EdgeInsets.symmetric(vertical: 24),
               decoration: BoxDecoration(
-                gradient: const LinearGradient(
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                  colors: [AppColors.cream, AppColors.surface],
-                ),
+                color: AppColors.cream,
                 borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-                border: Border.all(color: AppColors.border),
               ),
               child: Column(
                 children: [

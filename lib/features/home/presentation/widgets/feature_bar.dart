@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_typography.dart';
 
-/// The four trust promises the web home page runs under its hero. Each tile
-/// takes a different brand hue, so the strip reads as a set rather than four
-/// copies of the same card.
+/// The four trust promises the web home page runs under its hero: a solid
+/// ink band with teal icon chips, the storefront's equivalent of a logo strip.
 class FeatureBar extends StatelessWidget {
   const FeatureBar({super.key});
 
@@ -32,63 +32,66 @@ class FeatureBar extends StatelessWidget {
     ),
   ];
 
-  static const _chipColors = [AppColors.primary, AppColors.purple, AppColors.teal];
-
   @override
   Widget build(BuildContext context) {
-    return SizedBox(
-      // Tall enough for the icon, the title and two lines of description;
-      // a Spacer here once overflowed on small phones.
-      height: 138,
-      child: ListView.separated(
-        scrollDirection: Axis.horizontal,
-        padding: const EdgeInsets.symmetric(horizontal: AppTheme.gutter),
-        itemCount: _features.length,
-        separatorBuilder: (context, index) => const SizedBox(width: 10),
-        itemBuilder: (context, index) {
-          final feature = _features[index];
-          final chipColor = _chipColors[index % _chipColors.length];
-          final chipTint =
-              AppColors.categoryTints[index % AppColors.categoryTints.length];
-
-          return Container(
-            width: 158,
-            padding: const EdgeInsets.all(14),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Container(
-                  height: 32,
-                  width: 32,
-                  decoration: BoxDecoration(
-                    color: chipTint,
-                    borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+    return ColoredBox(
+      color: AppColors.foreground,
+      child: SizedBox(
+        height: 92,
+        child: ListView.separated(
+          scrollDirection: Axis.horizontal,
+          padding: const EdgeInsets.symmetric(
+            horizontal: AppTheme.gutter,
+            vertical: 20,
+          ),
+          itemCount: _features.length,
+          separatorBuilder: (context, index) => const SizedBox(width: 22),
+          itemBuilder: (context, index) {
+            final feature = _features[index];
+            return SizedBox(
+              width: 196,
+              child: Row(
+                children: [
+                  Container(
+                    height: 40,
+                    width: 40,
+                    decoration: BoxDecoration(
+                      color: AppColors.teal,
+                      borderRadius: BorderRadius.circular(AppTheme.radiusSm),
+                    ),
+                    child: Icon(feature.icon, size: 19, color: AppColors.foreground),
                   ),
-                  child: Icon(feature.icon, size: 17, color: chipColor),
-                ),
-                const SizedBox(height: 12),
-                Text(
-                  feature.title,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 3),
-                Text(
-                  feature.description,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
-            ),
-          );
-        },
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          feature.title.toUpperCase(),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: AppTypography.tag(size: 10.5, color: Colors.white),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          feature.description,
+                          maxLines: 2,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                color: Colors.white.withValues(alpha: 0.6),
+                                fontSize: 11.5,
+                                height: 1.3,
+                              ),
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
+            );
+          },
+        ),
       ),
     );
   }

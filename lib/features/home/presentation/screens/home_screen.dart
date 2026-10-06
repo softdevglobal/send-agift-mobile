@@ -83,6 +83,7 @@ class HomeScreen extends ConsumerWidget {
                 child: SectionHeading(
                   title: 'Fresh from our shops',
                   subtitle: 'Published gifts, ready to send.',
+                  markerColor: SectionHeading.violetMarker,
                   actionLabel: 'View all',
                   onAction: () => context.go(AppRoutes.explore),
                 ),
@@ -102,7 +103,10 @@ class HomeScreen extends ConsumerWidget {
               const SizedBox(height: 34),
               const FadeSlideIn(
                 delay: Duration(milliseconds: 300),
-                child: SectionHeading(title: 'What our customers say'),
+                child: SectionHeading(
+                  title: 'What our customers say',
+                  markerColor: SectionHeading.violetMarker,
+                ),
               ),
               const TestimonialCarousel(),
             ],
@@ -151,14 +155,17 @@ class _HomeTopBar extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      _greeting(),
-                      style: Theme.of(context).textTheme.bodySmall,
+                      _greeting().toUpperCase(),
+                      style: AppTypography.tag(
+                        color: AppColors.mutedForeground,
+                      ),
                     ),
+                    const SizedBox(height: 3),
                     Text(
                       first.isEmpty ? 'Who are we spoiling?' : 'Hi, $first',
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
-                      style: AppTypography.display(22),
+                      style: AppTypography.display(21),
                     ),
                   ],
                 ),

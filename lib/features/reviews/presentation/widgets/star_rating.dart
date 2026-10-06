@@ -17,14 +17,6 @@ const _ratingWords = <String>[
 
 String ratingWord(int value) => _ratingWords[value.clamp(0, 5)];
 
-/// The gold a lit star is filled with. Warmer at the tip than the base, so a
-/// row of stars has some depth instead of reading as flat colour.
-const _starGradient = LinearGradient(
-  begin: Alignment.topCenter,
-  end: Alignment.bottomCenter,
-  colors: [Color(0xFFFFC961), AppColors.star],
-);
-
 /// Read-only stars with a *fractional* fill: 4.3 looks like 4.3 rather than
 /// rounding to a flat 4, which is the whole point of showing a decimal.
 ///
@@ -56,7 +48,7 @@ class StarMeter extends StatelessWidget {
       color: AppColors.mutedForeground,
     );
 
-    Widget row(Color? color, Gradient? gradient) {
+    Widget row(Color color) {
       final stars = List.generate(
         5,
         (index) => Padding(
@@ -64,13 +56,7 @@ class StarMeter extends StatelessWidget {
           child: Icon(Icons.star_rounded, size: size, color: color),
         ),
       );
-      final line = Row(mainAxisSize: MainAxisSize.min, children: stars);
-      if (gradient == null) return line;
-      return ShaderMask(
-        shaderCallback: (bounds) => gradient.createShader(bounds),
-        blendMode: BlendMode.srcIn,
-        child: line,
-      );
+      return Row(mainAxisSize: MainAxisSize.min, children: stars);
     }
 
     return Semantics(
@@ -80,10 +66,10 @@ class StarMeter extends StatelessWidget {
         children: [
           Stack(
             children: [
-              row(AppColors.mist, null),
+              row(AppColors.mist),
               ClipRect(
                 clipper: _FractionClipper(safe / 5),
-                child: row(Colors.white, _starGradient),
+                child: row(AppColors.star),
               ),
             ],
           ),
@@ -294,14 +280,9 @@ class _Star extends StatelessWidget {
     final icon = Icon(
       lit ? Icons.star_rounded : Icons.star_outline_rounded,
       size: size,
-      color: lit ? Colors.white : AppColors.mist,
+      color: lit ? AppColors.star : AppColors.mist,
     );
-    if (!lit) return icon;
-    return ShaderMask(
-      shaderCallback: (bounds) => _starGradient.createShader(bounds),
-      blendMode: BlendMode.srcIn,
-      child: icon,
-    );
+    return icon;
   }
 }
 

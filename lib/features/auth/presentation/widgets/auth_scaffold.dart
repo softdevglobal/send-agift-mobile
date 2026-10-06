@@ -6,6 +6,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/brand_logo.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
+import '../../../../core/widgets/storefront_decor.dart';
 
 /// Shared chrome for sign-in and registration: brand mark, title, and the
 /// reminder that browsing never needed an account in the first place.
@@ -47,19 +48,6 @@ class AuthScaffold extends StatelessWidget {
     return Scaffold(
       body: Stack(
         children: [
-          // Two soft brand-colour blobs behind the header. Quiet enough not
-          // to fight the form, present enough that sign-in doesn't open on a
-          // blank page.
-          Positioned(
-            top: -70,
-            right: -50,
-            child: _GlowBlob(size: 240, color: AppColors.purple),
-          ),
-          Positioned(
-            top: 60,
-            left: -70,
-            child: _GlowBlob(size: 190, color: AppColors.teal),
-          ),
           SafeArea(
             child: ListView(
               padding: const EdgeInsets.fromLTRB(
@@ -69,32 +57,73 @@ class AuthScaffold extends StatelessWidget {
                 32,
               ),
               children: [
-                // No app bar: the back arrow sits on the page itself, so
-                // the header has no separate strip above it.
-                Align(
-                  alignment: Alignment.centerLeft,
-                  child: IconButton(
-                    key: const Key('auth-back'),
-                    tooltip: 'Back',
-                    padding: EdgeInsets.zero,
-                    visualDensity: VisualDensity.compact,
-                    icon: const Icon(Icons.arrow_back_rounded),
-                    onPressed: () =>
-                        context.canPop() ? context.pop() : context.go('/'),
+                // A flat violet band: back arrow, the logo on a white tile,
+                // and a scatter of sparkles. The web's brand panel, folded
+                // down to fit a phone.
+                FadeSlideIn(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(AppTheme.radius2xl),
+                    child: ColoredBox(
+                      color: AppColors.purple,
+                      child: Stack(
+                        children: [
+                          const Positioned(
+                            right: 24,
+                            top: 20,
+                            child: Sparkle(size: 24, color: AppColors.teal),
+                          ),
+                          const Positioned(
+                            right: 70,
+                            bottom: 22,
+                            child: Sparkle(size: 14, color: Colors.white),
+                          ),
+                          const Positioned(
+                            left: 24,
+                            bottom: 18,
+                            child: Dot(size: 8, color: AppColors.teal),
+                          ),
+                          Padding(
+                            padding: const EdgeInsets.fromLTRB(6, 6, 6, 26),
+                            child: Column(
+                              children: [
+                                Align(
+                                  alignment: Alignment.centerLeft,
+                                  child: IconButton(
+                                    key: const Key('auth-back'),
+                                    tooltip: 'Back',
+                                    color: Colors.white,
+                                    icon: const Icon(Icons.arrow_back_rounded),
+                                    onPressed: () => context.canPop()
+                                        ? context.pop()
+                                        : context.go('/'),
+                                  ),
+                                ),
+                                // Align loosens the ListView's full-width
+                                // constraint so `logoWidth` takes effect.
+                                Align(
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(
+                                      horizontal: 14,
+                                      vertical: 8,
+                                    ),
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(
+                                        AppTheme.radiusLg,
+                                      ),
+                                    ),
+                                    child: BrandLockup(width: logoWidth * 0.8),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
                   ),
                 ),
-                FadeSlideIn(
-                  // A ListView hands its children a tight, full-width
-                  // constraint, which would otherwise force the image wider
-                  // than `logoWidth` and stretch it back up regardless of
-                  // what's asked for. Align relaxes that back to loose so
-                  // the requested width actually takes effect. And centers
-                  // it, since a lockup floating at the left edge reads as
-                  // unfinished rather than deliberate.
-                  child: Align(child: BrandLockup(width: logoWidth)),
-                ),
-                // Clear space between the logo and the heading below it.
-                const SizedBox(height: 40),
+                const SizedBox(height: 28),
                 if (eyebrow != null) ...[
                   FadeSlideIn(
                     delay: const Duration(milliseconds: 40),
@@ -109,7 +138,10 @@ class AuthScaffold extends StatelessWidget {
                   delay: const Duration(milliseconds: 60),
                   child:
                       titleWidget ??
-                      Text(title, style: AppTypography.display(28)),
+                      Text(
+                        title.toUpperCase(),
+                        style: AppTypography.poster(30),
+                      ),
                 ),
                 const SizedBox(height: 8),
                 FadeSlideIn(
@@ -143,30 +175,6 @@ class AuthScaffold extends StatelessWidget {
             ),
           ),
         ],
-      ),
-    );
-  }
-}
-
-/// Soft, edge-faded colour wash used behind the auth header.
-class _GlowBlob extends StatelessWidget {
-  const _GlowBlob({required this.size, required this.color});
-
-  final double size;
-  final Color color;
-
-  @override
-  Widget build(BuildContext context) {
-    return IgnorePointer(
-      child: Container(
-        height: size,
-        width: size,
-        decoration: BoxDecoration(
-          shape: BoxShape.circle,
-          gradient: RadialGradient(
-            colors: [color.withValues(alpha: 0.18), color.withValues(alpha: 0)],
-          ),
-        ),
       ),
     );
   }

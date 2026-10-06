@@ -32,10 +32,10 @@ class GiftCard extends ConsumerWidget {
   // Styles are named so the height measurement below and the widgets that
   // render them can never drift apart.
   static const TextStyle _shopStyle = TextStyle(
-    fontSize: 11,
-    fontWeight: FontWeight.w500,
+    fontSize: 10,
+    fontWeight: FontWeight.w700,
     color: AppColors.mutedForeground,
-    letterSpacing: 0.2,
+    letterSpacing: 1.1,
   );
   static const TextStyle _compareAtStyle = TextStyle(
     fontSize: 11.5,
@@ -43,12 +43,13 @@ class GiftCard extends ConsumerWidget {
     decoration: TextDecoration.lineThrough,
   );
   static const TextStyle _priceStyle = TextStyle(
-    fontSize: 15.5,
-    fontWeight: FontWeight.w700,
+    fontSize: 16.5,
+    fontWeight: FontWeight.w900,
+    letterSpacing: -0.4,
     color: AppColors.foreground,
   );
 
-  static const EdgeInsets _textPadding = EdgeInsets.fromLTRB(12, 10, 12, 10);
+  static const EdgeInsets _textPadding = EdgeInsets.fromLTRB(4, 10, 4, 0);
   static const double _shopToNameGap = 3;
   static const double _nameToPriceGap = 6;
   static const double _addButtonSize = 34;
@@ -94,49 +95,55 @@ class GiftCard extends ConsumerWidget {
     final discount = gift.discountPercent;
 
     return PressableScale(
-      onTap: () => context.push(
-        AppRoutes.giftDetailPath(gift.id, heroTag: _heroTag),
-      ),
+      onTap: () =>
+          context.push(AppRoutes.giftDetailPath(gift.id, heroTag: _heroTag)),
+      // Outlined so each card's area reads clearly. The inset is equal on
+      // all sides, so the square photo shrinks by exactly what the padding
+      // adds and the measured cell height still fits.
       child: Container(
+        padding: const EdgeInsets.all(7),
         decoration: BoxDecoration(
           color: AppColors.surface,
           borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-          border: Border.all(color: AppColors.border),
-          boxShadow: AppTheme.cardShadow,
+          border: Border.all(
+            color: AppColors.foreground.withValues(alpha: 0.22),
+          ),
         ),
-        clipBehavior: Clip.antiAlias,
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Stack(
-              children: [
-                AspectRatio(
-                  aspectRatio: 1,
-                  child: _heroTag == null
-                      ? AppNetworkImage(url: gift.image)
-                      : Hero(
-                          tag: _heroTag!,
-                          child: AppNetworkImage(url: gift.image),
-                        ),
-                ),
-                Positioned(
-                  top: 8,
-                  right: 8,
-                  child: SaveGiftButton(giftId: gift.id),
-                ),
-                if (discount != null)
-                  Positioned(
-                    top: 10,
-                    left: 10,
-                    child: _Badge(label: '$discount% OFF'),
+            ClipRRect(
+              borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+              child: Stack(
+                children: [
+                  AspectRatio(
+                    aspectRatio: 1,
+                    child: _heroTag == null
+                        ? AppNetworkImage(url: gift.image)
+                        : Hero(
+                            tag: _heroTag!,
+                            child: AppNetworkImage(url: gift.image),
+                          ),
                   ),
-                if (gift.rewardPoints > 0)
                   Positioned(
-                    left: 8,
-                    bottom: 8,
-                    child: RewardPointsBadge(points: gift.rewardPoints),
+                    top: 8,
+                    right: 8,
+                    child: SaveGiftButton(giftId: gift.id),
                   ),
-              ],
+                  if (discount != null)
+                    Positioned(
+                      top: 10,
+                      left: 10,
+                      child: _Badge(label: '$discount% OFF'),
+                    ),
+                  if (gift.rewardPoints > 0)
+                    Positioned(
+                      left: 8,
+                      bottom: 8,
+                      child: RewardPointsBadge(points: gift.rewardPoints),
+                    ),
+                ],
+              ),
             ),
             Expanded(
               child: Padding(
@@ -146,7 +153,7 @@ class GiftCard extends ConsumerWidget {
                   children: [
                     if (gift.shopName != null)
                       Text(
-                        gift.shopName!,
+                        gift.shopName!.toUpperCase(),
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: _shopStyle,
@@ -160,7 +167,9 @@ class GiftCard extends ConsumerWidget {
                         gift.name,
                         maxLines: _nameMaxLines,
                         overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.titleSmall,
+                        style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
                       ),
                     ),
                     const SizedBox(height: _nameToPriceGap),
@@ -215,7 +224,9 @@ class _AddToCartButton extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final inCart = ref.watch(cartProvider).any((item) => item.giftId == gift.id);
+    final inCart = ref
+        .watch(cartProvider)
+        .any((item) => item.giftId == gift.id);
 
     return GestureDetector(
       onTap: () {
@@ -239,13 +250,13 @@ class _AddToCartButton extends ConsumerWidget {
         height: _AddToCartButton.size,
         width: _AddToCartButton.size,
         decoration: BoxDecoration(
-          color: inCart ? AppColors.accent : AppColors.primary,
-          borderRadius: BorderRadius.circular(999),
+          color: inCart ? AppColors.teal : AppColors.foreground,
+          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
         ),
         child: Icon(
           inCart ? Icons.check_rounded : Icons.add_rounded,
           size: 18,
-          color: inCart ? AppColors.primary : AppColors.primaryForeground,
+          color: inCart ? AppColors.foreground : AppColors.primaryForeground,
         ),
       ),
     );
@@ -262,16 +273,16 @@ class _Badge extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
       decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(999),
+        color: AppColors.purple,
+        borderRadius: BorderRadius.circular(6),
       ),
       child: Text(
         label,
         style: const TextStyle(
           fontSize: 10,
-          fontWeight: FontWeight.w700,
-          color: AppColors.primaryForeground,
-          letterSpacing: 0.3,
+          fontWeight: FontWeight.w800,
+          color: Colors.white,
+          letterSpacing: 0.8,
         ),
       ),
     );

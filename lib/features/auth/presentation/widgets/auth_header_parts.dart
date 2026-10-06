@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/storefront_decor.dart';
 
-/// A small purple pill above an auth heading, e.g. "Free forever".
+/// A small ink tag above an auth heading, e.g. "Free forever".
 class AuthPill extends StatelessWidget {
   const AuthPill(this.text, {super.key});
 
@@ -11,41 +13,12 @@ class AuthPill extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-      decoration: BoxDecoration(
-        color: AppColors.purple.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(999),
-        border: Border.all(color: AppColors.purple.withValues(alpha: 0.18)),
-      ),
-      child: Row(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          const Icon(
-            Icons.card_giftcard_rounded,
-            size: 14,
-            color: AppColors.purple,
-          ),
-          const SizedBox(width: 6),
-          Flexible(
-            child: Text(
-              text,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
-              style: const TextStyle(
-                color: AppColors.purple,
-                fontSize: 12,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+    return TagChip(text, icon: Icons.card_giftcard_rounded);
   }
 }
 
-/// A heading whose last word is in the brand gradient: "Welcome *back*".
+/// Uppercase poster heading whose last word sits on a violet marker block:
+/// "WELCOME [BACK]".
 class AuthHeadline extends StatelessWidget {
   const AuthHeadline({super.key, required this.lead, required this.accent});
 
@@ -54,17 +27,13 @@ class AuthHeadline extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final style = AppTypography.display(34, height: 1.05);
+    final style = AppTypography.poster(36);
     return Wrap(
       crossAxisAlignment: WrapCrossAlignment.end,
+      runSpacing: 4,
       children: [
-        Text(lead, style: style),
-        ShaderMask(
-          shaderCallback: (rect) => const LinearGradient(
-            colors: [AppColors.purple, Color(0xFFDB2777)],
-          ).createShader(rect),
-          child: Text(accent, style: style.copyWith(color: Colors.white)),
-        ),
+        Text(lead.toUpperCase(), style: style),
+        Marker(accent.toUpperCase(), style: style),
       ],
     );
   }
@@ -89,9 +58,8 @@ class AuthPerkChips extends StatelessWidget {
             child: Container(
               padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 8),
               decoration: BoxDecoration(
-                color: AppColors.surface,
-                borderRadius: BorderRadius.circular(999),
-                border: Border.all(color: AppColors.border),
+                color: AppColors.cream,
+                borderRadius: BorderRadius.circular(AppTheme.radiusButton),
               ),
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.center,
@@ -104,8 +72,9 @@ class AuthPerkChips extends StatelessWidget {
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
                       style: const TextStyle(
-                        color: AppColors.mutedForeground,
+                        color: AppColors.foreground,
                         fontSize: 11.5,
+                        fontWeight: FontWeight.w700,
                       ),
                     ),
                   ),
@@ -120,7 +89,7 @@ class AuthPerkChips extends StatelessWidget {
   }
 }
 
-/// The solid purple pill button used for the main auth action.
+/// The solid ink box button used for the main auth action.
 class AuthPrimaryButton extends StatelessWidget {
   const AuthPrimaryButton({
     super.key,
@@ -139,13 +108,13 @@ class AuthPrimaryButton extends StatelessWidget {
       opacity: onPressed == null && !loading ? 0.6 : 1,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(999),
-          color: AppColors.purple,
+          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+          color: AppColors.foreground,
         ),
         child: Material(
           color: Colors.transparent,
           child: InkWell(
-            borderRadius: BorderRadius.circular(999),
+            borderRadius: BorderRadius.circular(AppTheme.radiusButton),
             onTap: onPressed,
             child: SizedBox(
               height: 52,
@@ -165,13 +134,12 @@ class AuthPrimaryButton extends StatelessWidget {
                         children: [
                           Flexible(
                             child: Text(
-                              label,
+                              label.toUpperCase(),
                               maxLines: 1,
                               overflow: TextOverflow.ellipsis,
-                              style: const TextStyle(
+                              style: AppTypography.tag(
+                                size: 13,
                                 color: Colors.white,
-                                fontSize: 15,
-                                fontWeight: FontWeight.w700,
                               ),
                             ),
                           ),
