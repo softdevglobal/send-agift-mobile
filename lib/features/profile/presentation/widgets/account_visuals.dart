@@ -28,7 +28,10 @@ class BrandHero extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Full width wherever it sits: in a start-aligned column it would
+    // otherwise shrink to its content.
     return Container(
+      width: double.infinity,
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(AppTheme.radius2xl),
         boxShadow: [

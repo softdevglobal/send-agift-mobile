@@ -242,6 +242,17 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ),
               const SizedBox(height: 18),
             ],
+            if (_social == null && SocialSignInButtons.enabled) ...[
+              SocialSignInButtons(
+                verb: 'Sign up',
+                onSignedIn: _leave,
+                onNeedsProfile: _useSocial,
+                onError: (message) => setState(() => _error = message),
+              ),
+              const SizedBox(height: 18),
+              const SocialDivider(label: 'or sign up with email'),
+              const SizedBox(height: 18),
+            ],
             FadeSlideIn(
               delay: const Duration(milliseconds: 160),
               child: Column(
@@ -482,17 +493,6 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 label: 'Create my account',
               ),
             ),
-            if (_social == null && SocialSignInButtons.enabled) ...[
-              const SizedBox(height: 22),
-              const SocialDivider(label: 'or sign up with'),
-              const SizedBox(height: 18),
-              SocialSignInButtons(
-                verb: 'Sign up',
-                onSignedIn: _leave,
-                onNeedsProfile: _useSocial,
-                onError: (message) => setState(() => _error = message),
-              ),
-            ],
           ],
         ),
       ),

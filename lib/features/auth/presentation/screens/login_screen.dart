@@ -77,6 +77,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
               AuthAlert(message: _error!),
               const SizedBox(height: 18),
             ],
+            if (SocialSignInButtons.enabled) ...[
+              SocialSignInButtons(
+                onSignedIn: () => context.canPop()
+                    ? context.pop()
+                    : context.go(AppRoutes.account),
+                // A new customer finishes signing up (country and phone) first.
+                onNeedsProfile: (signup) =>
+                    context.pushReplacement(AppRoutes.register, extra: signup),
+                onError: (message) => setState(() => _error = message),
+              ),
+              const SizedBox(height: 18),
+              const SocialDivider(label: 'or sign in with email'),
+              const SizedBox(height: 18),
+            ],
             FadeSlideIn(
               delay: const Duration(milliseconds: 140),
               child: AuthField(
@@ -119,20 +133,6 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 ),
               ),
             ),
-            if (SocialSignInButtons.enabled) ...[
-              const SizedBox(height: 22),
-              const SocialDivider(label: 'or continue with'),
-              const SizedBox(height: 18),
-              SocialSignInButtons(
-                onSignedIn: () => context.canPop()
-                    ? context.pop()
-                    : context.go(AppRoutes.account),
-                // A new customer finishes signing up (country and phone) first.
-                onNeedsProfile: (signup) =>
-                    context.pushReplacement(AppRoutes.register, extra: signup),
-                onError: (message) => setState(() => _error = message),
-              ),
-            ],
           ],
         ),
       ),

@@ -9,7 +9,6 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/pressable_scale.dart';
-import '../../../../core/widgets/quantity_stepper.dart';
 import '../../../auth/data/auth_controller.dart';
 import '../../../games/data/games_providers.dart';
 import '../../../messages/data/messages_providers.dart';
@@ -128,81 +127,79 @@ class AccountScreen extends ConsumerWidget {
             const SizedBox(height: 26),
             FadeSlideIn(
               delay: const Duration(milliseconds: 90),
-              child: _MenuSection(
+              child: _ShortcutSection(
                 title: 'Shopping',
                 items: [
-                  _MenuItem(
-                    icon: Icons.receipt_long_outlined,
+                  _Shortcut(
+                    icon: Icons.receipt_long_rounded,
                     color: AppColors.primary,
+                    tint: AppColors.categoryTints[0],
                     label: 'My orders',
-                    subtitle: 'Track deliveries and view history',
+                    subtitle: 'Track deliveries and history',
                     onTap: () => context.push(AppRoutes.orders),
                   ),
-                  _MenuItem(
+                  _Shortcut(
                     icon: Icons.stars_rounded,
                     color: AppColors.purple,
+                    tint: AppColors.categoryTints[1],
                     label: 'My points',
-                    subtitle: 'Balance and points history',
+                    subtitle: 'Balance and history',
                     onTap: () => signedInOnly(AppRoutes.points),
                   ),
-                  _MenuItem(
-                    icon: Icons.chat_bubble_outline_rounded,
-                    color: AppColors.teal,
+                  _Shortcut(
+                    icon: Icons.chat_bubble_rounded,
+                    color: AppColors.accentForeground,
+                    tint: AppColors.categoryTints[2],
                     label: 'Messages',
-                    subtitle: 'Chat with shops about gifts',
+                    subtitle: 'Chat with shops',
                     badge: unreadMessages,
                     onTap: () => signedInOnly(AppRoutes.messages),
                   ),
-                  _MenuItem(
-                    icon: Icons.star_outline_rounded,
-                    color: AppColors.star,
+                  _Shortcut(
+                    icon: Icons.star_rounded,
+                    color: const Color(0xFFB7791F),
+                    tint: const Color(0xFFFDF3E1),
                     label: 'My reviews',
-                    subtitle: 'Ratings you left on delivered gifts',
+                    subtitle: 'Ratings you left',
                     onTap: () => signedInOnly(AppRoutes.reviews),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 24),
             FadeSlideIn(
               delay: const Duration(milliseconds: 130),
-              child: _MenuSection(
+              child: _ShortcutSection(
                 title: 'Gifting',
                 items: [
-                  _MenuItem(
+                  _Shortcut(
                     icon: Icons.card_giftcard_rounded,
                     color: const Color(0xFFDB2777),
+                    tint: const Color(0xFFFCE7F1),
                     label: 'Gifts received',
                     subtitle: 'Gifts sent to you. Review them here',
                     onTap: () => signedInOnly(AppRoutes.receivedGifts),
                   ),
-                  _MenuItem(
-                    icon: Icons.favorite_border_rounded,
-                    color: const Color(0xFFE0457B),
-                    label: 'Saved gifts',
-                    subtitle: savedCount == 0
-                        ? 'Nothing saved yet'
-                        : '$savedCount saved',
-                    onTap: () => context.go(AppRoutes.saved),
-                  ),
-                  _MenuItem(
-                    icon: Icons.people_alt_outlined,
+                  _Shortcut(
+                    icon: Icons.people_alt_rounded,
                     color: AppColors.purple,
+                    tint: AppColors.categoryTints[5],
                     label: 'Recipients',
-                    subtitle: 'People you send gifts to',
+                    subtitle: 'People you gift',
                     onTap: () => signedInOnly(AppRoutes.recipients),
                   ),
-                  _MenuItem(
-                    icon: Icons.location_on_outlined,
+                  _Shortcut(
+                    icon: Icons.location_on_rounded,
                     color: AppColors.accentForeground,
+                    tint: AppColors.categoryTints[4],
                     label: 'Addresses',
-                    subtitle: 'Delivery and return addresses',
+                    subtitle: 'Delivery and return',
                     onTap: () => signedInOnly(AppRoutes.addresses),
                   ),
                 ],
               ),
             ),
-            const SizedBox(height: 22),
+            const SizedBox(height: 24),
             FadeSlideIn(
               delay: const Duration(milliseconds: 170),
               child: _MenuSection(
@@ -228,17 +225,23 @@ class AccountScreen extends ConsumerWidget {
                       label: 'Change password',
                       onTap: () => context.push(AppRoutes.changePassword),
                     ),
-                  if (auth.isSignedIn)
-                    _MenuItem(
-                      icon: Icons.logout_rounded,
-                      color: AppColors.destructive,
-                      label: 'Sign out',
-                      destructive: true,
-                      onTap: () => _confirmSignOut(context, ref),
-                    ),
                 ],
               ),
             ),
+            if (auth.isSignedIn) ...[
+              const SizedBox(height: 20),
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 200),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTheme.gutter,
+                  ),
+                  child: _SignOutButton(
+                    onTap: () => _confirmSignOut(context, ref),
+                  ),
+                ),
+              ),
+            ],
           ],
         ),
       ),
@@ -295,9 +298,7 @@ class _HeroBackground extends StatelessWidget {
     return ClipRRect(
       borderRadius: BorderRadius.circular(AppTheme.radius2xl),
       child: Container(
-        decoration: BoxDecoration(
-          color: AppColors.foreground,
-        ),
+        decoration: BoxDecoration(color: AppColors.foreground),
         child: Stack(
           children: [
             Positioned(
@@ -625,6 +626,260 @@ class _StatTile extends StatelessWidget {
   }
 }
 
+/// A rounded card with a soft lift: a hairline edge on white, none on the
+/// tinted tiles where the colour already defines the shape.
+class _InkPanel extends StatelessWidget {
+  const _InkPanel({required this.child, this.color = AppColors.surface});
+
+  final Widget child;
+  final Color color;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      decoration: BoxDecoration(
+        color: color,
+        borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+        border: color == AppColors.surface
+            ? Border.all(color: AppColors.border)
+            : null,
+        boxShadow: AppTheme.cardShadow,
+      ),
+      child: ClipRRect(
+        borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+        child: Material(color: Colors.transparent, child: child),
+      ),
+    );
+  }
+}
+
+class _Shortcut {
+  const _Shortcut({
+    required this.icon,
+    required this.color,
+    required this.tint,
+    required this.label,
+    required this.subtitle,
+    required this.onTap,
+    this.badge = 0,
+  });
+
+  final IconData icon;
+  final Color color;
+  final Color tint;
+  final String label;
+  final String subtitle;
+  final int badge;
+  final VoidCallback onTap;
+}
+
+/// A titled group of shortcut tiles, two to a row. With an odd count the
+/// first tile runs the full width, so the grid never ends on a lone half.
+class _ShortcutSection extends StatelessWidget {
+  const _ShortcutSection({required this.title, required this.items});
+
+  final String title;
+  final List<_Shortcut> items;
+
+  static const double _gap = 12;
+
+  @override
+  Widget build(BuildContext context) {
+    final wide = items.length.isOdd ? items.first : null;
+    final rest = wide == null ? items : items.skip(1).toList();
+
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: AppTheme.gutter),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Padding(
+            padding: const EdgeInsets.only(left: 4, bottom: 10),
+            child: Text(title.toUpperCase(), style: AppTypography.eyebrow),
+          ),
+          if (wide != null) ...[
+            _ShortcutTile(item: wide, wide: true),
+            if (rest.isNotEmpty) const SizedBox(height: _gap),
+          ],
+          for (var i = 0; i < rest.length; i += 2) ...[
+            if (i > 0) const SizedBox(height: _gap),
+            // IntrinsicHeight keeps both tiles in a row the same height when
+            // one subtitle wraps and the other does not.
+            IntrinsicHeight(
+              child: Row(
+                crossAxisAlignment: CrossAxisAlignment.stretch,
+                children: [
+                  Expanded(child: _ShortcutTile(item: rest[i])),
+                  const SizedBox(width: _gap),
+                  Expanded(
+                    child: i + 1 < rest.length
+                        ? _ShortcutTile(item: rest[i + 1])
+                        : const SizedBox.shrink(),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+}
+
+class _ShortcutTile extends StatelessWidget {
+  const _ShortcutTile({required this.item, this.wide = false});
+
+  final _Shortcut item;
+
+  /// Lays the icon beside the text instead of above it.
+  final bool wide;
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = Container(
+      height: 40,
+      width: 40,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+      ),
+      child: Icon(item.icon, size: 20, color: item.color),
+    );
+    final text = Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        Text(
+          item.label,
+          maxLines: 1,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.titleSmall?.copyWith(
+            fontSize: 15,
+            fontWeight: FontWeight.w800,
+          ),
+        ),
+        const SizedBox(height: 2),
+        Text(
+          item.subtitle,
+          maxLines: 2,
+          overflow: TextOverflow.ellipsis,
+          style: Theme.of(context).textTheme.bodySmall,
+        ),
+      ],
+    );
+    final arrow = Container(
+      height: 26,
+      width: 26,
+      decoration: const BoxDecoration(
+        color: AppColors.foreground,
+        shape: BoxShape.circle,
+      ),
+      child: const Icon(
+        Icons.arrow_forward_rounded,
+        size: 15,
+        color: Colors.white,
+      ),
+    );
+
+    return PressableScale(
+      onTap: item.onTap,
+      child: _InkPanel(
+        color: item.tint,
+        child: Stack(
+          children: [
+            Padding(
+              padding: const EdgeInsets.all(14),
+              child: wide
+                  ? Row(
+                      children: [
+                        icon,
+                        const SizedBox(width: 14),
+                        Expanded(child: text),
+                        const SizedBox(width: 10),
+                        arrow,
+                      ],
+                    )
+                  : Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [icon, const Spacer(), arrow],
+                        ),
+                        const SizedBox(height: 14),
+                        text,
+                      ],
+                    ),
+            ),
+            if (item.badge > 0)
+              Positioned(
+                top: 10,
+                left: 42,
+                child: Container(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: 6,
+                    vertical: 2,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppColors.purple,
+                    borderRadius: BorderRadius.circular(999),
+                    border: Border.all(color: Colors.white, width: 1.5),
+                  ),
+                  child: Text(
+                    item.badge > 99 ? '99+' : '${item.badge}',
+                    style: const TextStyle(
+                      fontFamily: AppTypography.sansFamily,
+                      fontSize: 10.5,
+                      fontWeight: FontWeight.w700,
+                      color: AppColors.purpleForeground,
+                    ),
+                  ),
+                ),
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+class _SignOutButton extends StatelessWidget {
+  const _SignOutButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return PressableScale(
+      onTap: onTap,
+      child: Container(
+        height: 52,
+        decoration: BoxDecoration(
+          color: AppColors.surface,
+          borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+          border: Border.all(color: AppColors.destructive, width: 1.5),
+        ),
+        child: const Row(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Icon(Icons.logout_rounded, size: 19, color: AppColors.destructive),
+            SizedBox(width: 8),
+            Text(
+              'Sign out',
+              style: TextStyle(
+                fontFamily: AppTypography.sansFamily,
+                fontSize: 15,
+                fontWeight: FontWeight.w700,
+                color: AppColors.destructive,
+              ),
+            ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
 class _MenuSection extends StatelessWidget {
   const _MenuSection({required this.title, required this.items});
 
@@ -647,8 +902,7 @@ class _MenuSection extends StatelessWidget {
         ),
         Padding(
           padding: const EdgeInsets.symmetric(horizontal: AppTheme.gutter),
-          child: AppPanel(
-            padding: const EdgeInsets.symmetric(vertical: 6),
+          child: _InkPanel(
             child: Column(
               children: [
                 for (var i = 0; i < items.length; i++) ...[
@@ -675,24 +929,19 @@ class _MenuItem extends StatelessWidget {
     required this.label,
     required this.onTap,
     this.subtitle,
-    this.badge = 0,
-    this.destructive = false,
   });
 
   final IconData icon;
   final Color color;
   final String label;
   final String? subtitle;
-  final int badge;
-  final bool destructive;
   final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
-    final labelStyle = Theme.of(context).textTheme.titleSmall?.copyWith(
-      fontSize: 14.5,
-      color: destructive ? AppColors.destructive : null,
-    );
+    final labelStyle = Theme.of(
+      context,
+    ).textTheme.titleSmall?.copyWith(fontSize: 14.5);
     return InkWell(
       onTap: onTap,
       child: Padding(
@@ -726,33 +975,12 @@ class _MenuItem extends StatelessWidget {
                 ],
               ),
             ),
-            if (badge > 0) ...[
-              const SizedBox(width: 8),
-              Container(
-                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 3),
-                decoration: BoxDecoration(
-                  color: AppColors.purple,
-                  borderRadius: BorderRadius.circular(999),
-                ),
-                child: Text(
-                  badge > 99 ? '99+ new' : '$badge new',
-                  style: const TextStyle(
-                    fontFamily: AppTypography.sansFamily,
-                    fontSize: 11,
-                    fontWeight: FontWeight.w600,
-                    color: AppColors.purpleForeground,
-                  ),
-                ),
-              ),
-            ],
-            if (!destructive) ...[
-              const SizedBox(width: 6),
-              const Icon(
-                Icons.chevron_right_rounded,
-                size: 20,
-                color: AppColors.mutedForeground,
-              ),
-            ],
+            const SizedBox(width: 6),
+            const Icon(
+              Icons.chevron_right_rounded,
+              size: 20,
+              color: AppColors.mutedForeground,
+            ),
           ],
         ),
       ),
