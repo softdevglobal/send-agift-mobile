@@ -85,7 +85,12 @@ class _SavedScreenState extends ConsumerState<SavedScreen> {
                         style: Theme.of(context).textTheme.bodyMedium,
                       ),
                       const SizedBox(height: 16),
-                      _Hero(gifts: saved),
+                      // The column is start-aligned, which would shrink the
+                      // card to its content; stretch it to the full width.
+                      SizedBox(
+                        width: double.infinity,
+                        child: _Hero(gifts: saved),
+                      ),
                     ],
                   ),
                 ),
