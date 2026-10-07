@@ -236,8 +236,8 @@ class _SortButton extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+          border: Border.all(color: AppColors.primary, width: 2),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

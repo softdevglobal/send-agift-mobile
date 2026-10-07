@@ -31,11 +31,12 @@ class GiftGrid extends StatelessWidget {
   /// scales with the user's font size. A guessed ratio overflows on devices
   /// whose text renders taller than the design assumed.
   SliverGridDelegate _delegate(BuildContext context, double maxWidth) {
-    final columnWidth =
-        (maxWidth - _spacing * (_columns - 1)) / _columns;
+    // A lone gift fills the row rather than sitting in half of it.
+    final columns = gifts.length == 1 ? 1 : _columns;
+    final columnWidth = (maxWidth - _spacing * (columns - 1)) / columns;
 
     return SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: _columns,
+      crossAxisCount: columns,
       crossAxisSpacing: _spacing,
       mainAxisSpacing: _spacing,
       mainAxisExtent: columnWidth + GiftCard.textBlockHeight(context),

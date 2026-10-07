@@ -89,20 +89,22 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
           },
           child: CustomScrollView(
             slivers: [
+              // Runs edge to edge; the controls below sit in the gutter.
+              SliverToBoxAdapter(
+                child: FadeSlideIn(child: _ShopBanner(categoryId: category)),
+              ),
               SliverToBoxAdapter(
                 child: FadeSlideIn(
                   child: Padding(
                     padding: const EdgeInsets.fromLTRB(
                       AppTheme.gutter,
-                      10,
+                      16,
                       AppTheme.gutter,
                       14,
                     ),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        _ShopBanner(categoryId: category),
-                        const SizedBox(height: 16),
                         // The same search as home, so where and when can be
                         // changed without going back for them.
                         const GiftSearchBar(),
@@ -260,7 +262,8 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Flexible(
+                            Align(
+                              alignment: Alignment.centerRight,
                               child: _SortButton(
                                 value: _sort,
                                 onChanged: (value) =>
@@ -366,11 +369,11 @@ class _SortButton extends StatelessWidget {
           PopupMenuItem(value: entry.key, child: Text(entry.value)),
       ],
       child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(999),
-          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+          border: Border.all(color: AppColors.primary, width: 2),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
@@ -411,8 +414,8 @@ class _ShopBanner extends StatelessWidget {
     }
     final headline = AppTypography.poster(32);
 
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+    return SizedBox(
+      width: double.infinity,
       child: ColoredBox(
         color: AppColors.cream,
         child: Stack(
