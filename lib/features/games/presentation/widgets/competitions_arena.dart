@@ -7,6 +7,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/pressable_scale.dart';
+import '../../../../core/widgets/section_tag.dart';
 import '../../data/games_providers.dart';
 import '../../domain/competition.dart';
 import '../game_visuals.dart';
@@ -53,41 +54,50 @@ class _CompetitionsArenaState extends ConsumerState<CompetitionsArena> {
 
     final live = all.where((c) => c.isLive).length;
 
-    return Padding(
-      padding: const EdgeInsets.only(top: 22),
+    // A tinted band edged top and bottom, so prize rounds sit apart from
+    // the practice games below.
+    return Container(
+      margin: const EdgeInsets.only(top: 22),
+      padding: const EdgeInsets.only(top: 20, bottom: 22),
+      decoration: const BoxDecoration(
+        color: Color(0xFFFFF4E8),
+        border: Border.symmetric(
+          horizontal: BorderSide(color: AppColors.boxBorder, width: 1.5),
+        ),
+      ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: AppTheme.gutter),
-            child: Row(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Container(
-                  width: 36,
-                  height: 36,
-                  decoration: const BoxDecoration(
-                    shape: BoxShape.circle,
-                    color: Color(0xFFFFA63D),
-                  ),
-                  child: const Icon(
-                    Icons.emoji_events_rounded,
-                    color: Colors.white,
-                    size: 20,
-                  ),
+                Row(
+                  children: [
+                    const Flexible(
+                      child: SectionTag(
+                        label: 'Competitions',
+                        icon: Icons.emoji_events_rounded,
+                        color: Color(0xFFF97316),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const Spacer(),
+                    if (live > 0) _LiveBadge(count: live),
+                  ],
                 ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Text(
-                    'Win real prizes',
-                    style: AppTypography.display(24),
-                  ),
+                const SizedBox(height: 10),
+                Text('Win real prizes', style: AppTypography.display(26)),
+                const SizedBox(height: 4),
+                Text(
+                  'Official rounds with a prize for the top of the board.',
+                  style: Theme.of(context).textTheme.bodyMedium,
                 ),
-                if (live > 0) _LiveBadge(count: live),
               ],
             ),
           ),
-          const SizedBox(height: 12),
-          const SizedBox(height: 14),
+          const SizedBox(height: 16),
           ...[
             SizedBox(
               height: 268,
@@ -175,7 +185,8 @@ class _LiveBadgeState extends State<_LiveBadge>
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: const Color(0xFFFFE4E6),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm),
+        border: Border.all(color: const Color(0x33E11D48), width: 1.5),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -229,18 +240,11 @@ class _PrizeCard extends StatelessWidget {
       onTap: onTap,
       child: DecoratedBox(
         decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg + 2),
           color: visual.colors[1],
-          boxShadow: [
-            BoxShadow(
-              color: visual.colors.last.withValues(alpha: 0.38),
-              blurRadius: 22,
-              offset: const Offset(0, 12),
-            ),
-          ],
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(28),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg + 2),
           child: Stack(
             children: [
               // Decorative: the game's own icon, large and faint, and a soft
@@ -416,7 +420,9 @@ class _PrizeCard extends StatelessWidget {
                               ),
                               decoration: BoxDecoration(
                                 color: Colors.white,
-                                borderRadius: BorderRadius.circular(20),
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusBoxSm,
+                                ),
                               ),
                               child: Row(
                                 mainAxisSize: MainAxisSize.min,
@@ -484,7 +490,7 @@ class _StatusTag extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 4),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.22),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
@@ -602,7 +608,7 @@ class _Glass extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 5),
       decoration: BoxDecoration(
         color: Colors.white.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm),
         border: Border.all(color: Colors.white.withValues(alpha: 0.25)),
       ),
       child: child,

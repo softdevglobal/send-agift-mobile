@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 
 /// The big call-to-action on game screens, a solid block of the game's
 /// main colour.
@@ -26,13 +27,15 @@ class GameActionButton extends StatelessWidget {
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: BorderRadius.circular(AppTheme.radiusBox),
         onTap: onPressed,
         child: Ink(
           height: 56,
           decoration: BoxDecoration(
-            color: enabled ? colors[colors.length > 1 ? 1 : 0] : AppColors.muted,
-            borderRadius: BorderRadius.circular(18),
+            color: enabled
+                ? colors[colors.length > 1 ? 1 : 0]
+                : AppColors.muted,
+            borderRadius: BorderRadius.circular(AppTheme.radiusBox),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -46,7 +49,7 @@ class GameActionButton extends StatelessWidget {
                   overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w700,
+                    fontWeight: FontWeight.w800,
                     color: foreground,
                   ),
                 ),

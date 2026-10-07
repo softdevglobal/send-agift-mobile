@@ -13,7 +13,7 @@ class GameChoice {
   /// Shown under the preview, and what a test taps.
   final String name;
 
-  /// The glow under the preview, taken from the thing itself.
+  /// The thing's own colours, for the preview.
   final List<Color> colors;
 
   /// Draws the preview into the square it is given.
@@ -69,7 +69,8 @@ class GameChooser extends StatelessWidget {
               builder: (context, constraints) {
                 // Two across, so each preview is big enough to tell what it
                 // is before committing to a whole round with it.
-                final width = (constraints.maxWidth.clamp(240.0, 460.0) - 14) / 2;
+                final width =
+                    (constraints.maxWidth.clamp(240.0, 460.0) - 14) / 2;
                 return Wrap(
                   spacing: 14,
                   runSpacing: 14,
@@ -120,21 +121,14 @@ class _ChoiceTile extends StatelessWidget {
               width: width,
               height: height,
               decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(18),
+                borderRadius: BorderRadius.circular(14),
                 border: Border.all(
                   color: Colors.white.withValues(alpha: 0.5),
                   width: 2,
                 ),
-                boxShadow: [
-                  BoxShadow(
-                    color: choice.colors.last.withValues(alpha: 0.45),
-                    blurRadius: 16,
-                    offset: const Offset(0, 6),
-                  ),
-                ],
               ),
               child: ClipRRect(
-                borderRadius: BorderRadius.circular(16),
+                borderRadius: BorderRadius.circular(12),
                 child: CustomPaint(
                   painter: _ChoicePainter(choice: choice),
                   size: Size(width, height),

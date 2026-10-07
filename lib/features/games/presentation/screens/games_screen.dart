@@ -9,6 +9,7 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/pressable_scale.dart';
+import '../../../../core/widgets/section_tag.dart';
 import '../../../auth/data/auth_controller.dart';
 import '../../data/games_providers.dart';
 import '../../domain/game.dart';
@@ -46,6 +47,19 @@ class GamesScreen extends ConsumerWidget {
               sliver: SliverToBoxAdapter(child: _Header()),
             ),
             const SliverToBoxAdapter(child: CompetitionsArena()),
+            // Games get their own section below the competitions band, so
+            // practice play never reads as part of a prize round.
+            SliverPadding(
+              padding: const EdgeInsets.fromLTRB(
+                AppTheme.gutter,
+                26,
+                AppTheme.gutter,
+                0,
+              ),
+              sliver: SliverToBoxAdapter(
+                child: _GamesHeader(count: games.valueOrNull?.length),
+              ),
+            ),
             ...games.when<List<Widget>>(
               loading: () => const [
                 SliverFillRemaining(
@@ -82,7 +96,12 @@ class GamesScreen extends ConsumerWidget {
                     ]
                   : [
                       SliverPadding(
-                        padding: const EdgeInsets.all(AppTheme.gutter),
+                        padding: const EdgeInsets.fromLTRB(
+                          AppTheme.gutter,
+                          16,
+                          AppTheme.gutter,
+                          AppTheme.gutter,
+                        ),
                         sliver: SliverGrid(
                           gridDelegate:
                               const SliverGridDelegateWithFixedCrossAxisCount(
@@ -113,13 +132,43 @@ class _Header extends StatelessWidget {
   const _Header();
 
   @override
+  Widget build(BuildContext context) => const _PointsBanner();
+}
+
+/// Opens the games section: what these are, and how many there are.
+class _GamesHeader extends StatelessWidget {
+  const _GamesHeader({required this.count});
+
+  final int? count;
+
+  @override
   Widget build(BuildContext context) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const _PointsBanner(),
-        const SizedBox(height: 18),
-        Text('Play a round', style: AppTypography.display(28)),
+        Row(
+          children: [
+            const Flexible(
+              child: SectionTag(
+                label: 'Games',
+                icon: Icons.sports_esports_rounded,
+                color: AppColors.purple,
+              ),
+            ),
+            const SizedBox(width: 8),
+            const Spacer(),
+            if (count != null && count! > 0)
+              Text(
+                '${count!} TO PLAY',
+                style: AppTheme.boxLabel.copyWith(
+                  fontSize: 10.5,
+                  color: AppColors.mutedForeground,
+                ),
+              ),
+          ],
+        ),
+        const SizedBox(height: 10),
+        Text('Play a round', style: AppTypography.display(26)),
         const SizedBox(height: 4),
         Text(
           'Pure-skill games. Every board comes from a server seed and every '
@@ -149,14 +198,7 @@ class _PointsBanner extends ConsumerWidget {
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
           color: const Color(0xFF0F1B45),
-          borderRadius: BorderRadius.circular(20),
-          boxShadow: const [
-            BoxShadow(
-              color: Color(0x406D28D9),
-              blurRadius: 16,
-              offset: Offset(0, 8),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(AppTheme.radiusBox),
         ),
         child: Row(
           children: [
@@ -165,7 +207,7 @@ class _PointsBanner extends ConsumerWidget {
               height: 36,
               decoration: BoxDecoration(
                 color: Colors.white.withValues(alpha: 0.16),
-                borderRadius: BorderRadius.circular(12),
+                borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm),
               ),
               child: const Icon(
                 Icons.stars_rounded,
@@ -259,17 +301,10 @@ class _GameTileState extends ConsumerState<_GameTile>
       child: Container(
         decoration: BoxDecoration(
           color: visual.colors[1],
-          borderRadius: BorderRadius.circular(26),
-          boxShadow: [
-            BoxShadow(
-              color: visual.colors[1].withValues(alpha: 0.4),
-              blurRadius: 18,
-              offset: const Offset(0, 10),
-            ),
-          ],
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg + 2),
         ),
         child: ClipRRect(
-          borderRadius: BorderRadius.circular(26),
+          borderRadius: BorderRadius.circular(AppTheme.radiusLg + 2),
           child: Stack(
             children: [
               // A soft glow behind the artwork, so the hero has something to
@@ -349,7 +384,9 @@ class _GameTileState extends ConsumerState<_GameTile>
                             ),
                             decoration: BoxDecoration(
                               color: Colors.black.withValues(alpha: 0.18),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.radiusBoxSm,
+                              ),
                             ),
                             child: FittedBox(
                               fit: BoxFit.scaleDown,
@@ -375,7 +412,9 @@ class _GameTileState extends ConsumerState<_GameTile>
                             ),
                             decoration: BoxDecoration(
                               color: const Color(0xFFFCD980),
-                              borderRadius: BorderRadius.circular(20),
+                              borderRadius: BorderRadius.circular(
+                                AppTheme.radiusBoxSm,
+                              ),
                             ),
                             child: Text(
                               '${game.playCostPoints} pts',
@@ -392,9 +431,11 @@ class _GameTileState extends ConsumerState<_GameTile>
                         Container(
                           width: 36,
                           height: 36,
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             color: Colors.white,
-                            shape: BoxShape.circle,
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.radiusBoxSm + 2,
+                            ),
                           ),
                           child: Icon(
                             Icons.play_arrow_rounded,
@@ -415,6 +456,11 @@ class _GameTileState extends ConsumerState<_GameTile>
                       context.push(AppRoutes.gameLeaderboardPath(game.slug)),
                   style: IconButton.styleFrom(
                     backgroundColor: Colors.white.withValues(alpha: 0.22),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(
+                        AppTheme.radiusBoxSm + 2,
+                      ),
+                    ),
                   ),
                   icon: const Icon(
                     Icons.leaderboard_rounded,

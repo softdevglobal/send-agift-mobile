@@ -4,6 +4,7 @@ import 'dart:ui' show ImageFilter;
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../domain/game.dart';
 import '../game_visuals.dart';
@@ -58,14 +59,7 @@ class _Card extends StatelessWidget {
       padding: const EdgeInsets.fromLTRB(22, 24, 22, 18),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(28),
-        boxShadow: const [
-          BoxShadow(
-            color: Color(0x40000000),
-            blurRadius: 30,
-            offset: Offset(0, 14),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg + 2),
       ),
       child: child,
     );
@@ -91,30 +85,37 @@ class _MenuButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final gradient = this.gradient;
+    final solid = gradient != null;
+    final radius = BorderRadius.circular(AppTheme.radiusBox);
+    // Box-template buttons: the main action a solid block of the game's
+    // colour, the rest white with an ash outline.
     return Material(
       type: MaterialType.transparency,
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
+        borderRadius: radius,
         onTap: onPressed,
         child: Ink(
           height: 54,
           decoration: BoxDecoration(
-            color: gradient == null
-                ? AppColors.muted
-                : gradient[gradient.length > 1 ? 1 : 0],
-            borderRadius: BorderRadius.circular(18),
+            color: solid
+                ? gradient[gradient.length > 1 ? 1 : 0]
+                : AppColors.surface,
+            borderRadius: radius,
+            border: solid
+                ? null
+                : Border.all(color: AppColors.boxBorder, width: 1.5),
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(icon, color: gradient == null ? foreground : Colors.white),
+              Icon(icon, color: solid ? Colors.white : foreground),
               const SizedBox(width: 8),
               Text(
                 label,
                 style: TextStyle(
                   fontSize: 16,
-                  fontWeight: FontWeight.w700,
-                  color: gradient == null ? foreground : Colors.white,
+                  fontWeight: FontWeight.w800,
+                  color: solid ? Colors.white : foreground,
                 ),
               ),
             ],
@@ -137,15 +138,8 @@ class _GameBadge extends StatelessWidget {
       width: 64,
       height: 64,
       decoration: BoxDecoration(
-        shape: BoxShape.circle,
         color: visual.colors[1],
-        boxShadow: [
-          BoxShadow(
-            color: visual.accent.withValues(alpha: 0.45),
-            blurRadius: 18,
-            offset: const Offset(0, 8),
-          ),
-        ],
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
       ),
       child: Icon(icon, color: Colors.white, size: 32),
     );
@@ -196,7 +190,7 @@ class GameVerifyingBanner extends StatelessWidget {
           padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
           decoration: BoxDecoration(
             color: Colors.black.withValues(alpha: 0.55),
-            borderRadius: BorderRadius.circular(24),
+            borderRadius: BorderRadius.circular(AppTheme.radiusBox),
           ),
           child: const Row(
             mainAxisSize: MainAxisSize.min,
@@ -327,10 +321,7 @@ class GamePauseMenu extends StatelessWidget {
               Container(
                 width: double.infinity,
                 padding: const EdgeInsets.all(14),
-                decoration: BoxDecoration(
-                  color: AppColors.muted,
-                  borderRadius: BorderRadius.circular(16),
-                ),
+                decoration: AppTheme.box(color: AppColors.background),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
@@ -349,7 +340,7 @@ class GamePauseMenu extends StatelessWidget {
                                 height: 6,
                                 decoration: BoxDecoration(
                                   color: visual.accent,
-                                  shape: BoxShape.circle,
+                                  borderRadius: BorderRadius.circular(1.5),
                                 ),
                               ),
                             ),
@@ -571,7 +562,7 @@ class GameResultOverlay extends StatelessWidget {
                     padding: const EdgeInsets.all(12),
                     decoration: BoxDecoration(
                       color: AppColors.cream,
-                      borderRadius: BorderRadius.circular(14),
+                      borderRadius: BorderRadius.circular(AppTheme.radiusBox),
                     ),
                     child: Text(
                       result.isOfficial
@@ -639,8 +630,9 @@ class _StatPill extends StatelessWidget {
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 7),
       decoration: BoxDecoration(
-        color: color.withValues(alpha: 0.1),
-        borderRadius: BorderRadius.circular(20),
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm),
+        border: Border.all(color: color.withValues(alpha: 0.25), width: 1.5),
       ),
       child: Text.rich(
         TextSpan(
