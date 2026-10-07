@@ -179,9 +179,7 @@ class _Hero extends StatelessWidget {
         : 'PROVISIONAL';
 
     return DecoratedBox(
-      decoration: BoxDecoration(
-        color: visual.colors[1],
-      ),
+      decoration: BoxDecoration(color: visual.colors[1]),
       child: Stack(
         children: [
           Positioned(
@@ -213,7 +211,9 @@ class _Hero extends StatelessWidget {
                       ),
                       decoration: BoxDecoration(
                         color: Colors.white.withValues(alpha: 0.22),
-                        borderRadius: BorderRadius.circular(20),
+                        borderRadius: BorderRadius.circular(
+                          AppTheme.radiusBoxSm,
+                        ),
                       ),
                       child: Row(
                         mainAxisSize: MainAxisSize.min,

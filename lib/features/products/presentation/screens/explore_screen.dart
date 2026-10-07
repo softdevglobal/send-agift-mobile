@@ -9,6 +9,7 @@ import '../../../../core/widgets/app_search_field.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/storefront_decor.dart';
+import '../../../../core/widgets/sort_menu_button.dart';
 import '../../../delivery/data/delivery_providers.dart';
 import '../../../delivery/presentation/widgets/gift_search_bar.dart';
 import '../../data/catalog_providers.dart';
@@ -262,13 +263,12 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
                               ),
                             ),
                             const SizedBox(width: 8),
-                            Align(
-                              alignment: Alignment.centerRight,
-                              child: _SortButton(
-                                value: _sort,
-                                onChanged: (value) =>
-                                    setState(() => _sort = value),
-                              ),
+                            SortMenuButton<_Sort>(
+                              key: const Key('explore-sort'),
+                              labels: _sortLabels,
+                              value: _sort,
+                              onChanged: (value) =>
+                                  setState(() => _sort = value),
                             ),
                           ],
                         ),
@@ -313,23 +313,34 @@ class _OccasionChip extends StatelessWidget {
       child: AnimatedContainer(
         duration: const Duration(milliseconds: 200),
         padding: EdgeInsets.fromLTRB(image == null ? 16 : 5, 5, 16, 5),
+        // Box chip, as on the website: ash outline, solid ink once chosen.
         decoration: BoxDecoration(
           color: selected ? AppColors.foreground : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+          borderRadius: BorderRadius.circular(AppTheme.radiusBox),
           border: Border.all(
-            color: selected ? Colors.transparent : AppColors.border,
+            color: selected ? AppColors.foreground : AppColors.boxBorder,
+            width: 1.5,
           ),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
           children: [
             if (image != null) ...[
-              ClipRRect(
-                borderRadius: BorderRadius.circular(6),
-                child: SizedBox(
-                  height: 34,
-                  width: 34,
-                  child: AppNetworkImage(url: image!),
+              // A white frame lifts the photo off the ink when chosen.
+              AnimatedContainer(
+                duration: const Duration(milliseconds: 200),
+                padding: const EdgeInsets.all(2),
+                decoration: BoxDecoration(
+                  color: selected ? Colors.white : Colors.transparent,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm + 1),
+                ),
+                child: ClipRRect(
+                  borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm - 1),
+                  child: SizedBox(
+                    height: 32,
+                    width: 32,
+                    child: AppNetworkImage(url: image!),
+                  ),
                 ),
               ),
               const SizedBox(width: 8),
@@ -342,54 +353,6 @@ class _OccasionChip extends StatelessWidget {
               style: Theme.of(context).textTheme.labelLarge?.copyWith(
                 color: selected ? Colors.white : AppColors.foreground,
                 fontWeight: FontWeight.w800,
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _SortButton extends StatelessWidget {
-  const _SortButton({required this.value, required this.onChanged});
-
-  final _Sort value;
-  final ValueChanged<_Sort> onChanged;
-
-  @override
-  Widget build(BuildContext context) {
-    return PopupMenuButton<_Sort>(
-      key: const Key('explore-sort'),
-      tooltip: 'Sort',
-      initialValue: value,
-      onSelected: onChanged,
-      itemBuilder: (_) => [
-        for (final entry in _sortLabels.entries)
-          PopupMenuItem(value: entry.key, child: Text(entry.value)),
-      ],
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-          border: Border.all(color: AppColors.primary, width: 2),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.swap_vert_rounded,
-              size: 16,
-              color: AppColors.primary,
-            ),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                _sortLabels[value]!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelLarge,
               ),
             ),
           ],

@@ -17,11 +17,35 @@ class AppTheme {
   /// Buttons are solid blocks with barely rounded corners, not pills.
   static const double radiusButton = 8;
 
+  /// Box template corners, as on the website: crisp cards and panels, and
+  /// tighter still for chips and tabs.
+  static const double radiusBox = 12;
+  static const double radiusBoxSm = 7;
+
+  /// The website's box-template card edge: an ash outline, no glow.
+  static BoxDecoration box({Color color = AppColors.surface}) => BoxDecoration(
+    color: color,
+    borderRadius: BorderRadius.circular(radiusBox),
+    border: Border.all(color: AppColors.boxBorder, width: 1.5),
+  );
+
+  /// Small uppercase label used on box chips and tabs.
+  static const TextStyle boxLabel = TextStyle(
+    fontFamily: AppTypography.sansFamily,
+    fontSize: 12,
+    fontWeight: FontWeight.w800,
+    letterSpacing: 0.8,
+  );
+
   /// Horizontal page gutter used by every screen.
   static const double gutter = 20;
 
   static const List<BoxShadow> cardShadow = [
-    BoxShadow(color: AppColors.cardShadow, blurRadius: 24, offset: Offset(0, 8)),
+    BoxShadow(
+      color: AppColors.cardShadow,
+      blurRadius: 24,
+      offset: Offset(0, 8),
+    ),
   ];
 
   static ThemeData get light {
@@ -136,7 +160,10 @@ class AppTheme {
           fontSize: 14,
           color: AppColors.mutedForeground,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(radiusMd),
           borderSide: const BorderSide(color: AppColors.border),
@@ -150,18 +177,73 @@ class AppTheme {
           borderSide: const BorderSide(color: AppColors.primary, width: 1.4),
         ),
       ),
+      // Box chips, as on the website: an ash outline, and a solid ink block
+      // once selected.
       chipTheme: ChipThemeData(
         backgroundColor: AppColors.surface,
-        side: const BorderSide(color: AppColors.border),
+        selectedColor: AppColors.foreground,
+        showCheckmark: false,
+        side: const BorderSide(color: AppColors.boxBorder, width: 1.5),
+        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
         labelStyle: const TextStyle(
           fontFamily: AppTypography.sansFamily,
           fontSize: 13,
-          fontWeight: FontWeight.w500,
+          fontWeight: FontWeight.w700,
           color: AppColors.foreground,
         ),
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(radiusButton),
+        secondaryLabelStyle: const TextStyle(
+          fontFamily: AppTypography.sansFamily,
+          fontSize: 13,
+          fontWeight: FontWeight.w700,
+          color: Colors.white,
         ),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(radiusBoxSm),
+        ),
+      ),
+      // Box tabs: a tinted track with the active tab as a solid ink block.
+      segmentedButtonTheme: SegmentedButtonThemeData(
+        style: ButtonStyle(
+          visualDensity: VisualDensity.compact,
+          backgroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected)
+                ? AppColors.foreground
+                : AppColors.boxTrack,
+          ),
+          foregroundColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected)
+                ? Colors.white
+                : AppColors.foreground.withValues(alpha: 0.6),
+          ),
+          iconColor: WidgetStateProperty.resolveWith(
+            (s) => s.contains(WidgetState.selected)
+                ? Colors.white
+                : AppColors.foreground.withValues(alpha: 0.6),
+          ),
+          side: const WidgetStatePropertyAll(
+            BorderSide(color: AppColors.boxTrack, width: 3),
+          ),
+          shape: WidgetStatePropertyAll(
+            RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(radiusBoxSm + 2),
+            ),
+          ),
+          textStyle: const WidgetStatePropertyAll(boxLabel),
+        ),
+      ),
+      tabBarTheme: TabBarThemeData(
+        indicatorSize: TabBarIndicatorSize.tab,
+        dividerColor: Colors.transparent,
+        indicator: BoxDecoration(
+          color: AppColors.foreground,
+          borderRadius: BorderRadius.circular(radiusBoxSm),
+        ),
+        labelColor: Colors.white,
+        unselectedLabelColor: AppColors.foreground.withValues(alpha: 0.6),
+        labelStyle: boxLabel,
+        unselectedLabelStyle: boxLabel,
+        overlayColor: const WidgetStatePropertyAll(Colors.transparent),
+        splashFactory: NoSplash.splashFactory,
       ),
       bottomSheetTheme: const BottomSheetThemeData(
         backgroundColor: AppColors.surface,

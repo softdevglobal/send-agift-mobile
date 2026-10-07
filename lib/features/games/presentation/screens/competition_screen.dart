@@ -301,13 +301,9 @@ class _CompetitionViewState extends ConsumerState<_CompetitionView> {
         ),
         decoration: const BoxDecoration(
           color: AppColors.surface,
-          boxShadow: [
-            BoxShadow(
-              color: AppColors.cardShadow,
-              blurRadius: 16,
-              offset: Offset(0, -4),
-            ),
-          ],
+          border: Border(
+            top: BorderSide(color: AppColors.boxBorder, width: 1.5),
+          ),
         ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
@@ -390,9 +386,7 @@ class _Hero extends StatelessWidget {
   Widget build(BuildContext context) {
     final c = competition;
     return Container(
-      decoration: BoxDecoration(
-        color: visual.colors[1],
-      ),
+      decoration: BoxDecoration(color: visual.colors[1]),
       child: Stack(
         children: [
           Positioned(
@@ -496,8 +490,8 @@ class _Panel extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.surface,
-        borderRadius: BorderRadius.circular(20),
-        border: Border.all(color: AppColors.border),
+        borderRadius: BorderRadius.circular(AppTheme.radiusBox),
+        border: Border.all(color: AppColors.boxBorder, width: 1.5),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -525,7 +519,7 @@ class _Disclosure extends StatelessWidget {
       padding: const EdgeInsets.all(12),
       decoration: BoxDecoration(
         color: AppColors.cream,
-        borderRadius: BorderRadius.circular(14),
+        borderRadius: BorderRadius.circular(AppTheme.radiusBox),
       ),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -818,7 +812,7 @@ class _EntryCard extends StatelessWidget {
               padding: const EdgeInsets.all(12),
               decoration: BoxDecoration(
                 color: AppColors.destructive.withValues(alpha: 0.08),
-                borderRadius: BorderRadius.circular(14),
+                borderRadius: BorderRadius.circular(AppTheme.radiusBox),
               ),
               child: Text(
                 me.ineligibleReason ??
@@ -868,7 +862,7 @@ class _BoardSection extends ConsumerWidget {
               padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
               decoration: BoxDecoration(
                 color: visual.accent.withValues(alpha: 0.12),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm),
               ),
               child: Text(
                 isFinal ? 'Final' : 'Provisional',
@@ -1001,7 +995,7 @@ class _CancelledCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: AppColors.destructive.withValues(alpha: 0.08),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.radiusBox),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -1076,7 +1070,7 @@ class _WinCard extends StatelessWidget {
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
         color: const Color(0xFFFFB800),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.radiusBox),
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,

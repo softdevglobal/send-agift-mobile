@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/pressable_scale.dart';
 import '../../domain/competition.dart';
@@ -30,13 +31,6 @@ class CompetitionCard extends StatelessWidget {
         decoration: BoxDecoration(
           color: visual.colors[1],
           borderRadius: BorderRadius.circular(24),
-          boxShadow: [
-            BoxShadow(
-              color: visual.colors[1].withValues(alpha: 0.35),
-              blurRadius: 16,
-              offset: const Offset(0, 8),
-            ),
-          ],
         ),
         child: ClipRRect(
           borderRadius: BorderRadius.circular(24),
@@ -195,7 +189,7 @@ class _TimeLine extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
       decoration: BoxDecoration(
         color: Colors.black.withValues(alpha: 0.2),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm),
       ),
       child: Text(
         text,
@@ -250,7 +244,7 @@ class CompetitionStatusChip extends StatelessWidget {
         color: status == 'live'
             ? const Color(0xFFE11D48)
             : Colors.black.withValues(alpha: 0.25),
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,

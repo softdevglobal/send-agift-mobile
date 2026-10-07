@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 
 import '../../../../core/theme/app_colors.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../domain/game.dart';
@@ -47,8 +48,8 @@ class LeaderboardList extends StatelessWidget {
         padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 16),
         decoration: BoxDecoration(
           color: AppColors.surface,
-          borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: AppColors.border),
+          borderRadius: BorderRadius.circular(AppTheme.radiusBox),
+          border: Border.all(color: AppColors.boxBorder, width: 1.5),
         ),
         child: Column(
           children: [
@@ -230,10 +231,10 @@ class LeaderboardRow extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
       decoration: BoxDecoration(
         color: entry.isMe ? accent.withValues(alpha: 0.1) : AppColors.surface,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(AppTheme.radiusBox),
         border: Border.all(
-          color: entry.isMe ? accent : AppColors.border,
-          width: entry.isMe ? 1.5 : 1,
+          color: entry.isMe ? accent : AppColors.boxBorder,
+          width: 1.5,
         ),
       ),
       child: Row(
@@ -313,7 +314,7 @@ class _Tag extends StatelessWidget {
       padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 2),
       decoration: BoxDecoration(
         color: color.withValues(alpha: 0.15),
-        borderRadius: BorderRadius.circular(10),
+        borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm),
       ),
       child: Text(
         label,

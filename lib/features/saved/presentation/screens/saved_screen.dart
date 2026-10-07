@@ -9,11 +9,19 @@ import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/money.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/stat_hero.dart';
+import '../../../../core/widgets/sort_menu_button.dart';
 import '../../../products/domain/gift.dart';
 import '../../../products/presentation/widgets/gift_grid.dart';
 import '../../data/saved_controller.dart';
 
 enum _Sort { saved, priceLow, priceHigh, rating }
+
+const _sortLabels = {
+  _Sort.saved: 'Saved order',
+  _Sort.priceLow: 'Lowest price',
+  _Sort.priceHigh: 'Highest price',
+  _Sort.rating: 'Top rated',
+};
 
 /// Wishlist. Works for guests. The list lives on the device and syncs once
 /// there is an account.
@@ -128,22 +136,23 @@ class _SavedScreenState extends ConsumerState<SavedScreen> {
                           ),
                           const SizedBox(height: 16),
                         ],
+                        // Count on the left, sort pinned to the right corner.
                         Row(
                           children: [
-                            Text(
-                              '${shown.length} '
-                              '${shown.length == 1 ? 'gift' : 'gifts'}',
-                              style: Theme.of(context).textTheme.titleMedium,
+                            Expanded(
+                              child: Text(
+                                '${shown.length} '
+                                '${shown.length == 1 ? 'gift' : 'gifts'}',
+                                style: Theme.of(context).textTheme.titleMedium,
+                              ),
                             ),
                             const SizedBox(width: 8),
-                            const Spacer(),
-                            Flexible(
-                              flex: 3,
-                              child: _SortButton(
-                                value: _sort,
-                                onChanged: (value) =>
-                                    setState(() => _sort = value),
-                              ),
+                            SortMenuButton<_Sort>(
+                              key: const Key('saved-sort'),
+                              labels: _sortLabels,
+                              value: _sort,
+                              onChanged: (value) =>
+                                  setState(() => _sort = value),
                             ),
                           ],
                         ),
@@ -203,61 +212,6 @@ class _Hero extends StatelessWidget {
         ),
         icon: const Icon(Icons.search_rounded, size: 18),
         label: Text(gifts.isEmpty ? 'Find gifts' : 'Find more'),
-      ),
-    );
-  }
-}
-
-class _SortButton extends StatelessWidget {
-  const _SortButton({required this.value, required this.onChanged});
-
-  final _Sort value;
-  final ValueChanged<_Sort> onChanged;
-
-  static const _labels = {
-    _Sort.saved: 'Saved order',
-    _Sort.priceLow: 'Lowest price',
-    _Sort.priceHigh: 'Highest price',
-    _Sort.rating: 'Top rated',
-  };
-
-  @override
-  Widget build(BuildContext context) {
-    return PopupMenuButton<_Sort>(
-      key: const Key('saved-sort'),
-      tooltip: 'Sort',
-      initialValue: value,
-      onSelected: onChanged,
-      itemBuilder: (_) => [
-        for (final entry in _labels.entries)
-          PopupMenuItem(value: entry.key, child: Text(entry.value)),
-      ],
-      child: Container(
-        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
-          border: Border.all(color: AppColors.primary, width: 2),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            const Icon(
-              Icons.swap_vert_rounded,
-              size: 16,
-              color: AppColors.primary,
-            ),
-            const SizedBox(width: 6),
-            Flexible(
-              child: Text(
-                _labels[value]!,
-                maxLines: 1,
-                overflow: TextOverflow.ellipsis,
-                style: Theme.of(context).textTheme.labelLarge,
-              ),
-            ),
-          ],
-        ),
       ),
     );
   }

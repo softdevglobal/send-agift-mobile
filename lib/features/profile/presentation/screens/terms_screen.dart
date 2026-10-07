@@ -120,14 +120,31 @@ class TermsScreen extends StatelessWidget {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Terms & privacy'),
-          bottom: const TabBar(
-            indicatorColor: AppColors.purple,
-            labelColor: AppColors.foreground,
-            unselectedLabelColor: AppColors.mutedForeground,
-            tabs: [
-              Tab(text: 'Terms of use'),
-              Tab(text: 'Privacy'),
-            ],
+          // The website's box tabs: a tinted track, the active tab inked.
+          bottom: PreferredSize(
+            preferredSize: const Size.fromHeight(56),
+            child: Padding(
+              padding: const EdgeInsets.fromLTRB(
+                AppTheme.gutter,
+                4,
+                AppTheme.gutter,
+                8,
+              ),
+              child: Container(
+                height: 44,
+                padding: const EdgeInsets.all(4),
+                decoration: BoxDecoration(
+                  color: AppColors.boxTrack,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm + 3),
+                ),
+                child: const TabBar(
+                  tabs: [
+                    Tab(text: 'TERMS OF USE'),
+                    Tab(text: 'PRIVACY'),
+                  ],
+                ),
+              ),
+            ),
           ),
         ),
         body: const SafeArea(

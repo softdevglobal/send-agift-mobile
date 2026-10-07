@@ -22,7 +22,7 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: TermsScreen()));
     expect(find.text('Who we are'), findsOneWidget);
 
-    await tester.tap(find.text('Privacy'));
+    await tester.tap(find.text('PRIVACY'));
     await tester.pumpAndSettle();
 
     expect(find.text('What we collect'), findsOneWidget);

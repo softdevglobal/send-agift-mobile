@@ -121,7 +121,7 @@ void main() {
     expect(find.text('Purchased Wireless Headphones'), findsOneWidget);
     expect(find.text('Sent with gift SAG-1'), findsOneWidget);
 
-    await tester.tap(find.text('Spent'));
+    await tester.tap(find.text('SPENT'));
     await tester.pumpAndSettle();
     expect(find.text('Purchased Wireless Headphones'), findsNothing);
     expect(find.text('Sent with gift SAG-1'), findsOneWidget);

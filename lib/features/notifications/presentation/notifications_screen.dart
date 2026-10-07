@@ -170,90 +170,130 @@ class _NotificationTile extends StatelessWidget {
     final n = notification;
     // Someone beat this player's score: a nudge to play again.
     final overtaken = n.kind == 'competition_overtaken';
+    final tone = overtaken ? AppColors.purple : const Color(0xFFF97316);
+
+    // The website's message-row box: an ash outline, and for unread rows a
+    // violet edge with a solid bar down the left side.
     return Material(
-      color: highlighted
-          ? AppColors.teal.withValues(alpha: 0.08)
-          : AppColors.surface,
-      borderRadius: BorderRadius.circular(18),
+      color: highlighted ? AppColors.cream : AppColors.surface,
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppTheme.radiusBox),
+        side: BorderSide(
+          color: highlighted ? AppColors.purple : AppColors.boxBorder,
+          width: 1.5,
+        ),
+      ),
+      clipBehavior: Clip.antiAlias,
       child: InkWell(
-        borderRadius: BorderRadius.circular(18),
         onTap: onTap,
-        child: Container(
-          padding: const EdgeInsets.all(14),
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(
-              color: highlighted
-                  ? AppColors.teal.withValues(alpha: 0.35)
-                  : AppColors.border,
-            ),
-          ),
+        child: IntrinsicHeight(
           child: Row(
-            crossAxisAlignment: CrossAxisAlignment.start,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                width: 44,
-                height: 44,
-                decoration: BoxDecoration(
-                  shape: BoxShape.circle,
-                  color: overtaken ? AppColors.purple : const Color(0xFFF97316),
-                ),
-                child: Icon(
-                  overtaken
-                      ? Icons.trending_up_rounded
-                      : Icons.emoji_events_rounded,
-                  color: Colors.white,
-                  size: 22,
-                ),
-              ),
-              const SizedBox(width: 12),
+              if (highlighted) Container(width: 5, color: AppColors.purple),
               Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Row(
-                      children: [
-                        Expanded(
-                          child: Text(
-                            n.title,
-                            maxLines: 2,
-                            overflow: TextOverflow.ellipsis,
-                            style: Theme.of(context).textTheme.titleSmall
-                                ?.copyWith(fontWeight: FontWeight.w700),
+                child: Padding(
+                  padding: EdgeInsets.fromLTRB(
+                    highlighted ? 11 : 14,
+                    14,
+                    14,
+                    14,
+                  ),
+                  child: Row(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Container(
+                        width: 46,
+                        height: 46,
+                        decoration: BoxDecoration(
+                          color: tone,
+                          borderRadius: BorderRadius.circular(
+                            AppTheme.radiusBoxSm + 3,
                           ),
                         ),
-                        const SizedBox(width: 8),
-                        Text(
-                          _when(n.createdAt),
-                          style: Theme.of(context).textTheme.bodySmall,
+                        child: Icon(
+                          overtaken
+                              ? Icons.trending_up_rounded
+                              : Icons.emoji_events_rounded,
+                          color: Colors.white,
+                          size: 22,
                         ),
-                        if (highlighted) ...[
-                          const SizedBox(width: 6),
-                          Container(
-                            width: 8,
-                            height: 8,
-                            decoration: const BoxDecoration(
-                              color: AppColors.teal,
-                              shape: BoxShape.circle,
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Row(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Expanded(
+                                  child: Text(
+                                    n.title,
+                                    maxLines: 2,
+                                    overflow: TextOverflow.ellipsis,
+                                    style: Theme.of(context)
+                                        .textTheme
+                                        .titleSmall
+                                        ?.copyWith(fontWeight: FontWeight.w800),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                Text(
+                                  _when(n.createdAt).toUpperCase(),
+                                  style: AppTypography.eyebrow,
+                                ),
+                              ],
                             ),
-                          ),
-                        ],
-                      ],
-                    ),
-                    const SizedBox(height: 4),
-                    Text(n.body, style: Theme.of(context).textTheme.bodyMedium),
-                    if (n.competitionId != null) ...[
-                      const SizedBox(height: 8),
-                      Text(
-                        overtaken ? 'Play again →' : 'View competition →',
-                        style: TextStyle(
-                          color: AppColors.teal,
-                          fontWeight: FontWeight.w700,
-                          fontSize: 13,
+                            const SizedBox(height: 4),
+                            Text(
+                              n.body,
+                              style: Theme.of(context).textTheme.bodyMedium,
+                            ),
+                            if (n.competitionId != null) ...[
+                              const SizedBox(height: 10),
+                              Container(
+                                padding: const EdgeInsets.symmetric(
+                                  horizontal: 10,
+                                  vertical: 6,
+                                ),
+                                decoration: BoxDecoration(
+                                  color: AppColors.foreground,
+                                  borderRadius: BorderRadius.circular(
+                                    AppTheme.radiusBoxSm,
+                                  ),
+                                ),
+                                child: Row(
+                                  mainAxisSize: MainAxisSize.min,
+                                  children: [
+                                    Flexible(
+                                      child: Text(
+                                        overtaken
+                                            ? 'PLAY AGAIN'
+                                            : 'VIEW COMPETITION',
+                                        style: AppTheme.boxLabel.copyWith(
+                                          fontSize: 11,
+                                          color: Colors.white,
+                                        ),
+                                        maxLines: 1,
+                                        overflow: TextOverflow.ellipsis,
+                                      ),
+                                    ),
+                                    const SizedBox(width: 6),
+                                    const Icon(
+                                      Icons.arrow_forward_rounded,
+                                      size: 14,
+                                      color: Colors.white,
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ],
                         ),
                       ),
                     ],
-                  ],
+                  ),
                 ),
               ),
             ],

@@ -35,16 +35,7 @@ class StatHero extends StatelessWidget {
     // otherwise shrink to its content.
     return Container(
       width: double.infinity,
-      decoration: BoxDecoration(
-        borderRadius: BorderRadius.circular(24),
-        boxShadow: [
-          BoxShadow(
-            color: AppColors.purple.withValues(alpha: 0.25),
-            blurRadius: 24,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
+      decoration: BoxDecoration(borderRadius: BorderRadius.circular(24)),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(24),
         child: Container(
@@ -137,8 +128,8 @@ class StatTile extends StatelessWidget {
           decoration: BoxDecoration(
             borderRadius: BorderRadius.circular(16),
             border: Border.all(
-              color: selected ? color : AppColors.border,
-              width: selected ? 1.5 : 1,
+              color: selected ? color : AppColors.boxBorder,
+              width: 1.5,
             ),
           ),
           child: Row(
@@ -206,7 +197,8 @@ class StatGrid extends StatelessWidget {
   }
 }
 
-/// A row of filter chips that scrolls sideways when it runs out of room.
+/// A row of box filter chips, as on the website: ash-outlined boxes, the
+/// selected one a solid ink block. Scrolls sideways when it runs out of room.
 class FilterChipRow<T> extends StatelessWidget {
   const FilterChipRow({
     super.key,
@@ -222,22 +214,77 @@ class FilterChipRow<T> extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return SizedBox(
-      height: 40,
+      height: 38,
       child: ListView.separated(
         scrollDirection: Axis.horizontal,
         itemCount: options.length,
         separatorBuilder: (_, _) => const SizedBox(width: 8),
         itemBuilder: (context, index) {
           final (value, label) = options[index];
-          return ChoiceChip(
-            label: Text(label),
+          return BoxChip(
+            label: label,
             selected: value == selected,
-            onSelected: (_) => onSelected(value),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-            ),
+            onTap: () => onSelected(value),
           );
         },
+      ),
+    );
+  }
+}
+
+/// One box filter chip.
+class BoxChip extends StatelessWidget {
+  const BoxChip({
+    super.key,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+    this.leading,
+  });
+
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  /// An icon or thumbnail before the label.
+  final Widget? leading;
+
+  @override
+  Widget build(BuildContext context) {
+    return Semantics(
+      button: true,
+      selected: selected,
+      child: GestureDetector(
+        behavior: HitTestBehavior.opaque,
+        onTap: onTap,
+        child: AnimatedContainer(
+          duration: const Duration(milliseconds: 180),
+          curve: Curves.easeOut,
+          padding: EdgeInsets.fromLTRB(leading == null ? 14 : 5, 0, 14, 0),
+          decoration: BoxDecoration(
+            color: selected ? AppColors.foreground : AppColors.surface,
+            borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm),
+            border: Border.all(
+              color: selected ? AppColors.foreground : AppColors.boxBorder,
+              width: 1.5,
+            ),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              if (leading != null) ...[leading!, const SizedBox(width: 8)],
+              Text(
+                label,
+                style: TextStyle(
+                  fontFamily: AppTypography.sansFamily,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w700,
+                  color: selected ? Colors.white : AppColors.foreground,
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }

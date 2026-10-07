@@ -44,6 +44,13 @@ class AppColors {
   static const Color accentForeground = Color(0xFF0B6E68);
 
   static const Color border = Color(0xFFE3E5F1);
+
+  /// The website's box-template edge: ink at about 15%, a soft ash line that
+  /// still reads clearly on white and on tinted tiles.
+  static const Color boxBorder = Color(0x2612172E);
+
+  /// Fill behind a box tab bar, as the web's `bg-accent` strip.
+  static const Color boxTrack = Color(0xFFEDEBF7);
   static const Color destructive = Color(0xFFDC2626);
   static const Color star = Color(0xFFEEA23A);
 
@@ -63,5 +70,4 @@ class AppColors {
   static const Color cardShadow = Color(0x1E0F1B45);
 
   /// Brand colours are always used flat: no gradients anywhere in the app.
-
 }

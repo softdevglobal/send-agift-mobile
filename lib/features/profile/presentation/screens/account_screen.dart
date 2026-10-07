@@ -602,6 +602,7 @@ class _StatTile extends StatelessWidget {
         decoration: BoxDecoration(
           color: tint,
           borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+          border: Border.all(color: AppColors.boxBorder, width: 1.5),
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -626,8 +627,7 @@ class _StatTile extends StatelessWidget {
   }
 }
 
-/// A rounded card with a soft lift: a hairline edge on white, none on the
-/// tinted tiles where the colour already defines the shape.
+/// The website's box card: a soft ash outline, flat, no shadow.
 class _InkPanel extends StatelessWidget {
   const _InkPanel({required this.child, this.color = AppColors.surface});
 
@@ -640,10 +640,7 @@ class _InkPanel extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-        border: color == AppColors.surface
-            ? Border.all(color: AppColors.border)
-            : null,
-        boxShadow: AppTheme.cardShadow,
+        border: Border.all(color: AppColors.boxBorder, width: 1.5),
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(AppTheme.radiusXl),

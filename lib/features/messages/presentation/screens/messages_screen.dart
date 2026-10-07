@@ -285,9 +285,10 @@ class _Chip extends StatelessWidget {
         padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 8),
         decoration: BoxDecoration(
           color: selected ? AppColors.foreground : AppColors.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusButton),
+          borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm),
           border: Border.all(
-            color: selected ? AppColors.foreground : AppColors.border,
+            color: selected ? AppColors.foreground : AppColors.boxBorder,
+            width: 1.5,
           ),
         ),
         child: Row(
@@ -297,7 +298,7 @@ class _Chip extends StatelessWidget {
               label,
               style: TextStyle(
                 fontSize: 13,
-                fontWeight: FontWeight.w600,
+                fontWeight: FontWeight.w700,
                 color: foreground,
               ),
             ),

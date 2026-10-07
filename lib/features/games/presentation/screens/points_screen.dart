@@ -5,6 +5,7 @@ import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/box_tabs.dart';
 import '../../data/games_providers.dart';
 import '../../domain/competition.dart';
 import '../competition_format.dart';
@@ -73,23 +74,14 @@ class _PointsScreenState extends ConsumerState<PointsScreen> {
                   Expanded(
                     child: Text('HISTORY', style: AppTypography.eyebrow),
                   ),
-                  SegmentedButton<_Filter>(
-                    showSelectedIcon: false,
-                    style: const ButtonStyle(
-                      visualDensity: VisualDensity.compact,
-                      tapTargetSize: MaterialTapTargetSize.shrinkWrap,
-                    ),
-                    segments: const [
-                      ButtonSegment(value: _Filter.all, label: Text('All')),
-                      ButtonSegment(
-                        value: _Filter.earned,
-                        label: Text('Earned'),
-                      ),
-                      ButtonSegment(value: _Filter.spent, label: Text('Spent')),
+                  BoxTabs<_Filter>(
+                    options: const [
+                      (_Filter.all, 'All'),
+                      (_Filter.earned, 'Earned'),
+                      (_Filter.spent, 'Spent'),
                     ],
-                    selected: {_filter},
-                    onSelectionChanged: (s) =>
-                        setState(() => _filter = s.first),
+                    selected: _filter,
+                    onSelected: (f) => setState(() => _filter = f),
                   ),
                 ],
               ),
