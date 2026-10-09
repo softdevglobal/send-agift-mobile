@@ -6,7 +6,6 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
-import '../../../../core/widgets/app_search_field.dart';
 import '../../../../core/widgets/brand_logo.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/section_heading.dart';
@@ -207,12 +206,6 @@ class _HomeTopBar extends ConsumerWidget {
                 tooltip: 'Cart',
               ),
             ],
-          ),
-          const SizedBox(height: 14),
-          // Read-only: tapping hands off to Explore, which owns the query.
-          AppSearchField(
-            readOnly: true,
-            onTap: () => context.go(AppRoutes.explore),
           ),
         ],
       ),
