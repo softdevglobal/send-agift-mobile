@@ -101,6 +101,30 @@ class NotificationsRepository {
       throw _client.mapError(error);
     }
   }
+
+  /// Clears the given notifications from the inbox.
+  Future<void> dismiss(List<String> ids) async {
+    try {
+      await _client.dio.delete<void>(
+        '/customers/me/notifications',
+        data: {'ids': ids},
+      );
+    } on DioException catch (error) {
+      throw _client.mapError(error);
+    }
+  }
+
+  /// Clears the whole inbox.
+  Future<void> dismissAll() async {
+    try {
+      await _client.dio.delete<void>(
+        '/customers/me/notifications',
+        data: {'all': true},
+      );
+    } on DioException catch (error) {
+      throw _client.mapError(error);
+    }
+  }
 }
 
 final notificationsRepositoryProvider = Provider<NotificationsRepository>((

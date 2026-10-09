@@ -52,6 +52,58 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final _ = await ref.refresh(notificationInboxProvider.future);
   }
 
+  /// Ids cleared on this screen, hidden at once while the server catches up.
+  final Set<String> _cleared = {};
+
+  Future<void> _dismiss(AppNotification n) async {
+    setState(() => _cleared.add(n.id));
+    try {
+      await ref.read(notificationsRepositoryProvider).dismiss([n.id]);
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _cleared.remove(n.id));
+      _toast('Could not clear that notification. Try again.');
+    }
+    ref.invalidate(notificationInboxProvider);
+  }
+
+  Future<void> _clearAll(NotificationInbox inbox) async {
+    final ok = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Clear all notifications?'),
+        content: const Text('This removes every notification from your inbox.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            child: const Text('Clear all'),
+          ),
+        ],
+      ),
+    );
+    if (ok != true || !mounted) return;
+    final ids = inbox.items.map((n) => n.id).toList();
+    setState(() => _cleared.addAll(ids));
+    try {
+      await ref.read(notificationsRepositoryProvider).dismissAll();
+    } catch (_) {
+      if (!mounted) return;
+      setState(() => _cleared.removeAll(ids));
+      _toast('Could not clear notifications. Try again.');
+    }
+    ref.invalidate(notificationInboxProvider);
+  }
+
+  void _toast(String message) {
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(SnackBar(content: Text(message)));
+  }
+
   void _open(AppNotification n) {
     final id = n.competitionId;
     if (id != null && id.isNotEmpty) {
@@ -68,12 +120,26 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       (_, next) => next.whenData(_onLoaded),
     );
 
+    final visible = [
+      for (final n in inbox.valueOrNull?.items ?? const <AppNotification>[])
+        if (!_cleared.contains(n.id)) n,
+    ];
+
     return Scaffold(
       backgroundColor: AppColors.background,
       appBar: AppBar(
         title: Text('Notifications', style: AppTypography.display(22)),
         backgroundColor: AppColors.background,
         surfaceTintColor: Colors.transparent,
+        actions: [
+          if (visible.isNotEmpty)
+            Padding(
+              padding: const EdgeInsets.only(right: AppTheme.gutter),
+              child: _ClearAllButton(
+                onTap: () => _clearAll(inbox.requireValue),
+              ),
+            ),
+        ],
       ),
       body: !signedIn
           ? Center(
@@ -104,7 +170,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                     ),
                   ],
                 ),
-                data: (data) => data.items.isEmpty
+                data: (data) => visible.isEmpty
                     ? ListView(
                         physics: const AlwaysScrollableScrollPhysics(),
                         children: const [
@@ -126,15 +192,35 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                           AppTheme.gutter,
                           32,
                         ),
-                        itemCount: data.items.length,
+                        itemCount: visible.length,
                         separatorBuilder: (_, _) => const SizedBox(height: 10),
                         itemBuilder: (context, i) {
-                          final n = data.items[i];
-                          return _NotificationTile(
-                            notification: n,
-                            highlighted:
-                                _unreadOnOpen?.contains(n.id) ?? n.isUnread,
-                            onTap: () => _open(n),
+                          final n = visible[i];
+                          return Dismissible(
+                            key: ValueKey(n.id),
+                            direction: DismissDirection.endToStart,
+                            onDismissed: (_) => _dismiss(n),
+                            background: Container(
+                              alignment: Alignment.centerRight,
+                              padding: const EdgeInsets.only(right: 20),
+                              decoration: BoxDecoration(
+                                color: AppColors.destructive,
+                                borderRadius: BorderRadius.circular(
+                                  AppTheme.radiusBox,
+                                ),
+                              ),
+                              child: const Icon(
+                                Icons.delete_rounded,
+                                color: Colors.white,
+                              ),
+                            ),
+                            child: _NotificationTile(
+                              notification: n,
+                              highlighted:
+                                  _unreadOnOpen?.contains(n.id) ?? n.isUnread,
+                              onTap: () => _open(n),
+                              onClear: () => _dismiss(n),
+                            ),
                           );
                         },
                       ),
@@ -144,16 +230,68 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   }
 }
 
+/// The app bar's "Clear all": a small box-template button, white with an ash
+/// outline, so it sits with the rest of the boxes on this screen.
+class _ClearAllButton extends StatelessWidget {
+  const _ClearAllButton({required this.onTap});
+
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(AppTheme.radiusBoxSm + 3);
+    return Semantics(
+      button: true,
+      label: 'Clear all notifications',
+      child: Material(
+        type: MaterialType.transparency,
+        child: InkWell(
+          borderRadius: radius,
+          onTap: onTap,
+          child: Ink(
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+            decoration: BoxDecoration(
+              color: AppColors.surface,
+              borderRadius: radius,
+              border: Border.all(color: AppColors.boxBorder, width: 1.5),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Icon(
+                  Icons.delete_sweep_rounded,
+                  size: 17,
+                  color: AppColors.destructive,
+                ),
+                const SizedBox(width: 6),
+                Text(
+                  'CLEAR ALL',
+                  style: AppTheme.boxLabel.copyWith(
+                    fontSize: 11,
+                    color: AppColors.foreground,
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
 class _NotificationTile extends StatelessWidget {
   const _NotificationTile({
     required this.notification,
     required this.highlighted,
     required this.onTap,
+    required this.onClear,
   });
 
   final AppNotification notification;
   final bool highlighted;
   final VoidCallback onTap;
+  final VoidCallback onClear;
 
   /// "Just now", "5m", "3h", "2d", then the date.
   static String _when(DateTime at) {
@@ -242,6 +380,21 @@ class _NotificationTile extends StatelessWidget {
                                 Text(
                                   _when(n.createdAt).toUpperCase(),
                                   style: AppTypography.eyebrow,
+                                ),
+                                InkWell(
+                                  onTap: onClear,
+                                  borderRadius: BorderRadius.circular(12),
+                                  child: Padding(
+                                    padding: const EdgeInsets.only(left: 6),
+                                    child: Tooltip(
+                                      message: 'Clear',
+                                      child: const Icon(
+                                        Icons.close_rounded,
+                                        size: 18,
+                                        color: AppColors.mutedForeground,
+                                      ),
+                                    ),
+                                  ),
                                 ),
                               ],
                             ),
