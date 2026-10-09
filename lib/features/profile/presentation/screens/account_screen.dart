@@ -14,6 +14,7 @@ import '../../../games/data/games_providers.dart';
 import '../../../messages/data/messages_providers.dart';
 import '../../../orders/data/orders_repository.dart';
 import '../../../saved/data/saved_controller.dart';
+import '../widgets/sign_out_sheet.dart';
 
 /// Customer account hub. The mobile app is customer-only. There are no
 /// seller or admin surfaces here; those stay on the web app.
@@ -237,7 +238,13 @@ class AccountScreen extends ConsumerWidget {
                     horizontal: AppTheme.gutter,
                   ),
                   child: _SignOutButton(
-                    onTap: () => _confirmSignOut(context, ref),
+                    onTap: () => _confirmSignOut(
+                      context,
+                      ref,
+                      points: points,
+                      savedCount: savedCount,
+                      orderCount: orderCount,
+                    ),
                   ),
                 ),
               ),
@@ -257,31 +264,26 @@ class AccountScreen extends ConsumerWidget {
 
   static Future<void> _confirmSignOut(
     BuildContext context,
-    WidgetRef ref,
-  ) async {
-    final confirmed = await showDialog<bool>(
-      context: context,
-      builder: (context) => AlertDialog(
-        title: const Text('Sign out?'),
-        content: const Text(
-          "You'll need to sign in again to check out, track orders, or "
-          'message shops.',
-        ),
-        actions: [
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
-          ),
-          TextButton(
-            onPressed: () => Navigator.of(context).pop(true),
-            style: TextButton.styleFrom(foregroundColor: AppColors.destructive),
-            child: const Text('Sign out'),
-          ),
-        ],
-      ),
+    WidgetRef ref, {
+    required int? points,
+    required int savedCount,
+    required int? orderCount,
+  }) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final signedOut = await showSignOutSheet(
+      context,
+      // The real name only: displayName falls back to the email address,
+      // which would make an odd greeting.
+      name: ref.read(authProvider).customer?['display_name'] as String?,
+      points: points,
+      savedCount: savedCount,
+      orderCount: orderCount,
+      onSignOut: () => ref.read(authProvider.notifier).logout(),
     );
-    if (confirmed == true) {
-      await ref.read(authProvider.notifier).logout();
+    if (signedOut) {
+      messenger.showSnackBar(
+        const SnackBar(content: Text('Signed out. See you soon!')),
+      );
     }
   }
 }
@@ -847,15 +849,13 @@ class _SignOutButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Box-template button, as in the game menus: crisp corners, white with
+    // an ash outline, and the warning colour only on the label.
     return PressableScale(
       onTap: onTap,
       child: Container(
         height: 52,
-        decoration: BoxDecoration(
-          color: AppColors.surface,
-          borderRadius: BorderRadius.circular(AppTheme.radiusXl),
-          border: Border.all(color: AppColors.destructive, width: 1.5),
-        ),
+        decoration: AppTheme.box(),
         child: const Row(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
