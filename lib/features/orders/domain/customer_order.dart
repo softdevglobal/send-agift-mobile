@@ -138,6 +138,9 @@ class CustomerOrder {
     required this.currency,
     required this.createdAt,
     this.deliveryDate,
+    this.subtotalAmount = 0,
+    this.deliveryAmount = 0,
+    this.giftMessage,
     this.items = const [],
     this.giftPoints = 0,
     this.giftPointsStatus = 'none',
@@ -150,6 +153,14 @@ class CustomerOrder {
   final String currency;
   final DateTime createdAt;
   final DateTime? deliveryDate;
+
+  /// What the gifts cost and what delivery cost, in minor units: the two
+  /// parts of [totalAmount].
+  final int subtotalAmount;
+  final int deliveryAmount;
+
+  /// The note the sender attached, or null.
+  final String? giftMessage;
   final List<CustomerOrderItem> items;
 
   /// Points the customer sent with the gift, and where they are: none, held,
@@ -181,6 +192,9 @@ class CustomerOrder {
 
   String get statusLabel => _orderStatusLabels[status] ?? _humanize(status);
   String get totalLabel => Money.format(totalAmount, currency);
+  String get subtotalLabel => Money.format(subtotalAmount, currency);
+  String get deliveryLabel =>
+      deliveryAmount > 0 ? Money.format(deliveryAmount, currency) : 'Free';
   String formatAmount(int minorAmount) => Money.format(minorAmount, currency);
 
   bool get isClosed =>
@@ -197,6 +211,12 @@ class CustomerOrder {
           DateTime.tryParse(json['created_at'] as String? ?? '') ??
           DateTime.now(),
       deliveryDate: DateTime.tryParse(json['delivery_date'] as String? ?? ''),
+      subtotalAmount: (json['subtotal_amount'] as num?)?.toInt() ?? 0,
+      deliveryAmount: (json['delivery_amount'] as num?)?.toInt() ?? 0,
+      giftMessage: switch (json['gift_message']) {
+        final String text when text.trim().isNotEmpty => text.trim(),
+        _ => null,
+      },
       items:
           (json['items'] as List?)
               ?.whereType<Map<String, dynamic>>()

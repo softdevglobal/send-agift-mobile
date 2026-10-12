@@ -154,6 +154,35 @@ class CheckoutRepository {
     }
   }
 
+  /// Stripe's payment page for an order, or null when card payments are not
+  /// available (the server answers 503). The gift is only sent once it is
+  /// paid there.
+  Future<String?> startPayment(String orderId) async {
+    try {
+      final response = await _client.dio.post<Map<String, dynamic>>(
+        '/customers/me/orders/$orderId/pay',
+      );
+      final url = response.data?['url'] as String?;
+      return url == null || url.isEmpty ? null : url;
+    } on DioException catch (error) {
+      if (error.response?.statusCode == 503) return null;
+      throw _client.mapError(error);
+    }
+  }
+
+  /// Asks the server to re-check an order's payment with Stripe, for when
+  /// its webhook has not arrived. Returns whether the order is now paid.
+  Future<bool> syncPayment(String orderId) async {
+    try {
+      final response = await _client.dio.post<Map<String, dynamic>>(
+        '/customers/me/orders/$orderId/payment/sync',
+      );
+      return response.data?['paid'] == true;
+    } on DioException {
+      return false;
+    }
+  }
+
   /// The customer's own country, used as the order's country when a recipient
   /// address does not supply one.
   Future<String> myCountryId() async {

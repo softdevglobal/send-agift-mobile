@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -285,7 +286,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       const SizedBox(height: 12),
                       OutlinedButton.icon(
                         onPressed: _pickDate,
-                        icon: const Icon(Icons.calendar_today_rounded, size: 16),
+                        icon: const Icon(
+                          Icons.calendar_today_rounded,
+                          size: 16,
+                        ),
                         label: Text(_dateLabel(_deliveryDate)),
                       ),
                       const SizedBox(height: 10),
@@ -321,9 +325,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
               const SizedBox(height: 16),
               Text(
                 _error!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.destructive,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.destructive),
               ),
             ],
           ],
@@ -340,26 +344,45 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           color: AppColors.surface,
           border: Border(top: BorderSide(color: AppColors.border)),
         ),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _placing || (auth.isSignedIn && _blocker != null)
-                ? null
-                : auth.isSignedIn
-                ? _placeOrder
-                : () => context.push(AppRoutes.login),
-            child: _placing
-                ? const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(
-                    !auth.isSignedIn
-                        ? 'Sign in to continue'
-                        : _blocker ?? 'Place order',
-                  ),
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                key: const Key('checkout-submit'),
+                onPressed: _placing || (auth.isSignedIn && _blocker != null)
+                    ? null
+                    : auth.isSignedIn
+                    ? _placeOrder
+                    : () => context.push(AppRoutes.login),
+                child: _placing
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(
+                        !auth.isSignedIn
+                            ? 'Sign in to continue'
+                            : _blocker ?? 'Send a gift',
+                      ),
+              ),
+            ),
+            if (auth.isSignedIn && _blocker == null) ...[
+              const SizedBox(height: 8),
+              const Text(
+                'You pay securely on Stripe next. Your gift is only sent '
+                'once the payment succeeds.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.35,
+                  color: AppColors.mutedForeground,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -388,10 +411,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   static String _dateLabel(DateTime date) =>
       '${date.day.toString().padLeft(2, '0')} '
-      '${const [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-      ][date.month - 1]} ${date.year}';
+      '${const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.month - 1]} ${date.year}';
 
   static String _dateKey(DateTime date) =>
       '${date.year}-${date.month}-${date.day}';
@@ -463,6 +483,20 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       );
 
       ref.read(cartProvider.notifier).clear();
+
+      // The gift is only sent once it is paid, on Stripe's own page. If that
+      // cannot be opened the order waits on its page, which offers Pay now.
+      try {
+        final payUrl = await repository.startPayment(orderId);
+        if (payUrl != null) {
+          await launchUrl(
+            Uri.parse(payUrl),
+            mode: LaunchMode.externalApplication,
+          );
+        }
+      } on AppException {
+        // Falls through to the order page.
+      }
       if (!mounted) return;
       context.go('${AppRoutes.orders}/$orderId');
     } on AppException catch (error) {

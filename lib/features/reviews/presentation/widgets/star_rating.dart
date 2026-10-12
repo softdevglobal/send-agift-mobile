@@ -128,10 +128,14 @@ class StarPicker extends StatefulWidget {
     this.starSize = 40,
     this.showWord = false,
     this.enabled = true,
+    this.unlitColor = AppColors.mist,
   });
 
   final int value;
   final ValueChanged<int> onChanged;
+
+  /// Colour of the stars not yet chosen. Lighter on a dark banner.
+  final Color unlitColor;
 
   /// Read out by screen readers, e.g. "Delivery".
   final String label;
@@ -234,7 +238,11 @@ class _StarPickerState extends State<StarPicker>
                           ],
                         );
                       },
-                      child: _Star(size: widget.starSize, lit: lit),
+                      child: _Star(
+                        size: widget.starSize,
+                        lit: lit,
+                        unlit: widget.unlitColor,
+                      ),
                     ),
                   );
                 }),
@@ -270,17 +278,18 @@ class _StarPickerState extends State<StarPicker>
 }
 
 class _Star extends StatelessWidget {
-  const _Star({required this.size, required this.lit});
+  const _Star({required this.size, required this.lit, required this.unlit});
 
   final double size;
   final bool lit;
+  final Color unlit;
 
   @override
   Widget build(BuildContext context) {
     final icon = Icon(
       lit ? Icons.star_rounded : Icons.star_outline_rounded,
       size: size,
-      color: lit ? AppColors.star : AppColors.mist,
+      color: lit ? AppColors.star : unlit,
     );
     return icon;
   }
@@ -289,11 +298,7 @@ class _Star extends StatelessWidget {
 /// The 5→1 distribution, so a 4.6 made of forty 5s reads differently to one
 /// made of 4s. Bars grow in on first build so the shape registers.
 class RatingBars extends StatelessWidget {
-  const RatingBars({
-    super.key,
-    required this.breakdown,
-    required this.total,
-  });
+  const RatingBars({super.key, required this.breakdown, required this.total});
 
   final Map<int, int> breakdown;
   final int total;
@@ -324,20 +329,19 @@ class RatingBars extends StatelessWidget {
                     child: TweenAnimationBuilder<double>(
                       tween: Tween(
                         begin: 0,
-                        end: total == 0
-                            ? 0
-                            : (breakdown[stars] ?? 0) / total,
+                        end: total == 0 ? 0 : (breakdown[stars] ?? 0) / total,
                       ),
                       duration: const Duration(milliseconds: 650),
                       curve: Curves.easeOutCubic,
-                      builder: (context, fraction, _) => LinearProgressIndicator(
-                        value: fraction,
-                        minHeight: 7,
-                        backgroundColor: AppColors.muted,
-                        valueColor: const AlwaysStoppedAnimation(
-                          AppColors.star,
-                        ),
-                      ),
+                      builder: (context, fraction, _) =>
+                          LinearProgressIndicator(
+                            value: fraction,
+                            minHeight: 7,
+                            backgroundColor: AppColors.muted,
+                            valueColor: const AlwaysStoppedAnimation(
+                              AppColors.star,
+                            ),
+                          ),
                     ),
                   ),
                 ),

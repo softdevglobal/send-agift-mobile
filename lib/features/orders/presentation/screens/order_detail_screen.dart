@@ -2,7 +2,9 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
+import 'package:url_launcher/url_launcher.dart';
 
+import '../../../../core/errors/app_exception.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -11,6 +13,7 @@ import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/quantity_stepper.dart';
+import '../../../checkout/data/checkout_repository.dart';
 import '../../../messages/data/messages_providers.dart';
 import '../../../products/data/catalog_providers.dart';
 import '../../../reviews/data/reviews_repository.dart';
@@ -77,6 +80,10 @@ class _OrderBody extends StatelessWidget {
       ),
       children: [
         _OrderHero(order: order, delivery: delivery),
+        if (order.status == 'pending_payment') ...[
+          const SizedBox(height: 14),
+          _PayNowCard(order: order),
+        ],
         if (order.rewardPointsTotal > 0 || order.giftPointsLabel != null) ...[
           const SizedBox(height: 14),
           _PointsCard(order: order),
@@ -88,6 +95,11 @@ class _OrderBody extends StatelessWidget {
         ),
         for (final item in order.items) ...[
           _OrderItemCard(order: order, item: item),
+          const SizedBox(height: 10),
+        ],
+        if (order.giftMessage != null) ...[
+          const SizedBox(height: 6),
+          _GiftMessageCard(message: order.giftMessage!),
           const SizedBox(height: 10),
         ],
         const SizedBox(height: 6),
@@ -114,6 +126,211 @@ class _OrderBody extends StatelessWidget {
           ),
         ),
       ],
+    );
+  }
+}
+
+/// An order still waiting for payment. Paying happens on Stripe's page in the
+/// browser; the order only becomes paid when Stripe tells the server, so this
+/// re-reads the order as the app comes back into view.
+class _PayNowCard extends ConsumerStatefulWidget {
+  const _PayNowCard({required this.order});
+
+  final CustomerOrder order;
+
+  String get orderId => order.id;
+  String get totalLabel => order.totalLabel;
+
+  @override
+  ConsumerState<_PayNowCard> createState() => _PayNowCardState();
+}
+
+class _PayNowCardState extends ConsumerState<_PayNowCard>
+    with WidgetsBindingObserver {
+  bool _starting = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Already paid on Stripe but the webhook was late? Settle it now.
+    _recheck();
+  }
+
+  /// Asks the server to re-check this order's payment with Stripe. It is a
+  /// best-effort nudge in the background, so it never surfaces an error.
+  Future<void> _recheck() async {
+    try {
+      final paid = await ref
+          .read(checkoutRepositoryProvider)
+          .syncPayment(widget.orderId);
+      if (paid && mounted) {
+        ref.invalidate(customerOrderProvider(widget.orderId));
+      }
+    } catch (_) {
+      // Offline, or not signed in: the order simply stays as it is.
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    // The payment is confirmed by Stripe's webhook, a moment after the
+    // customer is back, so look again a few times.
+    for (final seconds in const [0, 2, 5]) {
+      Future<void>.delayed(Duration(seconds: seconds), () {
+        if (mounted) _recheck();
+      });
+    }
+  }
+
+  Future<void> _pay() async {
+    setState(() {
+      _starting = true;
+      _error = null;
+    });
+    try {
+      final url = await ref
+          .read(checkoutRepositoryProvider)
+          .startPayment(widget.orderId);
+      if (url == null) {
+        if (mounted) {
+          setState(() => _error = 'Card payments are not available yet.');
+        }
+        return;
+      }
+      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+    } catch (error) {
+      if (mounted) {
+        setState(
+          () => _error = error is AppException
+              ? error.message
+              : 'Could not open the payment page.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _starting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPanel(
+      key: const Key('pay-now'),
+      color: AppColors.cream,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Complete your payment', style: AppTypography.display(18)),
+          const SizedBox(height: 4),
+          const Text(
+            'Your gift is sent as soon as the payment goes through.',
+            style: TextStyle(color: AppColors.mutedForeground, height: 1.4),
+          ),
+          const SizedBox(height: 12),
+          // What the total is made of, before it is asked for.
+          _BreakdownRow('Gifts', widget.order.subtotalLabel),
+          _BreakdownRow('Delivery', widget.order.deliveryLabel),
+          const Divider(height: 18),
+          _BreakdownRow('Total', widget.totalLabel, strong: true),
+          if (_error != null) ...[
+            const SizedBox(height: 8),
+            Text(_error!, style: const TextStyle(color: AppColors.destructive)),
+          ],
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              key: const Key('pay-now-button'),
+              onPressed: _starting ? null : _pay,
+              child: _starting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text('Pay ${widget.totalLabel}'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BreakdownRow extends StatelessWidget {
+  const _BreakdownRow(this.label, this.value, {this.strong = false});
+
+  final String label;
+  final String value;
+  final bool strong;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = TextStyle(
+      fontWeight: strong ? FontWeight.w700 : FontWeight.w500,
+      color: strong ? AppColors.foreground : AppColors.mutedForeground,
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: style),
+          Text(value, style: style.copyWith(color: AppColors.foreground)),
+        ],
+      ),
+    );
+  }
+}
+
+/// The sender's note, set as a quote rather than a plain line.
+class _GiftMessageCard extends StatelessWidget {
+  const _GiftMessageCard({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('gift-message'),
+      decoration: BoxDecoration(
+        color: AppColors.cream,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border(
+          left: const BorderSide(color: AppColors.purple, width: 4),
+          top: BorderSide(color: AppColors.boxBorder),
+          right: BorderSide(color: AppColors.boxBorder),
+          bottom: BorderSide(color: AppColors.boxBorder),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.format_quote_rounded,
+                size: 18,
+                color: AppColors.purple,
+              ),
+              const SizedBox(width: 6),
+              Text('GIFT MESSAGE', style: AppTypography.eyebrow),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(message, style: AppTypography.display(20)),
+        ],
+      ),
     );
   }
 }
@@ -311,9 +528,7 @@ class _PointsCard extends StatelessWidget {
         ? null
         : order.rewardsEarned
         ? '+$points points added to your balance'
-        : order.items
-                  .firstWhere((i) => i.rewardLabel != null)
-                  .rewardLabel ??
+        : order.items.firstWhere((i) => i.rewardLabel != null).rewardLabel ??
               '$points points';
 
     return Container(
@@ -501,7 +716,8 @@ class _OrderItemCard extends ConsumerWidget {
                   : 'Message the shop',
             ),
           ),
-          if (item.tracking != null) ParcelTrackingCard(tracking: item.tracking!),
+          if (item.tracking != null)
+            ParcelTrackingCard(tracking: item.tracking!),
           _ReviewAction(item: item, giftName: gift?.name),
         ],
       ),
