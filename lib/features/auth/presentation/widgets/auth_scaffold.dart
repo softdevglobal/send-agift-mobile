@@ -196,9 +196,11 @@ class AuthField extends StatefulWidget {
     this.textInputAction,
     this.validator,
     this.prefixIcon,
+    this.enabled = true,
   });
 
   final IconData? prefixIcon;
+  final bool enabled;
   final String label;
   final TextEditingController controller;
   final String? hintText;
@@ -229,6 +231,7 @@ class _AuthFieldState extends State<AuthField> {
         const SizedBox(height: 7),
         TextFormField(
           controller: widget.controller,
+          enabled: widget.enabled,
           obscureText: widget.obscureText && _hidden,
           keyboardType: widget.keyboardType,
           textInputAction: widget.textInputAction,

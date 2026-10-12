@@ -2,8 +2,10 @@ import 'dart:typed_data';
 
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 
+import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
@@ -14,26 +16,10 @@ import '../../../auth/data/auth_controller.dart';
 import '../../data/account_repository.dart';
 import '../widgets/account_visuals.dart';
 import '../widgets/address_form_sheet.dart' show errorMessage;
-
-const _defaultDialIso = 'LK';
-
-/// Splits a saved "+94 77 123 4567" into its country code and the number.
-/// The longest matching code wins, so "+1 868" is not read as "+1".
-(String iso, String number) splitPhone(String? phone) {
-  final value = phone?.trim() ?? '';
-  if (value.isEmpty) return (_defaultDialIso, '');
-  final codes = [...dialCodes]
-    ..sort((a, b) => b.dial.length.compareTo(a.dial.length));
-  for (final code in codes) {
-    if (value.startsWith(code.dial)) {
-      return (code.iso2, value.substring(code.dial.length).trim());
-    }
-  }
-  return (_defaultDialIso, value);
-}
+import '../widgets/verify_phone_card.dart';
 
 /// The customer's own details: photo, name and phone. Email is shown but
-/// locked. It is what they sign in with.
+/// locked here; it is changed on its own screen, with a code.
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
 
@@ -73,7 +59,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   String get _dial => dialCodes
       .firstWhere(
         (d) => d.iso2 == _dialIso,
-        orElse: () => dialCodes.firstWhere((d) => d.iso2 == _defaultDialIso),
+        orElse: () => dialCodes.firstWhere((d) => d.iso2 == defaultDialIso),
       )
       .dial;
 
@@ -223,6 +209,11 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
+    // Back from Change email with the new address.
+    ref.listen(
+      authProvider.select((auth) => auth.email),
+      (_, email) => _email.text = email ?? '',
+    );
 
     return Scaffold(
       appBar: AppBar(title: const Text('Edit profile')),
@@ -347,6 +338,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 ),
               ],
             ),
+            const SizedBox(height: 10),
+            // Checks the saved phone, so a new number is saved first.
+            const VerifyPhoneCard(),
             const SizedBox(height: 12),
             TextField(
               key: const Key('profile-email'),
@@ -370,9 +364,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 const SizedBox(width: 6),
                 Expanded(
                   child: Text(
-                    "Your email can't be changed. It's how you sign in.",
+                    "It's how you sign in, so changing it needs a code.",
                     style: theme.textTheme.bodySmall,
                   ),
+                ),
+                TextButton(
+                  key: const Key('profile-change-email'),
+                  onPressed: _saving
+                      ? null
+                      : () => context.push(AppRoutes.changeEmail),
+                  child: const Text('Change'),
                 ),
               ],
             ),

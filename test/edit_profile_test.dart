@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:send_agift_mobile/features/auth/data/auth_controller.dart';
 import 'package:send_agift_mobile/features/profile/data/account_repository.dart';
+import 'package:send_agift_mobile/core/utils/dial_codes.dart';
 import 'package:send_agift_mobile/features/profile/presentation/screens/edit_profile_screen.dart';
 
 import 'support/fake_auth.dart';
@@ -35,6 +36,9 @@ void main() {
   });
 
   testWidgets('edits name and phone, and email stays locked', (tester) async {
+    tester.view.physicalSize = const Size(390, 1400);
+    tester.view.devicePixelRatio = 1;
+    addTearDown(tester.view.reset);
     final account = _FakeAccount();
     await tester.pumpWidget(
       ProviderScope(
@@ -78,6 +82,9 @@ void main() {
       find.byKey(const Key('profile-email')),
     );
     expect(email.enabled, isFalse);
+    // A saved phone not yet verified offers a text code.
+    expect(find.byKey(const Key('verify-phone-send')), findsOneWidget);
+    expect(find.byKey(const Key('profile-change-email')), findsOneWidget);
     final phone = tester.widget<TextField>(
       find.byKey(const Key('profile-phone')),
     );

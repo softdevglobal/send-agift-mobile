@@ -14,16 +14,21 @@ import '../../data/countries_provider.dart';
 import '../widgets/auth_header_parts.dart';
 import '../widgets/auth_scaffold.dart';
 import '../widgets/social_sign_in_buttons.dart';
+import '../../domain/code_signup.dart';
 import '../../domain/social_signup.dart';
 
 /// Customer registration. Just enough to start gifting. A photo and
 /// delivery addresses are added later from the Account tab. Sellers and
 /// admins register on the web app only.
 class RegisterScreen extends ConsumerStatefulWidget {
-  const RegisterScreen({super.key, this.social});
+  const RegisterScreen({super.key, this.social, this.codeSignup});
 
   /// A Google or Facebook sign-up handed over from the sign-in screen.
   final SocialSignup? social;
+
+  /// A phone or email just proved with a sign-in code. It is filled in and
+  /// locked, and marked verified once the account is made.
+  final CodeSignup? codeSignup;
 
   @override
   ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
@@ -73,11 +78,23 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
   SocialSignup? _social;
   final _socialCardKey = GlobalKey();
 
+  CodeSignup? get _code => widget.codeSignup;
+  bool get _emailLocked => _code?.channel == CodeChannel.email;
+  bool get _phoneLocked => _code?.channel == CodeChannel.sms;
+
   @override
   void initState() {
     super.initState();
     _social = widget.social;
     _nameController.text = widget.social?.name ?? '';
+    final code = widget.codeSignup;
+    if (code?.channel == CodeChannel.email) {
+      _emailController.text = code!.destination;
+    } else if (code?.channel == CodeChannel.sms) {
+      final (iso, number) = splitPhone(code!.destination);
+      _dialIso = iso;
+      _phoneController.text = number;
+    }
     // The strength meter and the match tick follow every keystroke.
     _passwordController.addListener(_refresh);
     _confirmController.addListener(_refresh);
@@ -172,6 +189,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             countryId: _countryId!,
             phone: '$_dial ${_phoneController.text.trim()}',
             customerType: _customerType,
+            signupToken: _code?.signupToken,
           );
       if (!mounted) return;
       _leave();
@@ -242,7 +260,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
               ),
               const SizedBox(height: 18),
             ],
-            if (_social == null && SocialSignInButtons.enabled) ...[
+            if (_code != null && _social == null) ...[
+              _VerifiedCard(signup: _code!),
+              const SizedBox(height: 18),
+            ],
+            if (_social == null &&
+                _code == null &&
+                SocialSignInButtons.enabled) ...[
               SocialSignInButtons(
                 verb: 'Sign up',
                 onSignedIn: _leave,
@@ -309,6 +333,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                   label: 'Email',
                   prefixIcon: Icons.mail_outline_rounded,
                   controller: _emailController,
+                  enabled: !_emailLocked,
                   hintText: 'you@example.com',
                   keyboardType: TextInputType.emailAddress,
                   textInputAction: TextInputAction.next,
@@ -392,11 +417,13 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                                 ),
                               ),
                           ],
-                          onChanged: (value) {
-                            if (value != null) {
-                              setState(() => _dialIso = value);
-                            }
-                          },
+                          onChanged: _phoneLocked
+                              ? null
+                              : (value) {
+                                  if (value != null) {
+                                    setState(() => _dialIso = value);
+                                  }
+                                },
                         ),
                       ),
                       const SizedBox(width: 10),
@@ -404,6 +431,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                         child: TextFormField(
                           key: const Key('register-phone'),
                           controller: _phoneController,
+                          enabled: !_phoneLocked,
                           keyboardType: TextInputType.phone,
                           textInputAction: TextInputAction.next,
                           decoration: const InputDecoration(
@@ -576,6 +604,55 @@ class _SocialSignupCard extends StatelessWidget {
                   ),
                   onPressed: onUseEmail,
                   child: const Text('Use email instead'),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// The phone or email a sign-in code just proved, which this sign-up uses.
+class _VerifiedCard extends StatelessWidget {
+  const _VerifiedCard({required this.signup});
+
+  final CodeSignup signup;
+
+  @override
+  Widget build(BuildContext context) {
+    final what = signup.channel == CodeChannel.sms ? 'phone' : 'email';
+    return Container(
+      key: const Key('code-signup'),
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppTheme.radiusXl),
+        color: AppColors.cream,
+        border: Border.all(color: AppColors.purple.withValues(alpha: 0.25)),
+      ),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          const Icon(Icons.verified_rounded, color: Color(0xFF10B981)),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  'Your $what is verified',
+                  style: const TextStyle(fontWeight: FontWeight.w700),
+                ),
+                const SizedBox(height: 2),
+                Text(
+                  'No account uses ${signup.destination} yet. Finish the '
+                  'details below to create one.',
+                  style: const TextStyle(
+                    color: AppColors.mutedForeground,
+                    fontSize: 13,
+                    height: 1.4,
+                  ),
                 ),
               ],
             ),

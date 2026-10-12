@@ -83,6 +83,7 @@ class _TakenEmailRepository implements AuthRepository {
     required String countryId,
     required String phone,
     String customerType = 'individual',
+    String? signupToken,
   }) async {
     throw const AppException('email already registered', statusCode: 409);
   }

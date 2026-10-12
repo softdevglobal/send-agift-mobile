@@ -219,13 +219,20 @@ class AccountScreen extends ConsumerWidget {
                     label: 'Terms & privacy',
                     onTap: () => context.push(AppRoutes.terms),
                   ),
-                  if (auth.isSignedIn)
+                  if (auth.isSignedIn) ...[
+                    _MenuItem(
+                      icon: Icons.alternate_email_rounded,
+                      color: AppColors.primary,
+                      label: 'Change email',
+                      onTap: () => context.push(AppRoutes.changeEmail),
+                    ),
                     _MenuItem(
                       icon: Icons.key_rounded,
                       color: AppColors.primary,
                       label: 'Change password',
                       onTap: () => context.push(AppRoutes.changePassword),
                     ),
+                  ],
                 ],
               ),
             ),

@@ -55,6 +55,33 @@ class AddressDraft {
   }
 }
 
+/// A confirmed email change.
+class EmailChangeResult {
+  const EmailChangeResult({
+    required this.email,
+    required this.token,
+    this.redemptionLockedUntil,
+  });
+
+  /// The address the account signs in with from now on.
+  final String email;
+
+  /// Replaces the stored token: every older one has stopped working.
+  final String token;
+
+  /// Until then prizes and gift points are on hold.
+  final DateTime? redemptionLockedUntil;
+
+  factory EmailChangeResult.fromJson(Map<String, dynamic> json) =>
+      EmailChangeResult(
+        email: json['email'] as String? ?? '',
+        token: json['token'] as String? ?? '',
+        redemptionLockedUntil: DateTime.tryParse(
+          json['redemption_locked_until'] as String? ?? '',
+        )?.toLocal(),
+      );
+}
+
 /// The customer's own saved addresses, and everything about their
 /// recipients beyond picking one at checkout.
 class AccountRepository {
@@ -99,6 +126,44 @@ class AccountRepository {
       '/customers/me/password',
       data: {'current_password': currentPassword, 'new_password': newPassword},
     );
+  });
+
+  /// Texts a code to [phone] so it can be used to sign in.
+  Future<void> requestPhoneCode(String phone) => _call(() async {
+    await _client.dio.post<dynamic>(
+      '/customers/me/phone/code',
+      data: {'phone': phone},
+    );
+  });
+
+  /// Marks [phone] as verified once the texted [code] matches.
+  Future<void> verifyPhone({required String phone, required String code}) =>
+      _call(() async {
+        await _client.dio.post<dynamic>(
+          '/customers/me/phone/verify',
+          data: {'phone': phone, 'code': code},
+        );
+      });
+
+  /// Checks the password and emails a code to [newEmail]. The answer is the
+  /// same whether or not that address can be used.
+  Future<void> requestEmailChange({
+    required String newEmail,
+    required String currentPassword,
+  }) => _call(() async {
+    await _client.dio.post<dynamic>(
+      '/customers/me/email/change',
+      data: {'new_email': newEmail, 'current_password': currentPassword},
+    );
+  });
+
+  /// Checks the emailed code and switches the account to the new address.
+  Future<EmailChangeResult> confirmEmailChange(String code) => _call(() async {
+    final response = await _client.dio.post<Map<String, dynamic>>(
+      '/customers/me/email/confirm',
+      data: {'code': code},
+    );
+    return EmailChangeResult.fromJson(response.data ?? const {});
   });
 
   /// Presign → PUT → the photo's public address.

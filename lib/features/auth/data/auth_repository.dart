@@ -3,6 +3,7 @@ import 'package:dio/dio.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/token_storage.dart';
+import '../domain/code_signup.dart';
 import '../domain/social_signup.dart';
 import 'social_sign_in.dart';
 
@@ -14,6 +15,7 @@ class AuthRepository {
   final ApiClient _client;
   final TokenStorage _tokenStorage;
 
+  /// [email] may also be the phone saved on the account.
   Future<void> login({required String email, required String password}) async {
     try {
       final response = await _client.dio.post<Map<String, dynamic>>(
@@ -38,6 +40,7 @@ class AuthRepository {
     required String countryId,
     required String phone,
     String customerType = 'individual',
+    String? signupToken,
   }) async {
     try {
       await _client.dio.post<Map<String, dynamic>>(
@@ -49,6 +52,7 @@ class AuthRepository {
           'country_id': countryId,
           'phone': phone,
           'customer_type': customerType,
+          'signup_token': ?signupToken,
         },
       );
       await login(email: email, password: password);
@@ -56,6 +60,53 @@ class AuthRepository {
       throw _client.mapError(error);
     }
   }
+
+  /// Sends a 6-digit sign-in code. The answer is the same whether or not an
+  /// account uses [destination], so it returns the server's wording.
+  Future<String> requestLoginCode({
+    required CodeChannel channel,
+    required String destination,
+  }) async {
+    try {
+      final response = await _client.dio.post<Map<String, dynamic>>(
+        '/customers/login/code',
+        data: {'channel': channel.name, 'destination': destination},
+      );
+      return response.data?['message'] as String? ??
+          'If that is yours, a code is on its way.';
+    } on DioException catch (error) {
+      throw _client.mapError(error);
+    }
+  }
+
+  /// Checks the code. Returns null when the customer is now signed in, or the
+  /// sign-up to finish when nobody uses that phone or email yet.
+  Future<CodeSignup?> verifyLoginCode({
+    required CodeChannel channel,
+    required String destination,
+    required String code,
+  }) async {
+    try {
+      final response = await _client.dio.post<Map<String, dynamic>>(
+        '/customers/login/code/verify',
+        data: {
+          'channel': channel.name,
+          'destination': destination,
+          'code': code,
+        },
+      );
+      final data = response.data ?? const {};
+      if (data['status'] == 'needs_signup') return CodeSignup.fromJson(data);
+      await _saveToken(data);
+      return null;
+    } on DioException catch (error) {
+      throw _client.mapError(error);
+    }
+  }
+
+  /// Keeps this device signed in with a fresh token, e.g. after an email
+  /// change stopped every older one working.
+  Future<void> replaceToken(String token) => _saveToken({'token': token});
 
   /// Sends a provider's token to the API. Returns null when the customer is
   /// now signed in, or the sign-up still to finish for a new customer.

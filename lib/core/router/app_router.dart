@@ -4,8 +4,10 @@ import 'package:go_router/go_router.dart';
 
 import '../../app/app_shell.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
+import '../../features/auth/domain/code_signup.dart';
 import '../../features/auth/domain/social_signup.dart';
 import '../../features/auth/presentation/screens/register_screen.dart';
+import '../../features/auth/presentation/screens/verify_code_screen.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/cart/presentation/screens/checkout_screen.dart';
 import '../../features/games/presentation/game_definitions.dart';
@@ -28,6 +30,7 @@ import '../../features/products/presentation/screens/explore_screen.dart';
 import '../../features/products/presentation/screens/gift_detail_screen.dart';
 import '../../features/profile/presentation/screens/account_screen.dart';
 import '../../features/profile/presentation/screens/addresses_screen.dart';
+import '../../features/profile/presentation/screens/change_email_screen.dart';
 import '../../features/profile/presentation/screens/change_password_screen.dart';
 import '../../features/profile/presentation/screens/edit_profile_screen.dart';
 import '../../features/profile/presentation/screens/help_centre_screen.dart';
@@ -54,6 +57,9 @@ class AppRoutes {
   static const checkout = '/checkout';
   static const orders = '/orders';
   static const login = '/login';
+
+  /// Entering a one-time sign-in code; `extra` is the [CodeTarget].
+  static const verifyCode = '/login/code';
   static const register = '/register';
   static const messages = '/messages';
   static const reviews = '/reviews';
@@ -67,6 +73,7 @@ class AppRoutes {
   static const addresses = '/addresses';
   static const editProfile = '/profile/edit';
   static const changePassword = '/profile/password';
+  static const changeEmail = '/profile/email';
 
   /// Delivered gifts other customers sent to this one.
   static const receivedGifts = '/gifts-received';
@@ -441,6 +448,12 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             _fadePage(state, const ChangePasswordScreen()),
       ),
       GoRoute(
+        path: AppRoutes.changeEmail,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            _fadePage(state, const ChangeEmailScreen()),
+      ),
+      GoRoute(
         path: AppRoutes.addresses,
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) =>
@@ -477,6 +490,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => _fadePage(state, const LoginScreen()),
       ),
       GoRoute(
+        path: AppRoutes.verifyCode,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          VerifyCodeScreen(target: state.extra! as CodeTarget),
+        ),
+      ),
+      GoRoute(
         path: AppRoutes.register,
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) => _fadePage(
@@ -484,6 +505,9 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           RegisterScreen(
             social: state.extra is SocialSignup
                 ? state.extra! as SocialSignup
+                : null,
+            codeSignup: state.extra is CodeSignup
+                ? state.extra! as CodeSignup
                 : null,
           ),
         ),

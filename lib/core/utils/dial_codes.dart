@@ -7,6 +7,24 @@ class DialCode {
   final String dial;
 }
 
+/// The country code a phone field starts on.
+const defaultDialIso = 'LK';
+
+/// Splits a saved "+94 77 123 4567" into its country code and the number.
+/// The longest matching code wins, so "+1 868" is not read as "+1".
+(String iso, String number) splitPhone(String? phone) {
+  final value = phone?.trim() ?? '';
+  if (value.isEmpty) return (defaultDialIso, '');
+  final codes = [...dialCodes]
+    ..sort((a, b) => b.dial.length.compareTo(a.dial.length));
+  for (final code in codes) {
+    if (value.startsWith(code.dial)) {
+      return (code.iso2, value.substring(code.dial.length).trim());
+    }
+  }
+  return (defaultDialIso, value);
+}
+
 const dialCodes = <DialCode>[
   DialCode('Afghanistan', 'AF', '+93'),
   DialCode('Albania', 'AL', '+355'),

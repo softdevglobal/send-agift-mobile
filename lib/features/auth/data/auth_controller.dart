@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/providers.dart';
 import '../../../core/notifications/push_notifications.dart';
+import '../domain/code_signup.dart';
 import '../domain/social_signup.dart';
 import 'auth_repository.dart';
 import 'social_sign_in.dart';
@@ -31,6 +32,9 @@ class AuthState {
   String? get email => customer?['email'] as String?;
 
   String? get phone => _text('phone');
+
+  /// The saved phone was proved with a text code, so it can sign in.
+  bool get phoneVerified => _text('phone_verified_at') != null;
 
   /// The profile photo, when one is set.
   String? get imageUrl => _text('image_url');
@@ -87,6 +91,7 @@ class AuthController extends StateNotifier<AuthState> {
     required String countryId,
     required String phone,
     String customerType = 'individual',
+    String? signupToken,
   }) async {
     state = const AuthState(isLoading: true);
     try {
@@ -97,12 +102,36 @@ class AuthController extends StateNotifier<AuthState> {
         countryId: countryId,
         phone: phone,
         customerType: customerType,
+        signupToken: signupToken,
       );
       state = AuthState(customer: await _repository.me());
     } catch (_) {
       state = const AuthState();
       rethrow;
     }
+  }
+
+  /// Checks a one-time sign-in code. Returns the sign-up still to finish for
+  /// someone new, or null once they are signed in.
+  Future<CodeSignup?> verifyLoginCode({
+    required CodeChannel channel,
+    required String destination,
+    required String code,
+  }) async {
+    final pending = await _repository.verifyLoginCode(
+      channel: channel,
+      destination: destination,
+      code: code,
+    );
+    if (pending == null) state = AuthState(customer: await _repository.me());
+    return pending;
+  }
+
+  /// Swaps in the token an email change answered with, and re-reads the
+  /// profile so the new address shows everywhere.
+  Future<void> replaceToken(String token) async {
+    await _repository.replaceToken(token);
+    state = AuthState(customer: await _repository.me());
   }
 
   /// Signs in with a provider token. Returns the sign-up still to finish for
