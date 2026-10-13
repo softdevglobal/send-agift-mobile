@@ -137,6 +137,7 @@ class CustomerOrder {
     required this.totalAmount,
     required this.currency,
     required this.createdAt,
+    this.updatedAt,
     this.deliveryDate,
     this.subtotalAmount = 0,
     this.deliveryAmount = 0,
@@ -152,6 +153,9 @@ class CustomerOrder {
   final int totalAmount;
   final String currency;
   final DateTime createdAt;
+
+  /// When the order last changed, which is when its current status began.
+  final DateTime? updatedAt;
   final DateTime? deliveryDate;
 
   /// What the gifts cost and what delivery cost, in minor units: the two
@@ -210,6 +214,7 @@ class CustomerOrder {
       createdAt:
           DateTime.tryParse(json['created_at'] as String? ?? '') ??
           DateTime.now(),
+      updatedAt: DateTime.tryParse(json['updated_at'] as String? ?? ''),
       deliveryDate: DateTime.tryParse(json['delivery_date'] as String? ?? ''),
       subtotalAmount: (json['subtotal_amount'] as num?)?.toInt() ?? 0,
       deliveryAmount: (json['delivery_amount'] as num?)?.toInt() ?? 0,
