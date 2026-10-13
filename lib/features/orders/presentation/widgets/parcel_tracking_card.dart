@@ -111,7 +111,9 @@ class ParcelTrackingCard extends StatelessWidget {
                             child: Text(
                               tracking.trackingNumber!,
                               style: theme.textTheme.bodyMedium?.copyWith(
-                                fontFeatures: const [FontFeature.tabularFigures()],
+                                fontFeatures: const [
+                                  FontFeature.tabularFigures(),
+                                ],
                                 fontWeight: FontWeight.w600,
                               ),
                               overflow: TextOverflow.ellipsis,
@@ -140,7 +142,8 @@ class ParcelTrackingCard extends StatelessWidget {
                           visualDensity: VisualDensity.compact,
                         ),
                       ),
-                    if (tracking.trackingUrl != null && tracking.shippedAt != null)
+                    if (tracking.trackingUrl != null &&
+                        tracking.shippedAt != null)
                       const SizedBox(width: 10),
                     if (tracking.shippedAt != null)
                       Flexible(
@@ -154,7 +157,8 @@ class ParcelTrackingCard extends StatelessWidget {
                       ),
                   ],
                 ),
-                if (tracking.isSellerManaged && tracking.trackingUrl == null) ...[
+                if (tracking.isSellerManaged &&
+                    tracking.trackingUrl == null) ...[
                   const SizedBox(height: 8),
                   Text(
                     tracking.trackingNumber != null
@@ -182,9 +186,9 @@ class ParcelTrackingCard extends StatelessWidget {
   Future<void> _copy(BuildContext context, String value) async {
     await Clipboard.setData(ClipboardData(text: value));
     if (!context.mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Tracking number copied.')),
-    );
+    ScaffoldMessenger.of(
+      context,
+    ).showSnackBar(const SnackBar(content: Text('Tracking number copied.')));
   }
 
   Future<void> _open(BuildContext context, String url) async {

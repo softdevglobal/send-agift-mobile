@@ -2,10 +2,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/errors/app_exception.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/utils/dial_codes.dart';
 import '../../data/auth_controller.dart';
+import '../../domain/code_problem.dart';
 import '../../domain/code_signup.dart';
 import 'auth_header_parts.dart';
 import 'auth_scaffold.dart';
@@ -81,7 +81,9 @@ class _CodeSignInPanelState extends ConsumerState<CodeSignInPanel> {
 
     final target = _target;
     final last = _last;
-    if (last != null && last.channel == _channel && last.destination == target) {
+    if (last != null &&
+        last.channel == _channel &&
+        last.destination == target) {
       final left =
           _resendSeconds - DateTime.now().difference(last.at).inSeconds;
       if (left > 0) return _openVerify(target, left);
@@ -99,10 +101,16 @@ class _CodeSignInPanelState extends ConsumerState<CodeSignInPanel> {
       _last = (channel: _channel, destination: target, at: DateTime.now());
       setState(() => _busy = false);
       await _openVerify(target, _resendSeconds);
-    } on AppException catch (error) {
-      if (mounted) setState(() => _error = error.message);
-    } catch (_) {
-      if (mounted) setState(() => _error = 'Could not send a code.');
+    } catch (error) {
+      if (!mounted) return;
+      final problem = CodeProblem.of(error, 'Could not send a code.');
+      if (problem.isWait) {
+        // One was sent a moment ago: go and enter it rather than refuse.
+        setState(() => _busy = false);
+        await _openVerify(target, _resendSeconds);
+        return;
+      }
+      setState(() => _error = problem.message);
     } finally {
       if (mounted) setState(() => _busy = false);
     }

@@ -4,10 +4,10 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
-import '../../../../core/errors/app_exception.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../data/auth_controller.dart';
+import '../../domain/code_problem.dart';
 import '../../domain/code_signup.dart';
 import '../widgets/auth_header_parts.dart';
 import '../widgets/auth_scaffold.dart';
@@ -79,10 +79,11 @@ class _VerifyCodeScreenState extends ConsumerState<VerifyCodeScreen> {
       _code.clear();
       setState(() => _notice = 'A new code is on its way.');
       _countdown(60);
-    } on AppException catch (error) {
-      if (mounted) setState(() => _error = error.message);
-    } catch (_) {
-      if (mounted) setState(() => _error = 'Could not send a code.');
+    } catch (error) {
+      if (!mounted) return;
+      final problem = CodeProblem.of(error, 'Could not send a code.');
+      setState(() => _error = problem.message);
+      if (problem.isWait) _countdown(60);
     } finally {
       if (mounted) setState(() => _busy = false);
     }
@@ -110,10 +111,11 @@ class _VerifyCodeScreenState extends ConsumerState<VerifyCodeScreen> {
           );
       if (!mounted) return;
       context.pop<Object>(signup ?? true);
-    } on AppException catch (error) {
-      if (mounted) setState(() => _error = error.message);
-    } catch (_) {
-      if (mounted) setState(() => _error = 'That code did not work.');
+    } catch (error) {
+      if (!mounted) return;
+      setState(
+        () => _error = CodeProblem.of(error, 'That code did not work.').message,
+      );
     } finally {
       if (mounted) setState(() => _busy = false);
     }

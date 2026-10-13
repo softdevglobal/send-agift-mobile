@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../../core/errors/app_exception.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -11,6 +12,8 @@ import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/quantity_stepper.dart';
+import '../../../checkout/data/checkout_repository.dart';
+import '../../../checkout/presentation/in_app_payment.dart';
 import '../../../messages/data/messages_providers.dart';
 import '../../../products/data/catalog_providers.dart';
 import '../../../reviews/data/reviews_repository.dart';
@@ -77,10 +80,16 @@ class _OrderBody extends StatelessWidget {
       ),
       children: [
         _OrderHero(order: order, delivery: delivery),
+        if (order.status == 'pending_payment') ...[
+          const SizedBox(height: 14),
+          _PayNowCard(order: order),
+        ],
         if (order.rewardPointsTotal > 0 || order.giftPointsLabel != null) ...[
           const SizedBox(height: 14),
           _PointsCard(order: order),
         ],
+        const SizedBox(height: 14),
+        _TrackingCard(order: order, delivery: delivery),
         const SizedBox(height: 24),
         Padding(
           padding: const EdgeInsets.only(bottom: 10),
@@ -88,6 +97,11 @@ class _OrderBody extends StatelessWidget {
         ),
         for (final item in order.items) ...[
           _OrderItemCard(order: order, item: item),
+          const SizedBox(height: 10),
+        ],
+        if (order.giftMessage != null) ...[
+          const SizedBox(height: 6),
+          _GiftMessageCard(message: order.giftMessage!),
           const SizedBox(height: 10),
         ],
         const SizedBox(height: 6),
@@ -118,6 +132,217 @@ class _OrderBody extends StatelessWidget {
   }
 }
 
+/// An order still waiting for payment. Paying happens on Stripe's page in the
+/// browser; the order only becomes paid when Stripe tells the server, so this
+/// re-reads the order as the app comes back into view.
+class _PayNowCard extends ConsumerStatefulWidget {
+  const _PayNowCard({required this.order});
+
+  final CustomerOrder order;
+
+  String get orderId => order.id;
+  String get totalLabel => order.totalLabel;
+
+  @override
+  ConsumerState<_PayNowCard> createState() => _PayNowCardState();
+}
+
+class _PayNowCardState extends ConsumerState<_PayNowCard>
+    with WidgetsBindingObserver {
+  bool _starting = false;
+  String? _error;
+
+  @override
+  void initState() {
+    super.initState();
+    WidgetsBinding.instance.addObserver(this);
+    // Already paid on Stripe but the webhook was late? Settle it now.
+    _recheck();
+  }
+
+  /// Asks the server to re-check this order's payment with Stripe. It is a
+  /// best-effort nudge in the background, so it never surfaces an error.
+  Future<void> _recheck() async {
+    try {
+      final paid = await ref
+          .read(checkoutRepositoryProvider)
+          .syncPayment(widget.orderId);
+      if (paid && mounted) {
+        ref.invalidate(customerOrderProvider(widget.orderId));
+      }
+    } catch (_) {
+      // Offline, or not signed in: the order simply stays as it is.
+    }
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    super.dispose();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (state != AppLifecycleState.resumed) return;
+    // The payment is confirmed by Stripe's webhook, a moment after the
+    // customer is back, so look again a few times.
+    for (final seconds in const [0, 2, 5]) {
+      Future<void>.delayed(Duration(seconds: seconds), () {
+        if (mounted) _recheck();
+      });
+    }
+  }
+
+  Future<void> _pay() async {
+    setState(() {
+      _starting = true;
+      _error = null;
+    });
+    try {
+      // Stripe's own payment sheet, inside the app.
+      final outcome = await payOrderInApp(ref, widget.orderId);
+      if (!mounted) return;
+      switch (outcome) {
+        case InAppPaymentOutcome.paid:
+          ref.invalidate(customerOrderProvider(widget.orderId));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Payment received. Your gift is on its way.'),
+            ),
+          );
+        case InAppPaymentOutcome.unavailable:
+          setState(() => _error = 'Card payments are not available yet.');
+        case InAppPaymentOutcome.cancelled:
+          break;
+      }
+    } catch (error) {
+      if (mounted) {
+        setState(
+          () => _error = error is AppException
+              ? error.message
+              : 'Could not open the payment.',
+        );
+      }
+    } finally {
+      if (mounted) setState(() => _starting = false);
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AppPanel(
+      key: const Key('pay-now'),
+      color: AppColors.cream,
+      padding: const EdgeInsets.all(16),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text('Complete your payment', style: AppTypography.display(18)),
+          const SizedBox(height: 4),
+          const Text(
+            'Your gift is sent as soon as the payment goes through.',
+            style: TextStyle(color: AppColors.mutedForeground, height: 1.4),
+          ),
+          const SizedBox(height: 12),
+          // What the total is made of, before it is asked for.
+          _BreakdownRow('Gifts', widget.order.subtotalLabel),
+          _BreakdownRow('Delivery', widget.order.deliveryLabel),
+          const Divider(height: 18),
+          _BreakdownRow('Total', widget.totalLabel, strong: true),
+          if (_error != null) ...[
+            const SizedBox(height: 8),
+            Text(_error!, style: const TextStyle(color: AppColors.destructive)),
+          ],
+          const SizedBox(height: 12),
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              key: const Key('pay-now-button'),
+              onPressed: _starting ? null : _pay,
+              child: _starting
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(strokeWidth: 2),
+                    )
+                  : Text('Pay ${widget.totalLabel}'),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _BreakdownRow extends StatelessWidget {
+  const _BreakdownRow(this.label, this.value, {this.strong = false});
+
+  final String label;
+  final String value;
+  final bool strong;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = TextStyle(
+      fontWeight: strong ? FontWeight.w700 : FontWeight.w500,
+      color: strong ? AppColors.foreground : AppColors.mutedForeground,
+    );
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 2),
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Text(label, style: style),
+          Text(value, style: style.copyWith(color: AppColors.foreground)),
+        ],
+      ),
+    );
+  }
+}
+
+/// The sender's note, set as a quote rather than a plain line.
+class _GiftMessageCard extends StatelessWidget {
+  const _GiftMessageCard({required this.message});
+
+  final String message;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      key: const Key('gift-message'),
+      decoration: BoxDecoration(
+        color: AppColors.cream,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border(
+          left: const BorderSide(color: AppColors.purple, width: 4),
+          top: BorderSide(color: AppColors.boxBorder),
+          right: BorderSide(color: AppColors.boxBorder),
+          bottom: BorderSide(color: AppColors.boxBorder),
+        ),
+      ),
+      padding: const EdgeInsets.fromLTRB(14, 12, 14, 14),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.format_quote_rounded,
+                size: 18,
+                color: AppColors.purple,
+              ),
+              const SizedBox(width: 6),
+              Text('GIFT MESSAGE', style: AppTypography.eyebrow),
+            ],
+          ),
+          const SizedBox(height: 8),
+          Text(message, style: AppTypography.display(20)),
+        ],
+      ),
+    );
+  }
+}
+
 /// The order at a glance: number, status, how far along it is, and the three
 /// facts people open an order for.
 class _OrderHero extends StatelessWidget {
@@ -126,24 +351,12 @@ class _OrderHero extends StatelessWidget {
   final CustomerOrder order;
   final DateTime? delivery;
 
-  static const _stages = [
-    'pending_payment',
-    'paid',
-    'accepted',
-    'preparing',
-    'dispatched',
-    'delivered',
-  ];
-
   @override
   Widget build(BuildContext context) {
     final muted = TextStyle(
       color: Colors.white.withValues(alpha: 0.7),
       fontSize: 12,
     );
-    final stage = _stages.indexOf(order.status);
-    final stopped = order.status == 'cancelled' || order.status == 'refunded';
-
     return Container(
       padding: const EdgeInsets.all(18),
       decoration: BoxDecoration(
@@ -174,30 +387,6 @@ class _OrderHero extends StatelessWidget {
               OrderStatusChip(order: order),
             ],
           ),
-          const SizedBox(height: 16),
-          // How far along the order is: one segment per stage.
-          Row(
-            children: [
-              for (var i = 0; i < _stages.length; i++) ...[
-                Expanded(
-                  child: Container(
-                    height: 5,
-                    decoration: BoxDecoration(
-                      color: stopped
-                          ? Colors.white.withValues(alpha: 0.15)
-                          : i <= stage
-                          ? const Color(0xFF5EEAD4)
-                          : Colors.white.withValues(alpha: 0.18),
-                      borderRadius: BorderRadius.circular(3),
-                    ),
-                  ),
-                ),
-                if (i < _stages.length - 1) const SizedBox(width: 4),
-              ],
-            ],
-          ),
-          const SizedBox(height: 6),
-          Text(order.statusLabel, style: muted),
           const SizedBox(height: 16),
           Row(
             children: [
@@ -311,9 +500,7 @@ class _PointsCard extends StatelessWidget {
         ? null
         : order.rewardsEarned
         ? '+$points points added to your balance'
-        : order.items
-                  .firstWhere((i) => i.rewardLabel != null)
-                  .rewardLabel ??
+        : order.items.firstWhere((i) => i.rewardLabel != null).rewardLabel ??
               '$points points';
 
     return Container(
@@ -501,7 +688,8 @@ class _OrderItemCard extends ConsumerWidget {
                   : 'Message the shop',
             ),
           ),
-          if (item.tracking != null) ParcelTrackingCard(tracking: item.tracking!),
+          if (item.tracking != null)
+            ParcelTrackingCard(tracking: item.tracking!),
           _ReviewAction(item: item, giftName: gift?.name),
         ],
       ),
@@ -563,5 +751,294 @@ class _ReviewAction extends ConsumerWidget {
       ),
     );
     ref.invalidate(myReviewsProvider);
+  }
+}
+
+/// One step of the order's journey.
+enum _StepState { complete, current, upcoming, stopped }
+
+class _TrackStep {
+  const _TrackStep(this.label, this.description, this.statuses);
+
+  final String label;
+  final String description;
+  final List<String> statuses;
+}
+
+/// "Track this gift": the order's journey step by step, as on the website.
+class _TrackingCard extends StatelessWidget {
+  const _TrackingCard({required this.order, required this.delivery});
+
+  final CustomerOrder order;
+  final DateTime? delivery;
+
+  static const _steps = [
+    _TrackStep('Order placed', 'We received your gift order.', [
+      'draft',
+      'pending_payment',
+    ]),
+    _TrackStep(
+      'Payment received',
+      'Payment is confirmed. The seller can start on your gift.',
+      ['paid'],
+    ),
+    _TrackStep('Seller accepted', 'The seller has accepted this order.', [
+      'accepted',
+    ]),
+    _TrackStep('Preparing gift', 'Your gift is being prepared for delivery.', [
+      'preparing',
+    ]),
+    _TrackStep('On the way', 'The gift is on its way to the recipient.', [
+      'dispatched',
+    ]),
+    _TrackStep('Delivered', 'The gift has been delivered.', ['delivered']),
+  ];
+
+  static const _descriptions = {
+    'draft': 'This order is still being prepared on our side.',
+    'pending_payment': 'Waiting for your payment.',
+    'paid': 'Payment is confirmed. Waiting for the seller to accept.',
+    'accepted': 'The seller has accepted this gift order.',
+    'preparing': 'The seller is preparing your gift.',
+    'dispatched': 'The gift is on its way to the recipient.',
+    'delivered': 'The gift has been delivered.',
+    'cancelled': 'This order was cancelled.',
+    'refunded': 'This order was refunded.',
+  };
+
+  @override
+  Widget build(BuildContext context) {
+    final stopped = order.status == 'cancelled' || order.status == 'refunded';
+    final current = _steps.indexWhere((s) => s.statuses.contains(order.status));
+    final format = DateFormat('MMM d, y, h:mm a');
+    final placed = format.format(order.createdAt.toLocal());
+    final updated = order.updatedAt == null
+        ? null
+        : format.format(order.updatedAt!.toLocal());
+
+    // The steps reached so far, then (for a cancelled order) where it stopped.
+    final shown = <({String label, String description, _StepState state})>[
+      for (var i = 0; i < _steps.length; i++)
+        if (!stopped || i == 0)
+          (
+            label: _steps[i].label,
+            description: _steps[i].description,
+            state: stopped
+                ? _StepState.complete
+                : i < current
+                ? _StepState.complete
+                : i == current
+                ? _StepState.current
+                : _StepState.upcoming,
+          ),
+      if (stopped)
+        (
+          label: order.statusLabel,
+          description: _descriptions[order.status] ?? '',
+          state: _StepState.stopped,
+        ),
+    ];
+
+    return AppPanel(
+      padding: const EdgeInsets.all(18),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text('Track this gift', style: AppTypography.display(19)),
+                    const SizedBox(height: 2),
+                    Text(
+                      delivery == null
+                          ? 'Delivery date to be set'
+                          : 'Delivery ${DateFormat.yMMMd().format(delivery!.toLocal())}',
+                      style: const TextStyle(
+                        color: AppColors.mutedForeground,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(width: 8),
+              _StatusTag(status: order.status, label: order.statusLabel),
+            ],
+          ),
+          const SizedBox(height: 10),
+          Text(
+            _descriptions[order.status] ??
+                'You can follow this gift as it moves toward delivery.',
+            style: const TextStyle(
+              color: AppColors.mutedForeground,
+              height: 1.4,
+            ),
+          ),
+          const SizedBox(height: 18),
+          for (var i = 0; i < shown.length; i++)
+            _TrackRow(
+              label: shown[i].label,
+              description: shown[i].description,
+              state: shown[i].state,
+              isLast: i == shown.length - 1,
+              time: i == 0 && shown[i].state != _StepState.stopped
+                  ? placed
+                  : shown[i].state == _StepState.current ||
+                        shown[i].state == _StepState.stopped
+                  ? updated
+                  : null,
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+class _StatusTag extends StatelessWidget {
+  const _StatusTag({required this.status, required this.label});
+
+  final String status;
+  final String label;
+
+  @override
+  Widget build(BuildContext context) {
+    final (bg, fg) = switch (status) {
+      'pending_payment' => (const Color(0xFFFDE68A), const Color(0xFF451A03)),
+      'paid' || 'accepted' || 'preparing' => (AppColors.purple, Colors.white),
+      'dispatched' => (AppColors.foreground, Colors.white),
+      'delivered' => (AppColors.teal, AppColors.tealForeground),
+      'cancelled' || 'refunded' => (AppColors.destructive, Colors.white),
+      _ => (AppColors.accent, AppColors.foreground),
+    };
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 5),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(8),
+      ),
+      child: Text(
+        label.toUpperCase(),
+        style: TextStyle(
+          color: fg,
+          fontSize: 10.5,
+          fontWeight: FontWeight.w800,
+          letterSpacing: 1,
+        ),
+      ),
+    );
+  }
+}
+
+class _TrackRow extends StatelessWidget {
+  const _TrackRow({
+    required this.label,
+    required this.description,
+    required this.state,
+    required this.isLast,
+    this.time,
+  });
+
+  final String label;
+  final String description;
+  final _StepState state;
+  final bool isLast;
+  final String? time;
+
+  @override
+  Widget build(BuildContext context) {
+    final (bg, fg) = switch (state) {
+      _StepState.complete => (AppColors.purple, Colors.white),
+      _StepState.current => (AppColors.foreground, Colors.white),
+      _StepState.upcoming => (AppColors.accent, AppColors.mutedForeground),
+      _StepState.stopped => (AppColors.destructive, Colors.white),
+    };
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 32,
+            child: Column(
+              children: [
+                Container(
+                  height: 32,
+                  width: 32,
+                  decoration: BoxDecoration(
+                    color: bg,
+                    borderRadius: BorderRadius.circular(9),
+                  ),
+                  child: Icon(
+                    switch (state) {
+                      _StepState.complete => Icons.check_rounded,
+                      _StepState.stopped => Icons.close_rounded,
+                      _ => Icons.circle,
+                    },
+                    size:
+                        state == _StepState.current ||
+                            state == _StepState.upcoming
+                        ? 8
+                        : 18,
+                    color: fg,
+                  ),
+                ),
+                if (!isLast)
+                  Expanded(
+                    child: Container(
+                      width: 1.5,
+                      margin: const EdgeInsets.symmetric(vertical: 4),
+                      color: state == _StepState.complete
+                          ? AppColors.purple
+                          : AppColors.border,
+                    ),
+                  ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Padding(
+              padding: EdgeInsets.only(top: 4, bottom: isLast ? 0 : 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    label,
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      color: state == _StepState.upcoming
+                          ? AppColors.mutedForeground
+                          : AppColors.foreground,
+                    ),
+                  ),
+                  const SizedBox(height: 2),
+                  Text(
+                    description,
+                    style: const TextStyle(
+                      color: AppColors.mutedForeground,
+                      fontSize: 13,
+                      height: 1.35,
+                    ),
+                  ),
+                  if (time != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      time!,
+                      style: const TextStyle(
+                        color: AppColors.mutedForeground,
+                        fontSize: 12,
+                      ),
+                    ),
+                  ],
+                ],
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
   }
 }

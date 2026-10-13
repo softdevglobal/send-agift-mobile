@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -154,6 +155,60 @@ class CheckoutRepository {
     }
   }
 
+  /// Stripe's payment page for an order, or null when card payments are not
+  /// available (the server answers 503). The gift is only sent once it is
+  /// paid there.
+  Future<String?> startPayment(String orderId) async {
+    try {
+      final response = await _client.dio.post<Map<String, dynamic>>(
+        '/customers/me/orders/$orderId/pay',
+      );
+      final url = response.data?['url'] as String?;
+      return url == null || url.isEmpty ? null : url;
+    } on DioException catch (error) {
+      if (error.response?.statusCode == 503) return null;
+      throw _client.mapError(error);
+    }
+  }
+
+  /// What Stripe's in-app payment sheet needs for an order, or null when
+  /// card payments are not available (the server answers 503).
+  Future<InAppPaymentSheet?> startInAppPayment(String orderId) async {
+    try {
+      final response = await _client.dio.post<Map<String, dynamic>>(
+        '/customers/me/orders/$orderId/payment-sheet',
+        // The server waits on Stripe here, which can take longer than the
+        // app's usual 15 seconds on a slow connection.
+        options: Options(receiveTimeout: const Duration(seconds: 60)),
+      );
+      final data = response.data ?? const {};
+      final key = data['publishable_key'] as String? ?? '';
+      final secret = data['client_secret'] as String? ?? '';
+      if (key.isEmpty || secret.isEmpty) return null;
+      return InAppPaymentSheet(publishableKey: key, clientSecret: secret);
+    } on DioException catch (error) {
+      debugPrint(
+        'payment-sheet for $orderId failed: ${error.type} '
+        '${error.response?.statusCode} ${error.message} ${error.error}',
+      );
+      if (error.response?.statusCode == 503) return null;
+      throw _client.mapError(error);
+    }
+  }
+
+  /// Asks the server to re-check an order's payment with Stripe, for when
+  /// its webhook has not arrived. Returns whether the order is now paid.
+  Future<bool> syncPayment(String orderId) async {
+    try {
+      final response = await _client.dio.post<Map<String, dynamic>>(
+        '/customers/me/orders/$orderId/payment/sync',
+      );
+      return response.data?['paid'] == true;
+    } on DioException {
+      return false;
+    }
+  }
+
   /// The customer's own country, used as the order's country when a recipient
   /// address does not supply one.
   Future<String> myCountryId() async {
@@ -190,3 +245,14 @@ final recipientDetailsProvider = FutureProvider.autoDispose
     .family<Recipient, String>((ref, id) {
       return ref.watch(checkoutRepositoryProvider).getRecipient(id);
     });
+
+/// The keys Stripe's payment sheet is opened with.
+class InAppPaymentSheet {
+  const InAppPaymentSheet({
+    required this.publishableKey,
+    required this.clientSecret,
+  });
+
+  final String publishableKey;
+  final String clientSecret;
+}

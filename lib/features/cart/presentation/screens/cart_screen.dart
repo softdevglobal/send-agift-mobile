@@ -21,7 +21,8 @@ class CartScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final lines = ref.watch(cartLinesProvider).valueOrNull ?? const <CartLine>[];
+    final lines =
+        ref.watch(cartLinesProvider).valueOrNull ?? const <CartLine>[];
     final summary = ref.watch(cartSummaryProvider);
     final itemCount = ref.watch(cartCountProvider);
 
@@ -33,12 +34,7 @@ class CartScreen extends ConsumerWidget {
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppTheme.gutter,
-                10,
-                12,
-                4,
-              ),
+              padding: const EdgeInsets.fromLTRB(AppTheme.gutter, 10, 12, 4),
               child: Row(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
@@ -52,7 +48,7 @@ class CartScreen extends ConsumerWidget {
                           lines.isEmpty
                               ? 'Gifts you add stay here until you check out.'
                               : '$itemCount item${itemCount == 1 ? '' : 's'} '
-                                  'ready for checkout.',
+                                    'ready for checkout.',
                           style: Theme.of(context).textTheme.bodyMedium,
                         ),
                       ],
@@ -104,8 +100,9 @@ class CartScreen extends ConsumerWidget {
           ],
         ),
       ),
-      bottomNavigationBar:
-          lines.isEmpty ? null : _CartSummaryBar(summary: summary),
+      bottomNavigationBar: lines.isEmpty
+          ? null
+          : _CartSummaryBar(summary: summary),
     );
   }
 }
@@ -239,10 +236,7 @@ class _CartSummaryBar extends StatelessWidget {
             value: Money.format(summary.subtotal, summary.currency),
           ),
           const SizedBox(height: 6),
-          const _SummaryRow(
-            label: 'Delivery',
-            value: 'Calculated at dispatch',
-          ),
+          const _SummaryRow(label: 'Delivery', value: 'Calculated at dispatch'),
           const Padding(
             padding: EdgeInsets.symmetric(vertical: 10),
             child: Divider(),

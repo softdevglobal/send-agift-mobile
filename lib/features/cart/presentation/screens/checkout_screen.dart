@@ -14,6 +14,7 @@ import '../../../../core/widgets/quantity_stepper.dart';
 import '../../../auth/data/auth_controller.dart';
 import '../../../checkout/data/checkout_repository.dart';
 import '../../../checkout/domain/checkout.dart';
+import '../../../checkout/presentation/in_app_payment.dart';
 import '../../../checkout/presentation/widgets/delivery_summary.dart';
 import '../../../checkout/presentation/widgets/new_recipient_sheet.dart';
 import '../../../checkout/presentation/widgets/recipient_picker.dart';
@@ -35,6 +36,18 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String? _recipientId;
+
+  /// The note that goes with the gift. Optional.
+  final _giftNote = TextEditingController();
+
+  /// A gift note is a line or two, not a letter.
+  static const _giftNoteMax = 300;
+
+  @override
+  void dispose() {
+    _giftNote.dispose();
+    super.dispose();
+  }
 
   /// The day asked for in the gift search, unless it has since passed.
   late DateTime _deliveryDate = _initialDate(
@@ -268,9 +281,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             color: AppColors.purple,
                           ),
                           const SizedBox(width: 10),
-                          Text(
-                            'When should it arrive?',
-                            style: Theme.of(context).textTheme.titleMedium,
+                          Expanded(
+                            child: Text(
+                              'When should it arrive?',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
                           ),
                         ],
                       ),
@@ -285,7 +300,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       const SizedBox(height: 12),
                       OutlinedButton.icon(
                         onPressed: _pickDate,
-                        icon: const Icon(Icons.calendar_today_rounded, size: 16),
+                        icon: const Icon(
+                          Icons.calendar_today_rounded,
+                          size: 16,
+                        ),
                         label: Text(_dateLabel(_deliveryDate)),
                       ),
                       const SizedBox(height: 10),
@@ -316,14 +334,68 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                   ),
                 ),
               ),
+              const SizedBox(height: 16),
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 230),
+                child: AppPanel(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.edit_note_rounded,
+                            size: 21,
+                            color: AppColors.purple,
+                          ),
+                          const SizedBox(width: 10),
+                          Flexible(
+                            child: Text(
+                              'Add a gift note',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Optional',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppColors.mutedForeground),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Printed on the gift and shown to the recipient.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.mutedForeground,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        key: const Key('gift-note'),
+                        controller: _giftNote,
+                        enabled: !_placing,
+                        minLines: 3,
+                        maxLines: 5,
+                        maxLength: _giftNoteMax,
+                        textCapitalization: TextCapitalization.sentences,
+                        textInputAction: TextInputAction.newline,
+                        decoration: const InputDecoration(
+                          hintText: 'Happy birthday. Thinking of you!',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
             ],
             if (_error != null) ...[
               const SizedBox(height: 16),
               Text(
                 _error!,
-                style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: AppColors.destructive,
-                ),
+                style: Theme.of(
+                  context,
+                ).textTheme.bodySmall?.copyWith(color: AppColors.destructive),
               ),
             ],
           ],
@@ -340,26 +412,45 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           color: AppColors.surface,
           border: Border(top: BorderSide(color: AppColors.border)),
         ),
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _placing || (auth.isSignedIn && _blocker != null)
-                ? null
-                : auth.isSignedIn
-                ? _placeOrder
-                : () => context.push(AppRoutes.login),
-            child: _placing
-                ? const SizedBox(
-                    height: 18,
-                    width: 18,
-                    child: CircularProgressIndicator(strokeWidth: 2),
-                  )
-                : Text(
-                    !auth.isSignedIn
-                        ? 'Sign in to continue'
-                        : _blocker ?? 'Place order',
-                  ),
-          ),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                key: const Key('checkout-submit'),
+                onPressed: _placing || (auth.isSignedIn && _blocker != null)
+                    ? null
+                    : auth.isSignedIn
+                    ? _placeOrder
+                    : () => context.push(AppRoutes.login),
+                child: _placing
+                    ? const SizedBox(
+                        height: 18,
+                        width: 18,
+                        child: CircularProgressIndicator(strokeWidth: 2),
+                      )
+                    : Text(
+                        !auth.isSignedIn
+                            ? 'Sign in to continue'
+                            : _blocker ?? 'Send a gift',
+                      ),
+              ),
+            ),
+            if (auth.isSignedIn && _blocker == null) ...[
+              const SizedBox(height: 8),
+              const Text(
+                'You pay securely on Stripe next. Your gift is only sent '
+                'once the payment succeeds.',
+                textAlign: TextAlign.center,
+                style: TextStyle(
+                  fontSize: 12,
+                  height: 1.35,
+                  color: AppColors.mutedForeground,
+                ),
+              ),
+            ],
+          ],
         ),
       ),
     );
@@ -388,10 +479,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
   static String _dateLabel(DateTime date) =>
       '${date.day.toString().padLeft(2, '0')} '
-      '${const [
-        'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-        'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
-      ][date.month - 1]} ${date.year}';
+      '${const ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'][date.month - 1]} ${date.year}';
 
   static String _dateKey(DateTime date) =>
       '${date.year}-${date.month}-${date.day}';
@@ -460,9 +548,29 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         deliveryDate: _deliveryDate,
         lines: lines,
         recipientId: recipientId,
+        giftMessage: _giftNote.text,
       );
 
       ref.read(cartProvider.notifier).clear();
+
+      // The gift is only sent once it is paid, in Stripe's payment sheet
+      // inside the app. Closed, declined or unavailable, the order waits on
+      // its page, which offers Pay now.
+      String? payProblem;
+      try {
+        final outcome = await payOrderInApp(ref, orderId);
+        if (outcome == InAppPaymentOutcome.unavailable) {
+          payProblem = 'Card payments are not available yet.';
+        }
+      } on AppException catch (error) {
+        payProblem = error.message;
+      }
+      if (payProblem != null && mounted) {
+        // Said here, since the order page only shows Pay now.
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Payment not started: $payProblem')),
+        );
+      }
       if (!mounted) return;
       context.go('${AppRoutes.orders}/$orderId');
     } on AppException catch (error) {
