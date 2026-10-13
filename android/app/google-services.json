@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "296053167326",
+    "project_id": "send-agift",
+    "storage_bucket": "send-agift.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:296053167326:android:4e790569578e24b02a9e4f",
+        "android_client_info": {
+          "package_name": "com.sendagift.send_agift_mobile"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyATli9WUHWjcoFJhqHBeWfq1dFjZKdr1OM"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
