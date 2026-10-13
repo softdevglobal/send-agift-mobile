@@ -37,6 +37,18 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String? _recipientId;
 
+  /// The note that goes with the gift. Optional.
+  final _giftNote = TextEditingController();
+
+  /// A gift note is a line or two, not a letter.
+  static const _giftNoteMax = 300;
+
+  @override
+  void dispose() {
+    _giftNote.dispose();
+    super.dispose();
+  }
+
   /// The day asked for in the gift search, unless it has since passed.
   late DateTime _deliveryDate = _initialDate(
     ref.read(deliveryIntentProvider)?.date,
@@ -269,9 +281,11 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             color: AppColors.purple,
                           ),
                           const SizedBox(width: 10),
-                          Text(
-                            'When should it arrive?',
-                            style: Theme.of(context).textTheme.titleMedium,
+                          Expanded(
+                            child: Text(
+                              'When should it arrive?',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
                           ),
                         ],
                       ),
@@ -315,6 +329,60 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                               ),
                             ),
                         ],
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 230),
+                child: AppPanel(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Row(
+                        children: [
+                          const Icon(
+                            Icons.edit_note_rounded,
+                            size: 21,
+                            color: AppColors.purple,
+                          ),
+                          const SizedBox(width: 10),
+                          Flexible(
+                            child: Text(
+                              'Add a gift note',
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          Text(
+                            'Optional',
+                            style: Theme.of(context).textTheme.bodySmall
+                                ?.copyWith(color: AppColors.mutedForeground),
+                          ),
+                        ],
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        'Printed on the gift and shown to the recipient.',
+                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: AppColors.mutedForeground,
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      TextField(
+                        key: const Key('gift-note'),
+                        controller: _giftNote,
+                        enabled: !_placing,
+                        minLines: 3,
+                        maxLines: 5,
+                        maxLength: _giftNoteMax,
+                        textCapitalization: TextCapitalization.sentences,
+                        textInputAction: TextInputAction.newline,
+                        decoration: const InputDecoration(
+                          hintText: 'Happy birthday. Thinking of you!',
+                        ),
                       ),
                     ],
                   ),
@@ -480,6 +548,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         deliveryDate: _deliveryDate,
         lines: lines,
         recipientId: recipientId,
+        giftMessage: _giftNote.text,
       );
 
       ref.read(cartProvider.notifier).clear();

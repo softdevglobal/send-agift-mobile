@@ -69,8 +69,9 @@ class CartController extends StateNotifier<List<CartItem>> {
   }
 }
 
-final cartProvider =
-    StateNotifierProvider<CartController, List<CartItem>>((ref) {
+final cartProvider = StateNotifierProvider<CartController, List<CartItem>>((
+  ref,
+) {
   return CartController(ref.watch(cartStorageProvider));
 });
 
