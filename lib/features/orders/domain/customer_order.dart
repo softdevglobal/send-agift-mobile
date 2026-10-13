@@ -236,7 +236,7 @@ class CustomerOrder {
 
 const _orderStatusLabels = {
   'draft': 'Draft',
-  'pending_payment': 'Awaiting payment',
+  'pending_payment': 'Awaiting',
   'paid': 'Paid',
   'accepted': 'Accepted',
   'preparing': 'Being prepared',
