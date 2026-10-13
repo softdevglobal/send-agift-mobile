@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/router/app_router.dart';
@@ -14,6 +13,7 @@ import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/quantity_stepper.dart';
 import '../../../checkout/data/checkout_repository.dart';
+import '../../../checkout/presentation/in_app_payment.dart';
 import '../../../messages/data/messages_providers.dart';
 import '../../../products/data/catalog_providers.dart';
 import '../../../reviews/data/reviews_repository.dart';
@@ -197,22 +197,28 @@ class _PayNowCardState extends ConsumerState<_PayNowCard>
       _error = null;
     });
     try {
-      final url = await ref
-          .read(checkoutRepositoryProvider)
-          .startPayment(widget.orderId);
-      if (url == null) {
-        if (mounted) {
+      // Stripe's own payment sheet, inside the app.
+      final outcome = await payOrderInApp(ref, widget.orderId);
+      if (!mounted) return;
+      switch (outcome) {
+        case InAppPaymentOutcome.paid:
+          ref.invalidate(customerOrderProvider(widget.orderId));
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Payment received. Your gift is on its way.'),
+            ),
+          );
+        case InAppPaymentOutcome.unavailable:
           setState(() => _error = 'Card payments are not available yet.');
-        }
-        return;
+        case InAppPaymentOutcome.cancelled:
+          break;
       }
-      await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
     } catch (error) {
       if (mounted) {
         setState(
           () => _error = error is AppException
               ? error.message
-              : 'Could not open the payment page.',
+              : 'Could not open the payment.',
         );
       }
     } finally {

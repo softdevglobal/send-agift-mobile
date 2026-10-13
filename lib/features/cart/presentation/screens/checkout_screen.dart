@@ -3,7 +3,6 @@ import 'dart:math' as math;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:url_launcher/url_launcher.dart';
 
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
@@ -15,6 +14,7 @@ import '../../../../core/widgets/quantity_stepper.dart';
 import '../../../auth/data/auth_controller.dart';
 import '../../../checkout/data/checkout_repository.dart';
 import '../../../checkout/domain/checkout.dart';
+import '../../../checkout/presentation/in_app_payment.dart';
 import '../../../checkout/presentation/widgets/delivery_summary.dart';
 import '../../../checkout/presentation/widgets/new_recipient_sheet.dart';
 import '../../../checkout/presentation/widgets/recipient_picker.dart';
@@ -484,18 +484,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
 
       ref.read(cartProvider.notifier).clear();
 
-      // The gift is only sent once it is paid, on Stripe's own page. If that
-      // cannot be opened the order waits on its page, which offers Pay now.
+      // The gift is only sent once it is paid, in Stripe's payment sheet
+      // inside the app. Closed, declined or unavailable, the order waits on
+      // its page, which offers Pay now.
+      String? payProblem;
       try {
-        final payUrl = await repository.startPayment(orderId);
-        if (payUrl != null) {
-          await launchUrl(
-            Uri.parse(payUrl),
-            mode: LaunchMode.externalApplication,
-          );
+        final outcome = await payOrderInApp(ref, orderId);
+        if (outcome == InAppPaymentOutcome.unavailable) {
+          payProblem = 'Card payments are not available yet.';
         }
-      } on AppException {
-        // Falls through to the order page.
+      } on AppException catch (error) {
+        payProblem = error.message;
+      }
+      if (payProblem != null && mounted) {
+        // Said here, since the order page only shows Pay now.
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Payment not started: $payProblem')),
+        );
       }
       if (!mounted) return;
       context.go('${AppRoutes.orders}/$orderId');
