@@ -169,7 +169,8 @@ class _ReelCardState extends ConsumerState<ReelCard>
           if (_paused) const _PausedGlyph(),
           Positioned(
             right: 12,
-            bottom: 40,
+            // Above the floating tab bar, which the reel runs underneath.
+            bottom: 40 + MediaQuery.paddingOf(context).bottom,
             child: _ActionRail(
               liked: reel.likedByMe,
               likeCount: reel.likeCount,
@@ -204,7 +205,7 @@ class _ReelCardState extends ConsumerState<ReelCard>
           Positioned(
             left: 0,
             right: 0,
-            bottom: 0,
+            bottom: MediaQuery.paddingOf(context).bottom,
             child: _ReelDetails(
               reel: reel,
               onSendGift: _openGift,

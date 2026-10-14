@@ -32,6 +32,9 @@ class AppShell extends ConsumerWidget {
     final unreadMessages = ref.watch(unreadMessagesProvider);
 
     return Scaffold(
+      // Pages run underneath the floating bar, so nothing but the bar itself
+      // shows at the bottom of the screen.
+      extendBody: true,
       body: navigationShell,
       bottomNavigationBar: AppBottomNav(
         currentIndex: navigationShell.currentIndex,

@@ -61,4 +61,51 @@ void main() {
       );
     }
   });
+
+  // Small phone, common phones, large phone, tablet: the bar must fit, stay
+  // phone-sized on a tablet, and sit low over a gesture strip but clear of
+  // Android's 3-button bar.
+  for (final (name, size, bottomInset, maxGap) in const [
+    ('iPhone SE', Size(320, 568), 0.0, 16.0),
+    ('Android swipe', Size(360, 780), 24.0, 23.0),
+    ('iPhone 15', Size(393, 852), 34.0, 32.0),
+    ('Pro Max', Size(430, 932), 34.0, 32.0),
+    ('Android buttons', Size(412, 915), 48.0, 58.0),
+    ('Tablet', Size(820, 1180), 20.0, 19.0),
+  ]) {
+    testWidgets('fits and sits low on $name', (tester) async {
+      tester.view.physicalSize = size * 3;
+      tester.view.devicePixelRatio = 3;
+      tester.view.viewPadding = FakeViewPadding(bottom: bottomInset * 3);
+      addTearDown(tester.view.reset);
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            bottomNavigationBar: AppBottomNav(
+              currentIndex: 0,
+              onChanged: (_) {},
+              items: _items,
+            ),
+          ),
+        ),
+      );
+      await tester.pump();
+      expect(tester.takeException(), isNull);
+
+      final bar = tester.getRect(find.byType(AppBottomNav));
+      final rail = tester.getRect(
+        find
+            .descendant(
+              of: find.byType(AppBottomNav),
+              matching: find.byType(Container),
+            )
+            .first,
+      );
+      expect(size.height - rail.bottom, lessThanOrEqualTo(maxGap));
+      expect(rail.width, lessThanOrEqualTo(480));
+      expect(rail.left, greaterThanOrEqualTo(bar.left));
+      expect(rail.right, lessThanOrEqualTo(bar.right));
+    });
+  }
 }

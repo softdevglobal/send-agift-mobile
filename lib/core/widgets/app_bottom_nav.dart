@@ -24,6 +24,9 @@ class AppBottomNav extends StatelessWidget {
   final List<AppBottomNavItem> items;
 
   static const double _barHeight = 72;
+
+  /// On tablets and landscape the bar keeps a phone-like width, centred.
+  static const double _maxBarWidth = 480;
   static const double _barRadius = 30;
   static const double _pillRadius = 22;
   static const double _iconSize = 22;
@@ -47,11 +50,28 @@ class AppBottomNav extends StatelessWidget {
   Widget build(BuildContext context) {
     final orbIndex = _orbIndex;
 
-    return SafeArea(
-      top: false,
-      child: Padding(
-        padding: const EdgeInsets.fromLTRB(16, 0, 16, 10),
-        child: LayoutBuilder(
+    final screen = MediaQuery.sizeOf(context);
+    // The bar sits low. Over a gesture strip (the iPhone home indicator,
+    // Android swipe navigation, both 34 or less) it only keeps a small gap,
+    // since the strip stays usable. Android's 3-button bar is taller and its
+    // buttons must stay tappable, so the bar sits fully above it.
+    final systemBottom = MediaQuery.viewPaddingOf(context).bottom;
+    final bottomGap = systemBottom == 0
+        ? 16.0
+        : systemBottom <= 34
+        ? (systemBottom * 0.95).clamp(16.0, 32.0)
+        : systemBottom + 10;
+    // Side margins follow the screen: tighter on small phones, roomier on
+    // big ones. On tablets the bar keeps a phone-like width, centred.
+    final side = (screen.width * 0.04).clamp(10.0, 20.0);
+
+    return Padding(
+      padding: EdgeInsets.fromLTRB(side, 0, side, bottomGap),
+      child: Center(
+        heightFactor: 1,
+        child: ConstrainedBox(
+          constraints: const BoxConstraints(maxWidth: _maxBarWidth),
+          child: LayoutBuilder(
           builder: (context, constraints) {
             final inner = constraints.maxWidth - (_barInset * 2);
             // The orb keeps its slot until there is not enough rail left for
@@ -106,6 +126,7 @@ class AppBottomNav extends StatelessWidget {
               ),
             );
           },
+          ),
         ),
       ),
     );

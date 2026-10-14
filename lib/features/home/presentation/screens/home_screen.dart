@@ -41,7 +41,10 @@ class HomeScreen extends ConsumerWidget {
             await ref.read(catalogProvider.future);
           },
           child: ListView(
-            padding: const EdgeInsets.only(bottom: 32),
+            // Clears the floating tab bar, which the page runs underneath.
+            padding: EdgeInsets.only(
+              bottom: 24 + MediaQuery.paddingOf(context).bottom,
+            ),
             children: [
               const _HomeTopBar(),
               // Where and when first, like the top of the web home page.
