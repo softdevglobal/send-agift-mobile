@@ -17,6 +17,7 @@ import '../../../reviews/presentation/screens/product_reviews_screen.dart';
 import '../../../reviews/presentation/widgets/product_reviews_section.dart';
 import '../../data/catalog_providers.dart';
 import '../../domain/gift.dart';
+import '../widgets/gift_gallery.dart';
 import '../widgets/save_gift_button.dart';
 import '../../../../core/widgets/reward_points_badge.dart';
 
@@ -63,15 +64,33 @@ class _GiftDetailScreenState extends ConsumerState<GiftDetailScreen> {
   }
 }
 
-class _Content extends StatelessWidget {
+class _Content extends StatefulWidget {
   const _Content({required this.gift, this.heroTag});
 
   final Gift gift;
   final String? heroTag;
 
   @override
+  State<_Content> createState() => _ContentState();
+}
+
+class _ContentState extends State<_Content> {
+  final _gallery = GiftGalleryController();
+
+  @override
+  void dispose() {
+    _gallery.dispose();
+    super.dispose();
+  }
+
+  Gift get gift => widget.gift;
+  String? get heroTag => widget.heroTag;
+
+  @override
   Widget build(BuildContext context) {
     final discount = gift.discountPercent;
+    // Every photo and video: photos first from the cover, then videos.
+    final media = gift.gallery;
 
     return CustomScrollView(
       slivers: [
@@ -92,14 +111,21 @@ class _Content extends StatelessWidget {
             ),
           ],
           flexibleSpace: FlexibleSpaceBar(
-            background: heroTag == null
-                ? AppNetworkImage(url: gift.image)
-                : Hero(
-                    tag: heroTag!,
-                    child: AppNetworkImage(url: gift.image),
-                  ),
+            background: GiftGalleryView(
+              media: media,
+              controller: _gallery,
+              heroTag: heroTag,
+            ),
           ),
         ),
+        // Every photo and video in one row under the main image.
+        if (media.length > 1)
+          SliverToBoxAdapter(
+            child: Padding(
+              padding: const EdgeInsets.only(top: 14),
+              child: GiftGalleryThumbnails(media: media, controller: _gallery),
+            ),
+          ),
         SliverToBoxAdapter(
           child: FadeSlideIn(
             child: Padding(
