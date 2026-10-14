@@ -146,12 +146,14 @@ class DeliverySummary extends StatelessWidget {
         ],
         if (quote != null && !quote!.complete) ...[
           const SizedBox(height: 8),
+          // What is wrong and how to fix it sits under the recipient.
           _note(
             context,
-            quote!.unquoted.isEmpty
-                ? 'A shop in your cart cannot deliver to this address.'
-                : 'Cannot deliver there: ${quote!.unquoted.join('; ')}. '
-                      'Choose another recipient or remove that shop\'s gifts.',
+            quote!.blocked.length > 1
+                ? '${quote!.blocked.length} shops can’t deliver to this '
+                      'address. See below for what you can do.'
+                : 'This address can’t be delivered to. See below for what '
+                      'you can do.',
             warn: true,
           ),
         ],

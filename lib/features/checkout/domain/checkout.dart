@@ -195,6 +195,46 @@ class QuotedShipment {
   }
 }
 
+/// One shop's delivery to the recipient: whether its zones reach them, and
+/// if not, why.
+class ShopDeliveryCheck {
+  const ShopDeliveryCheck({
+    required this.shopId,
+    required this.shopName,
+    required this.available,
+    this.reason,
+    this.reasonCode,
+    this.distanceKm,
+    this.farthestKm,
+  });
+
+  final String shopId;
+  final String shopName;
+  final bool available;
+
+  /// The API's own words for why it cannot deliver.
+  final String? reason;
+
+  /// NO_ZONES, SHOP_NO_LOCATION, ADDRESS_NO_LOCATION or OUTSIDE_ZONE.
+  final String? reasonCode;
+  final double? distanceKm;
+  final double? farthestKm;
+
+  factory ShopDeliveryCheck.fromJson(Map<String, dynamic> json) {
+    final option = json['seller_delivery'];
+    final o = option is Map<String, dynamic> ? option : const <String, dynamic>{};
+    return ShopDeliveryCheck(
+      shopId: json['shop_id'] as String? ?? '',
+      shopName: json['shop_name'] as String? ?? '',
+      available: o['available'] as bool? ?? false,
+      reason: o['reason'] as String?,
+      reasonCode: o['reason_code'] as String?,
+      distanceKm: (o['distance_km'] as num?)?.toDouble(),
+      farthestKm: (o['farthest_km'] as num?)?.toDouble(),
+    );
+  }
+}
+
 /// What delivery costs for the whole cart.
 class DeliveryQuote {
   const DeliveryQuote({
@@ -203,7 +243,15 @@ class DeliveryQuote {
     required this.currency,
     required this.complete,
     this.unquoted = const [],
+    this.shops = const [],
   });
+
+  /// Every shop in the cart, including the ones that cannot deliver.
+  final List<ShopDeliveryCheck> shops;
+
+  /// The shops whose delivery zones do not reach the recipient.
+  List<ShopDeliveryCheck> get blocked =>
+      shops.where((shop) => !shop.available).toList(growable: false);
 
   final List<QuotedShipment> shipments;
   final int amount;
@@ -241,6 +289,12 @@ class DeliveryQuote {
       complete: json['complete'] as bool? ?? false,
       unquoted: unquoted is List
           ? unquoted.whereType<String>().toList(growable: false)
+          : const [],
+      shops: json['shops'] is List
+          ? (json['shops'] as List)
+                .whereType<Map<String, dynamic>>()
+                .map(ShopDeliveryCheck.fromJson)
+                .toList(growable: false)
           : const [],
     );
   }

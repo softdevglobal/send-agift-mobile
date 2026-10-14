@@ -15,6 +15,7 @@ import '../../../auth/data/auth_controller.dart';
 import '../../../checkout/data/checkout_repository.dart';
 import '../../../checkout/domain/checkout.dart';
 import '../../../checkout/presentation/in_app_payment.dart';
+import '../../../checkout/presentation/widgets/delivery_problem_card.dart';
 import '../../../checkout/presentation/widgets/delivery_summary.dart';
 import '../../../checkout/presentation/widgets/new_recipient_sheet.dart';
 import '../../../checkout/presentation/widgets/recipient_picker.dart';
@@ -262,6 +263,32 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                         onChanged: (value) =>
                             setState(() => _recipientId = value),
                       ),
+                      // Each shop that cannot deliver here, and the fixes.
+                      for (final shop in _quote?.blocked ?? const <ShopDeliveryCheck>[])
+                        Padding(
+                          padding: const EdgeInsets.only(top: 12),
+                          child: DeliveryProblemCard(
+                            shop: shop,
+                            giftCount: lines
+                                .where((line) => line.gift.shopId == shop.shopId)
+                                .length,
+                            onChangeRecipient: () =>
+                                setState(() => _recipientId = null),
+                            onEditAddress: _recipientId == null
+                                ? null
+                                : () => context.push(
+                                    AppRoutes.recipientPath(_recipientId!),
+                                  ),
+                            onRemoveShopGifts: () {
+                              final cart = ref.read(cartProvider.notifier);
+                              for (final line in lines) {
+                                if (line.gift.shopId == shop.shopId) {
+                                  cart.remove(line.gift.id);
+                                }
+                              }
+                            },
+                          ),
+                        ),
                     ],
                   ),
                 ),

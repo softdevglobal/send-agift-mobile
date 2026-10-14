@@ -18,6 +18,7 @@ import '../../../auth/domain/code_signup.dart';
 import '../../../checkout/data/checkout_repository.dart';
 import '../../../checkout/domain/checkout.dart';
 import '../../../checkout/presentation/in_app_payment.dart';
+import '../../../checkout/presentation/widgets/delivery_problem_card.dart';
 import '../../../checkout/presentation/widgets/recipient_picker.dart';
 import '../../../delivery/data/delivery_providers.dart';
 import '../../../delivery/domain/delivery_intent.dart';
@@ -476,7 +477,17 @@ class _FreeGiftScreenState extends ConsumerState<FreeGiftScreen> {
                   ),
                 ),
                 const SizedBox(height: 14),
-                _Summary(product: _product, quote: _quote, quoting: _quoting),
+                _Summary(
+                  product: _product,
+                  quote: _quote,
+                  quoting: _quoting,
+                  onChangeRecipient: () => _pickRecipient(null),
+                  onEditAddress: _recipientId == null
+                      ? null
+                      : () => context.push(
+                          AppRoutes.recipientPath(_recipientId!),
+                        ),
+                ),
               ],
               if (_error != null) ...[
                 const SizedBox(height: 14),
@@ -1238,7 +1249,12 @@ class _Summary extends StatelessWidget {
     required this.product,
     required this.quote,
     required this.quoting,
+    this.onChangeRecipient,
+    this.onEditAddress,
   });
+
+  final VoidCallback? onChangeRecipient;
+  final VoidCallback? onEditAddress;
 
   final FreeGiftOffer? product;
   final DeliveryQuote? quote;
@@ -1320,13 +1336,19 @@ class _Summary extends StatelessWidget {
             ),
           ),
           if (quote != null && !quote!.complete) ...[
-            const SizedBox(height: 8),
-            _Notice(
-              text: quote!.unquoted.isEmpty
-                  ? 'This shop cannot deliver to that address.'
-                  : 'Cannot deliver there: ${quote!.unquoted.join('; ')}.',
-              error: true,
-            ),
+            const SizedBox(height: 10),
+            // What is wrong and how to fix it, as in checkout.
+            for (final shop in quote!.blocked)
+              DeliveryProblemCard(
+                shop: shop,
+                onChangeRecipient: onChangeRecipient,
+                onEditAddress: onEditAddress,
+              ),
+            if (quote!.blocked.isEmpty)
+              const _Notice(
+                text: 'This shop cannot deliver to that address.',
+                error: true,
+              ),
           ],
         ],
       ),
