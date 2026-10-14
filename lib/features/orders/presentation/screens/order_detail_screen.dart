@@ -237,15 +237,25 @@ class _PayNowCardState extends ConsumerState<_PayNowCard>
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text('Complete your payment', style: AppTypography.display(18)),
+          Text(
+            widget.order.isFreeGift
+                ? 'Pay for delivery'
+                : 'Complete your payment',
+            style: AppTypography.display(18),
+          ),
           const SizedBox(height: 4),
-          const Text(
-            'Your gift is sent as soon as the payment goes through.',
+          Text(
+            widget.order.isFreeGift
+                ? 'Your free gift is sent as soon as its delivery is paid.'
+                : 'Your gift is sent as soon as the payment goes through.',
             style: TextStyle(color: AppColors.mutedForeground, height: 1.4),
           ),
           const SizedBox(height: 12),
           // What the total is made of, before it is asked for.
-          _BreakdownRow('Gifts', widget.order.subtotalLabel),
+          _BreakdownRow(
+            widget.order.isFreeGift ? 'Gift (paid by the shop)' : 'Gifts',
+            widget.order.subtotalLabel,
+          ),
           _BreakdownRow('Delivery', widget.order.deliveryLabel),
           const Divider(height: 18),
           _BreakdownRow('Total', widget.totalLabel, strong: true),
@@ -780,7 +790,7 @@ class _TrackingCard extends StatelessWidget {
     _TrackStep(
       'Payment received',
       'Payment is confirmed. The seller can start on your gift.',
-      ['paid'],
+      ['paid', 'confirmed'],
     ),
     _TrackStep('Seller accepted', 'The seller has accepted this order.', [
       'accepted',
@@ -798,6 +808,7 @@ class _TrackingCard extends StatelessWidget {
     'draft': 'This order is still being prepared on our side.',
     'pending_payment': 'Waiting for your payment.',
     'paid': 'Payment is confirmed. Waiting for the seller to accept.',
+    'confirmed': 'Your free gift is confirmed. Waiting for the seller to accept.',
     'accepted': 'The seller has accepted this gift order.',
     'preparing': 'The seller is preparing your gift.',
     'dispatched': 'The gift is on its way to the recipient.',
@@ -908,7 +919,10 @@ class _StatusTag extends StatelessWidget {
   Widget build(BuildContext context) {
     final (bg, fg) = switch (status) {
       'pending_payment' => (const Color(0xFFFDE68A), const Color(0xFF451A03)),
-      'paid' || 'accepted' || 'preparing' => (AppColors.purple, Colors.white),
+      'paid' ||
+      'confirmed' ||
+      'accepted' ||
+      'preparing' => (AppColors.purple, Colors.white),
       'dispatched' => (AppColors.foreground, Colors.white),
       'delivered' => (AppColors.teal, AppColors.tealForeground),
       'cancelled' || 'refunded' => (AppColors.destructive, Colors.white),

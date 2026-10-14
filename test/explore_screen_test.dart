@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:send_agift_mobile/features/products/data/catalog_providers.dart';
-import 'package:send_agift_mobile/features/products/data/sample_gifts.dart';
+import 'support/sample_gifts.dart';
 import 'package:send_agift_mobile/features/products/presentation/screens/explore_screen.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 

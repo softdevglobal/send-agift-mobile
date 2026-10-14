@@ -6,7 +6,7 @@ import 'package:send_agift_mobile/features/cart/presentation/screens/cart_screen
 import 'package:send_agift_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:send_agift_mobile/features/home/presentation/widgets/games_teaser.dart';
 import 'package:send_agift_mobile/features/products/data/catalog_providers.dart';
-import 'package:send_agift_mobile/features/products/data/sample_gifts.dart';
+import 'support/sample_gifts.dart';
 
 import 'support/fake_auth.dart';
 

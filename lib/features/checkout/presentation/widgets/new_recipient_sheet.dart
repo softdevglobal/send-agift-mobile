@@ -21,7 +21,13 @@ import '../../domain/checkout.dart';
 /// address searched for on home or explore is filled in from the start, so
 /// the shopper is not asked twice. The map point from the search is what
 /// each shop prices delivery against, so one must be picked.
-Future<Recipient?> showNewRecipientSheet(BuildContext context) {
+///
+/// With [requireContact] their email and phone are required too, as for a
+/// free gift: it is limited to one per person, matched on both.
+Future<Recipient?> showNewRecipientSheet(
+  BuildContext context, {
+  bool requireContact = false,
+}) {
   return showModalBottomSheet<Recipient>(
     context: context,
     isScrollControlled: true,
@@ -32,7 +38,7 @@ Future<Recipient?> showNewRecipientSheet(BuildContext context) {
         top: Radius.circular(AppTheme.radius2xl),
       ),
     ),
-    builder: (_) => const _NewRecipientSheet(),
+    builder: (_) => _NewRecipientSheet(requireContact: requireContact),
   );
 }
 
@@ -58,7 +64,9 @@ PlaceDetails? placeFromIntent(DeliveryIntent? intent) {
 const _defaultDialIso = 'LK';
 
 class _NewRecipientSheet extends ConsumerStatefulWidget {
-  const _NewRecipientSheet();
+  const _NewRecipientSheet({this.requireContact = false});
+
+  final bool requireContact;
 
   @override
   ConsumerState<_NewRecipientSheet> createState() => _NewRecipientSheetState();
@@ -188,8 +196,13 @@ class _NewRecipientSheetState extends ConsumerState<_NewRecipientSheet> {
     final line1 = _line1.text.trim();
     final city = _city.text.trim();
     String? problem;
+    final email = _email.text.trim();
     if (name.isEmpty) {
       problem = 'Enter their name.';
+    } else if (widget.requireContact && !email.contains('@')) {
+      problem = 'Enter their email. A free gift needs it.';
+    } else if (widget.requireContact && _phone.text.trim().isEmpty) {
+      problem = 'Enter their phone number. A free gift needs it.';
     } else if (place == null ||
         place.latitude == null ||
         place.longitude == null) {
@@ -330,7 +343,9 @@ class _NewRecipientSheetState extends ConsumerState<_NewRecipientSheet> {
               key: const Key('new-recipient-email'),
               controller: _email,
               keyboardType: TextInputType.emailAddress,
-              decoration: const InputDecoration(labelText: 'Email (optional)'),
+              decoration: InputDecoration(
+                labelText: widget.requireContact ? 'Email' : 'Email (optional)',
+              ),
             ),
             const SizedBox(height: 12),
             DropdownButtonFormField<String>(

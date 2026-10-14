@@ -3,7 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:send_agift_mobile/core/widgets/app_bottom_nav.dart';
 import 'package:send_agift_mobile/features/products/data/catalog_providers.dart';
-import 'package:send_agift_mobile/features/products/data/sample_gifts.dart';
+import 'support/sample_gifts.dart';
 import 'package:send_agift_mobile/app/app.dart';
 import 'package:send_agift_mobile/core/errors/app_exception.dart';
 import 'package:send_agift_mobile/features/auth/data/auth_controller.dart';

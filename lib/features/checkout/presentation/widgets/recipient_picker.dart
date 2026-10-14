@@ -16,10 +16,14 @@ class RecipientPicker extends ConsumerWidget {
     super.key,
     required this.selectedId,
     required this.onChanged,
+    this.requireContact = false,
   });
 
   final String? selectedId;
   final ValueChanged<String?> onChanged;
+
+  /// New recipients must have an email and a phone, as for a free gift.
+  final bool requireContact;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -76,7 +80,10 @@ class RecipientPicker extends ConsumerWidget {
           child: TextButton.icon(
             key: const Key('recipient-add'),
             onPressed: () async {
-              final created = await showNewRecipientSheet(context);
+              final created = await showNewRecipientSheet(
+                context,
+                requireContact: requireContact,
+              );
               if (created != null) onChanged(created.id);
             },
             icon: const Icon(Icons.person_add_alt_1_rounded, size: 18),

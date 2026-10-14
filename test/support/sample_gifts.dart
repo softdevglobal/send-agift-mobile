@@ -1,7 +1,7 @@
-import '../domain/gift.dart';
+import 'package:send_agift_mobile/features/products/domain/gift.dart';
 
-/// Placeholder shelf shown when no seller has published anything yet (or the
-/// marketplace endpoint is unreachable). Mirrors the web's `bestSellingGifts`.
+/// Test data only: a shelf of made-up gifts for widget tests. The app itself
+/// never shows these.
 const List<Gift> sampleGifts = [
   Gift(
     id: 'sample-1',

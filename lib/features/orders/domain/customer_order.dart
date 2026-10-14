@@ -145,6 +145,7 @@ class CustomerOrder {
     this.items = const [],
     this.giftPoints = 0,
     this.giftPointsStatus = 'none',
+    this.orderKind = 'paid',
   });
 
   final String id;
@@ -172,6 +173,12 @@ class CustomerOrder {
   final int giftPoints;
   final String giftPointsStatus;
 
+  /// `paid`, or `free_gift`: the customer's one free gift, where the shop
+  /// pays for the gift and the customer pays only its delivery.
+  final String orderKind;
+
+  bool get isFreeGift => orderKind == 'free_gift';
+
   /// Reward points the order's lines carry, whatever state they are in.
   int get rewardPointsTotal => items
       .where((i) => i.rewardStatus != 'none')
@@ -196,7 +203,8 @@ class CustomerOrder {
 
   String get statusLabel => _orderStatusLabels[status] ?? _humanize(status);
   String get totalLabel => Money.format(totalAmount, currency);
-  String get subtotalLabel => Money.format(subtotalAmount, currency);
+  String get subtotalLabel =>
+      isFreeGift ? 'Free' : Money.format(subtotalAmount, currency);
   String get deliveryLabel =>
       deliveryAmount > 0 ? Money.format(deliveryAmount, currency) : 'Free';
   String formatAmount(int minorAmount) => Money.format(minorAmount, currency);
@@ -230,6 +238,7 @@ class CustomerOrder {
           const <CustomerOrderItem>[],
       giftPoints: (json['gift_points'] as num?)?.toInt() ?? 0,
       giftPointsStatus: json['gift_points_status'] as String? ?? 'none',
+      orderKind: json['order_kind'] as String? ?? 'paid',
     );
   }
 }
@@ -238,6 +247,7 @@ const _orderStatusLabels = {
   'draft': 'Draft',
   'pending_payment': 'Awaiting',
   'paid': 'Paid',
+  'confirmed': 'Confirmed',
   'accepted': 'Accepted',
   'preparing': 'Being prepared',
   'dispatched': 'On its way',

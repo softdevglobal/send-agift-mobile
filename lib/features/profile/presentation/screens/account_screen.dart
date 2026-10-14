@@ -174,6 +174,14 @@ class AccountScreen extends ConsumerWidget {
                 title: 'Gifting',
                 items: [
                   _Shortcut(
+                    icon: Icons.redeem_rounded,
+                    color: AppColors.tealForeground,
+                    tint: AppColors.accent,
+                    label: 'Free gift',
+                    subtitle: 'Send one gift free. You pay delivery',
+                    onTap: () => context.push(AppRoutes.freeGift),
+                  ),
+                  _Shortcut(
                     icon: Icons.card_giftcard_rounded,
                     color: const Color(0xFFDB2777),
                     tint: const Color(0xFFFCE7F1),

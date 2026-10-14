@@ -10,6 +10,7 @@ import '../../features/auth/presentation/screens/register_screen.dart';
 import '../../features/auth/presentation/screens/verify_code_screen.dart';
 import '../../features/cart/presentation/screens/cart_screen.dart';
 import '../../features/cart/presentation/screens/checkout_screen.dart';
+import '../../features/free_gift/presentation/screens/free_gift_screen.dart';
 import '../../features/games/presentation/game_definitions.dart';
 import '../../features/games/presentation/screens/competition_leaderboard_screen.dart';
 import '../../features/notifications/presentation/notifications_screen.dart';
@@ -79,6 +80,9 @@ class AppRoutes {
   static const receivedGifts = '/gifts-received';
   static const recipients = '/recipients';
   static const help = '/help';
+
+  /// The customer's one free gift: the shop pays for it, they pay delivery.
+  static const freeGift = '/free-gift';
   static const terms = '/terms';
 
   static String recipientPath(String id) => '$recipients/$id';
@@ -312,6 +316,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) =>
             _fadePage(state, const CheckoutScreen()),
+      ),
+      GoRoute(
+        path: AppRoutes.freeGift,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          FreeGiftScreen(
+            initialProductId: state.uri.queryParameters['product'],
+          ),
+        ),
       ),
       GoRoute(
         path: AppRoutes.orders,

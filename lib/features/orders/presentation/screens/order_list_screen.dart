@@ -387,7 +387,10 @@ class _OrderCard extends StatelessWidget {
                           style: textTheme.titleSmall,
                         ),
                         const SizedBox(height: 2),
-                        Text(when, style: textTheme.bodySmall),
+                        Text(
+                          order.isFreeGift ? 'Free gift · $when' : when,
+                          style: textTheme.bodySmall,
+                        ),
                       ],
                     ),
                   ),

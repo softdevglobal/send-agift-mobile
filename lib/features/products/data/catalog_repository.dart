@@ -1,9 +1,9 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/errors/app_exception.dart';
 import '../../../core/network/api_client.dart';
 import '../domain/gift.dart';
 import '../domain/shop.dart';
-import 'sample_gifts.dart';
 
 /// Reads the public marketplace: every active shop and its published products.
 ///
@@ -24,9 +24,9 @@ class CatalogRepository {
       _cachedAt != null &&
       DateTime.now().difference(_cachedAt!) < _cacheTtl;
 
-  /// Loads the marketplace catalog. Falls back to [sampleGifts] when the
-  /// backend is unreachable or no shop has published yet, so the storefront
-  /// never renders empty on a cold start.
+  /// Loads the marketplace catalog: only real, published gifts. When the
+  /// backend cannot be reached this throws, and the screens say so with a
+  /// pull to retry instead of showing made-up products.
   Future<List<Gift>> loadCatalog({bool forceRefresh = false}) async {
     if (!forceRefresh && _cacheIsFresh) return _cache!;
 
@@ -41,18 +41,13 @@ class CatalogRepository {
         gifts.addAll(products);
       }
 
-      // A successful-but-empty response is real information: no shop has
-      // published yet. Substituting samples there would hide the true state of
-      // the catalog, so only an unreachable backend falls back.
+      // An empty list is real information: no shop has published yet.
       _cache = gifts;
       _cachedAt = DateTime.now();
       return gifts;
-    } on DioException {
-      // The backend is unreachable. Show the clearly-placeholder sample shelf
-      // rather than an empty app.
-      _cache = sampleGifts;
-      _cachedAt = DateTime.now();
-      return sampleGifts;
+    } on DioException catch (error) {
+      // Nothing is cached, so a retry asks the backend again.
+      throw _client.mapError(error);
     }
   }
 
@@ -63,9 +58,13 @@ class CatalogRepository {
   /// not be on the loaded shelf, so a miss falls through to the public
   /// product endpoint rather than showing "gift not found".
   Future<Gift?> giftById(String id) async {
-    final catalog = await loadCatalog();
-    for (final gift in catalog) {
-      if (gift.id == id) return gift;
+    try {
+      final catalog = await loadCatalog();
+      for (final gift in catalog) {
+        if (gift.id == id) return gift;
+      }
+    } on AppException {
+      // The shelf did not load; the product endpoint may still answer.
     }
     return _fetchPublicProduct(id);
   }

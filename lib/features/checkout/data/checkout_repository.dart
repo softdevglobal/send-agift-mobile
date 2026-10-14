@@ -100,6 +100,18 @@ class CheckoutRepository {
     required String recipientId,
     required DateTime deliveryDate,
     required List<CartLine> lines,
+  }) => quoteItems(
+    recipientId: recipientId,
+    deliveryDate: deliveryDate,
+    items: [for (final line in lines) (line.gift.id, line.quantity)],
+  );
+
+  /// The same quote for products by id, e.g. the one unit of a free gift,
+  /// whose delivery the customer pays.
+  Future<DeliveryQuote> quoteItems({
+    required String recipientId,
+    required DateTime deliveryDate,
+    required List<(String productId, int quantity)> items,
   }) async {
     try {
       final response = await _client.dio.post<Map<String, dynamic>>(
@@ -108,8 +120,8 @@ class CheckoutRepository {
           'recipient_id': recipientId,
           'delivery_date': _dateOnly(deliveryDate),
           'items': [
-            for (final line in lines)
-              {'product_id': line.gift.id, 'quantity': line.quantity},
+            for (final (productId, quantity) in items)
+              {'product_id': productId, 'quantity': quantity},
           ],
         },
       );

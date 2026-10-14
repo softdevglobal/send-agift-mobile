@@ -12,6 +12,7 @@ import '../../../../core/widgets/section_heading.dart';
 import '../../../auth/data/auth_controller.dart';
 import '../../../cart/data/cart_controller.dart';
 import '../../../delivery/presentation/widgets/gift_search_bar.dart';
+import '../../../free_gift/presentation/widgets/free_gift_banner.dart';
 import '../../../notifications/data/notifications_repository.dart';
 import '../../../products/data/catalog_providers.dart';
 import '../../../products/domain/gift.dart';
@@ -59,6 +60,12 @@ class HomeScreen extends ConsumerWidget {
                   ),
                 ),
               ),
+              // One free gift each: the shop pays for it, they pay delivery.
+              // Shows nothing while the program is off or theirs is sent.
+              if (ref.watch(showFreeGiftProvider)) ...[
+                const FadeSlideIn(child: FreeGiftBanner()),
+                const SizedBox(height: 18),
+              ],
               // The hero animates its own entrance in sequence, so it isn't
               // wrapped again here. Everything after it cascades in behind.
               const HomeHero(),
@@ -169,6 +176,20 @@ class _HomeTopBar extends ConsumerWidget {
                   ],
                 ),
               ),
+              // The free gift, always one tap away while there is one to send.
+              if (ref.watch(showFreeGiftProvider)) ...[
+                IconButton(
+                  key: const Key('home-free-gift'),
+                  onPressed: () => context.push(AppRoutes.freeGift),
+                  style: IconButton.styleFrom(
+                    backgroundColor: AppColors.teal,
+                  ),
+                  icon: const Icon(Icons.redeem_rounded),
+                  color: AppColors.tealForeground,
+                  tooltip: 'Claim your free gift',
+                ),
+                const SizedBox(width: 8),
+              ],
               // New competitions and other news; the badge counts unread.
               IconButton(
                 onPressed: () => context.push(AppRoutes.notifications),
