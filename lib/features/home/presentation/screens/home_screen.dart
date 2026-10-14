@@ -22,7 +22,6 @@ import '../widgets/games_teaser.dart';
 import '../widgets/feature_bar.dart';
 import '../widgets/home_hero.dart';
 import '../widgets/offer_banner.dart';
-import '../widgets/testimonial_carousel.dart';
 
 /// Storefront landing screen. Opens with no sign-in, exactly like the web.
 class HomeScreen extends ConsumerWidget {
@@ -106,15 +105,6 @@ class HomeScreen extends ConsumerWidget {
                 delay: Duration(milliseconds: 240),
                 child: OfferBanner(),
               ),
-              const SizedBox(height: 34),
-              const FadeSlideIn(
-                delay: Duration(milliseconds: 300),
-                child: SectionHeading(
-                  title: 'What our customers say',
-                  markerColor: SectionHeading.violetMarker,
-                ),
-              ),
-              const TestimonialCarousel(),
             ],
           ),
         ),
