@@ -45,7 +45,7 @@ final filteredGiftsProvider = Provider<AsyncValue<List<Gift>>>((ref) {
 
   return catalog.whenData((gifts) {
     return gifts.where((gift) {
-      final matchesCategory = category == 'all' || gift.categoryId == category;
+      final matchesCategory = category == 'all' || gift.inCategory(category);
       return matchesCategory && gift.matchesQuery(query);
     }).toList(growable: false);
   });

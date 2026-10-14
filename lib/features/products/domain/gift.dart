@@ -77,6 +77,14 @@ class Gift {
 
   String get categoryLabel => GiftCategory.nameFor(categoryId);
 
+  /// True when the gift is filed under [category]. A seller can pick several
+  /// categories, so any of its tags counts, not only the first.
+  bool inCategory(String category) {
+    final wanted = category.trim().toLowerCase();
+    return categoryId == wanted ||
+        occasionTags.any((tag) => tag.trim().toLowerCase() == wanted);
+  }
+
   /// Percentage saved against the compare-at price, or null when not on sale.
   int? get discountPercent {
     final compareAt = compareAtAmount;
