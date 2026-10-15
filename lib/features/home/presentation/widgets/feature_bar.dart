@@ -34,10 +34,14 @@ class FeatureBar extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Two lines of 11.5px description, a 10.5px title and padding: tall
+    // enough at the phone's own text size, so the strip grows with it
+    // rather than clipping when someone has set their text larger.
+    final textScale = MediaQuery.textScalerOf(context).scale(1).clamp(1.0, 2.0);
     return ColoredBox(
       color: AppColors.foreground,
       child: SizedBox(
-        height: 92,
+        height: 92 + 36 * (textScale - 1),
         child: ListView.separated(
           scrollDirection: Axis.horizontal,
           padding: const EdgeInsets.symmetric(

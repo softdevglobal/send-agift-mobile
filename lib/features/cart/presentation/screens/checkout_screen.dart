@@ -251,9 +251,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             color: AppColors.purple,
                           ),
                           const SizedBox(width: 10),
-                          Text(
-                            'Who is it for?',
-                            style: Theme.of(context).textTheme.titleMedium,
+                          Expanded(
+                            child: Text(
+                              'Who is it for?',
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: Theme.of(context).textTheme.titleMedium,
+                            ),
                           ),
                         ],
                       ),
