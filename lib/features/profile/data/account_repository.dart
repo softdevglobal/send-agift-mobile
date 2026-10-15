@@ -216,6 +216,13 @@ class AccountRepository {
     }
   }
 
+  /// Deletes the account for good. The server keeps order and payment
+  /// records the law requires, with nothing personal left in them, and
+  /// refuses (409, `ACTIVE_ORDERS`) while a gift is still on its way.
+  Future<void> deleteAccount() => _call(() async {
+    await _client.dio.delete<dynamic>('/customers/me');
+  });
+
   /// The customer's own addresses, read from their profile.
   Future<List<RecipientAddress>> myAddresses() => _call(() async {
     final response = await _client.dio.get<Map<String, dynamic>>(

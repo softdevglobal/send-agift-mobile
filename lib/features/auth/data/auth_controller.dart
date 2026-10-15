@@ -172,6 +172,13 @@ class AuthController extends StateNotifier<AuthState> {
     await _repository.logout();
     state = const AuthState();
   }
+
+  /// Forgets the session after the account was deleted. The server has
+  /// already removed this device and revoked every token, so nothing is sent.
+  Future<void> forgetDeletedAccount() async {
+    await _repository.logout();
+    state = const AuthState();
+  }
 }
 
 final authProvider = StateNotifierProvider<AuthController, AuthState>((ref) {
