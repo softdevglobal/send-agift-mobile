@@ -118,6 +118,8 @@ class AuthRepository {
           'provider': provider.provider,
           'token': provider.token,
           'token_type': provider.tokenType,
+          'nonce': ?provider.nonce,
+          'name': ?provider.name,
         },
       );
       final data = response.data ?? const {};

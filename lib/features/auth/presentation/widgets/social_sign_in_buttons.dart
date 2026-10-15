@@ -8,7 +8,7 @@ import '../../data/auth_controller.dart';
 import '../../data/social_sign_in.dart';
 import '../../domain/social_signup.dart';
 
-/// "Continue with Google / Facebook". The provider's own sheet confirms who
+/// "Continue with Apple / Google / Facebook". The provider's own sheet confirms who
 /// the person is; the API then signs them in, or hands back a sign-up that
 /// still needs a country and phone.
 class SocialSignInButtons extends ConsumerStatefulWidget {
@@ -27,7 +27,9 @@ class SocialSignInButtons extends ConsumerStatefulWidget {
 
   /// Whether any provider is configured; without one there's nothing to show.
   static bool get enabled =>
-      SocialSignInClient.googleEnabled || SocialSignInClient.facebookEnabled;
+      SocialSignInClient.appleEnabled ||
+      SocialSignInClient.googleEnabled ||
+      SocialSignInClient.facebookEnabled;
 
   @override
   ConsumerState<SocialSignInButtons> createState() =>
@@ -41,9 +43,11 @@ class _SocialSignInButtonsState extends ConsumerState<SocialSignInButtons> {
   Future<void> _start(String provider) async {
     setState(() => _busy = provider);
     try {
-      final token = provider == 'google'
-          ? await _client.google()
-          : await _client.facebook();
+      final token = switch (provider) {
+        'apple' => await _client.apple(),
+        'google' => await _client.google(),
+        _ => await _client.facebook(),
+      };
       if (token == null) return; // closed the provider's sheet
       final pending = await ref.read(authProvider.notifier).socialSignIn(token);
       if (!mounted) return;
@@ -66,6 +70,21 @@ class _SocialSignInButtonsState extends ConsumerState<SocialSignInButtons> {
     if (!SocialSignInButtons.enabled) return const SizedBox.shrink();
     return Column(
       children: [
+        // Apple's button comes first and is as prominent as the others.
+        if (SocialSignInClient.appleEnabled) ...[
+          _ProviderButton(
+            key: const Key('social-apple'),
+            label: '${widget.verb} with Apple',
+            background: Colors.black,
+            foreground: Colors.white,
+            mark: const Icon(Icons.apple, color: Colors.white, size: 24),
+            busy: _busy == 'apple',
+            onPressed: _busy == null ? () => _start('apple') : null,
+          ),
+          if (SocialSignInClient.googleEnabled ||
+              SocialSignInClient.facebookEnabled)
+            const SizedBox(height: 10),
+        ],
         if (SocialSignInClient.googleEnabled)
           _ProviderButton(
             key: const Key('social-google'),
