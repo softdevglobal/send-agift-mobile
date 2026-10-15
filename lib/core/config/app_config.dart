@@ -17,6 +17,19 @@ class AppConfig {
     return _resolveHost(raw);
   }
 
+  /// The website, where the policy pages live. `WEB_BASE_URL` when set;
+  /// otherwise the API's own host without its `api.` prefix
+  /// (api.sendagift.win → sendagift.win), else the live site.
+  static String get webBaseUrl {
+    final configured = _env('WEB_BASE_URL');
+    if (configured.isNotEmpty) return configured.replaceAll(RegExp(r'/+$'), '');
+    final api = Uri.tryParse(apiBaseUrl);
+    if (api != null && api.host.startsWith('api.')) {
+      return '${api.scheme}://${api.host.substring(4)}';
+    }
+    return 'https://sendagift.win';
+  }
+
   /// Google OAuth web client ID. Google issues the app an ID token for this
   /// client, which the API checks. Empty hides the Google button.
   static String get googleWebClientId => _env('GOOGLE_WEB_CLIENT_ID');

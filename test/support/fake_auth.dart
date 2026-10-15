@@ -20,5 +20,8 @@ class _FakeAuthRepository implements AuthRepository {
   Future<Map<String, dynamic>?> me() async => customer;
 
   @override
+  Future<void> logout() async {}
+
+  @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
 }

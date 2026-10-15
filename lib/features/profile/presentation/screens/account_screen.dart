@@ -14,6 +14,7 @@ import '../../../games/data/games_providers.dart';
 import '../../../messages/data/messages_providers.dart';
 import '../../../orders/data/orders_repository.dart';
 import '../../../saved/data/saved_controller.dart';
+import '../widgets/delete_account_sheet.dart';
 import '../widgets/sign_out_sheet.dart';
 
 /// Customer account hub. The mobile app is customer-only. There are no
@@ -224,7 +225,8 @@ class AccountScreen extends ConsumerWidget {
                   _MenuItem(
                     icon: Icons.description_outlined,
                     color: AppColors.mutedForeground,
-                    label: 'Terms & privacy',
+                    label: 'Policies & terms',
+                    subtitle: 'Privacy, delivery, refunds, free gifts',
                     onTap: () => context.push(AppRoutes.terms),
                   ),
                   if (auth.isSignedIn) ...[
@@ -239,6 +241,14 @@ class AccountScreen extends ConsumerWidget {
                       color: AppColors.primary,
                       label: 'Change password',
                       onTap: () => context.push(AppRoutes.changePassword),
+                    ),
+                    _MenuItem(
+                      key: const Key('account-delete'),
+                      icon: Icons.person_remove_rounded,
+                      color: AppColors.destructive,
+                      label: 'Delete account',
+                      subtitle: 'Permanently remove your account and data',
+                      onTap: () => _confirmDelete(context, points: points),
                     ),
                   ],
                 ],
@@ -275,6 +285,26 @@ class AccountScreen extends ConsumerWidget {
     if (value < 10000) return '$value';
     if (value < 1000000) return '${(value / 1000).toStringAsFixed(1)}k';
     return '${(value / 1000000).toStringAsFixed(1)}m';
+  }
+
+  static Future<void> _confirmDelete(
+    BuildContext context, {
+    required int? points,
+  }) async {
+    final messenger = ScaffoldMessenger.of(context);
+    final router = GoRouter.of(context);
+    final result = await showDeleteAccountSheet(context, points: points);
+    switch (result) {
+      case DeleteAccountResult.deleted:
+        router.go(AppRoutes.home);
+        messenger.showSnackBar(
+          const SnackBar(content: Text('Your account has been deleted.')),
+        );
+      case DeleteAccountResult.viewOrders:
+        router.push(AppRoutes.orders);
+      case null:
+        break;
+    }
   }
 
   static Future<void> _confirmSignOut(
@@ -936,6 +966,7 @@ class _MenuSection extends StatelessWidget {
 
 class _MenuItem extends StatelessWidget {
   const _MenuItem({
+    super.key,
     required this.icon,
     required this.color,
     required this.label,
