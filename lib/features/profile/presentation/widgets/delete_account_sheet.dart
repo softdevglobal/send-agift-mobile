@@ -27,6 +27,8 @@ Future<DeleteAccountResult?> showDeleteAccountSheet(
 }) {
   return showModalBottomSheet<DeleteAccountResult>(
     context: context,
+    // Above the floating tab bar, which otherwise covers the buttons.
+    useRootNavigator: true,
     useSafeArea: true,
     isScrollControlled: true,
     backgroundColor: AppColors.surface,
