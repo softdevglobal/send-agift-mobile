@@ -191,7 +191,7 @@ class _Offers extends ConsumerWidget {
                 nextAction: 'shop',
               ),
             for (final offer in data.offers) ...[
-              _OfferCard(
+              MembershipOfferCard(
                 offer: offer,
                 canBuy: d.allowed && !busy,
                 onJoined: onJoined,
@@ -216,22 +216,28 @@ class _Offers extends ConsumerWidget {
   }
 }
 
-class _OfferCard extends ConsumerStatefulWidget {
-  const _OfferCard({
+class MembershipOfferCard extends ConsumerStatefulWidget {
+  const MembershipOfferCard({
+    super.key,
     required this.offer,
     required this.canBuy,
     required this.onJoined,
+    this.note,
   });
 
   final PlanOffer offer;
   final bool canBuy;
+
+  /// Why joining is not possible right now, shown under the button.
+  final String? note;
   final Future<void> Function(MembershipCheckout) onJoined;
 
   @override
-  ConsumerState<_OfferCard> createState() => _OfferCardState();
+  ConsumerState<MembershipOfferCard> createState() =>
+      _MembershipOfferCardState();
 }
 
-class _OfferCardState extends ConsumerState<_OfferCard> {
+class _MembershipOfferCardState extends ConsumerState<MembershipOfferCard> {
   bool _consent = false;
   bool _busy = false;
   String? _error;
@@ -441,7 +447,14 @@ class _OfferCardState extends ConsumerState<_OfferCard> {
                       : const Icon(Icons.workspace_premium_rounded),
                   label: Text('Join for ${o.priceLabel}'),
                 ),
-                if (widget.canBuy && !_consent) ...[
+                if (widget.note != null) ...[
+                  const SizedBox(height: 6),
+                  Text(
+                    widget.note!,
+                    textAlign: TextAlign.center,
+                    style: Theme.of(context).textTheme.bodySmall,
+                  ),
+                ] else if (widget.canBuy && !_consent) ...[
                   const SizedBox(height: 6),
                   Text(
                     'Tick the box above to continue.',

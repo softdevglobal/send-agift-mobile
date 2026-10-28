@@ -16,6 +16,7 @@ import '../../../games/data/games_providers.dart';
 import '../../data/membership_repository.dart';
 import '../../domain/membership.dart';
 import '../membership_widgets.dart';
+import 'membership_screen.dart';
 
 /// The customer's membership: the period in force, its discount and bonus,
 /// the next charge, and cancelling renewal. While a payment is still being
@@ -78,6 +79,31 @@ class _MyMembershipScreenState extends ConsumerState<MyMembershipScreen> {
     try {
       await ref.read(membershipRepositoryProvider).confirmTestPayment();
       await _refreshAfterChange();
+    } on AppException catch (e) {
+      if (mounted) setState(() => _error = e.message);
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
+  }
+
+  Future<void> _resume() async {
+    setState(() {
+      _busy = true;
+      _error = null;
+    });
+    try {
+      await ref.read(membershipRepositoryProvider).resume();
+      await _refreshAfterChange();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text(
+              'Renewal is back on. Your membership continues and renews as '
+              'before.',
+            ),
+          ),
+        );
+      }
     } on AppException catch (e) {
       if (mounted) setState(() => _error = e.message);
     } finally {
@@ -296,8 +322,10 @@ class _MyMembershipScreenState extends ConsumerState<MyMembershipScreen> {
           status: s,
           busy: _busy,
           onCancel: sub != null && sub.canCancel ? _cancel : null,
+          onResume: sub != null && sub.canResume ? _resume : null,
         ),
       ],
+      _OtherPackages(status: s),
       if (s.periods.isNotEmpty) ...[
         const SizedBox(height: 24),
         Text('PAYMENT HISTORY', style: AppTypography.eyebrow),
@@ -656,12 +684,16 @@ class _RenewalCard extends StatelessWidget {
     required this.status,
     required this.busy,
     required this.onCancel,
+    required this.onResume,
   });
 
   final PlanOffer offer;
   final MembershipStatus status;
   final bool busy;
   final VoidCallback? onCancel;
+
+  /// Turns renewal back on, for a membership set to end.
+  final VoidCallback? onResume;
 
   @override
   Widget build(BuildContext context) {
@@ -746,8 +778,76 @@ class _RenewalCard extends StatelessWidget {
               child: const Text('Cancel renewal'),
             ),
           ],
+          if (onResume != null) ...[
+            const SizedBox(height: 14),
+            FilledButton.icon(
+              onPressed: busy ? null : onResume,
+              icon: const Icon(Icons.autorenew_rounded),
+              label: const Text('Turn renewal back on'),
+            ),
+          ],
         ],
       ),
+    );
+  }
+}
+
+/// The other packages on sale where the customer lives. A member sees them
+/// too; another can be joined once the current membership has ended.
+class _OtherPackages extends ConsumerWidget {
+  const _OtherPackages({required this.status});
+
+  final MembershipStatus status;
+
+  @override
+  Widget build(BuildContext context, WidgetRef ref) {
+    final data = ref.watch(membershipOffersProvider).valueOrNull;
+    final current = status.offer?.tierCode;
+    final others =
+        data?.offers.where((o) => o.tierCode != current).toList() ?? const [];
+    if (others.isEmpty) return const SizedBox.shrink();
+
+    final sub = status.subscription;
+    final live = sub != null && sub.live;
+    final String note;
+    if (!live) {
+      note = 'Join from the Membership page.';
+    } else if (sub.cancelAtPeriodEnd && sub.currentPeriodEnd != null) {
+      note =
+          'You can join this after your current membership ends on '
+          '${formatMembershipDate(sub.currentPeriodEnd!)}.';
+    } else {
+      note =
+          'You can join this after your current membership ends. Cancel '
+          'its renewal first.';
+    }
+
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        const SizedBox(height: 24),
+        Text('OTHER PACKAGES', style: AppTypography.eyebrow),
+        const SizedBox(height: 4),
+        const Text(
+          'More memberships on sale where you live.',
+          style: TextStyle(color: AppColors.mutedForeground),
+        ),
+        const SizedBox(height: 12),
+        for (final o in others) ...[
+          MembershipOfferCard(
+            offer: o,
+            canBuy: false,
+            note: note,
+            onJoined: (_) async {},
+          ),
+          const SizedBox(height: 14),
+        ],
+        if (!live)
+          FilledButton(
+            onPressed: () => context.push(AppRoutes.membership),
+            child: const Text('See memberships'),
+          ),
+      ],
     );
   }
 }

@@ -14,6 +14,7 @@ import 'support/fake_auth.dart';
 
 const _offer = {
   'id': 'o1',
+  'tier_code': 'plus',
   'name': 'SendAgift Plus',
   'description': 'SendAGift Plus for Sri Lanka',
   'country_name': 'Sri Lanka',
@@ -29,7 +30,18 @@ const _offer = {
 
 final _offers = MembershipOffers.fromJson({
   'decision': {'allowed': true, 'message': ''},
-  'offers': [_offer],
+  'offers': [
+    _offer,
+    {
+      ..._offer,
+      'id': 'o2',
+      'tier_code': 'gold',
+      'name': 'SendAgift Gold',
+      'price_minor': 199900,
+      'member_bonus_points': 2500,
+      'member_discount_bps': 750,
+    },
+  ],
 });
 
 final _status = MembershipStatus.fromJson({

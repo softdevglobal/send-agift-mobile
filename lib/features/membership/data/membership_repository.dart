@@ -68,6 +68,14 @@ class MembershipRepository {
     return MembershipStatus.fromJson(response.data ?? const {});
   });
 
+  /// Turns renewal back on for a membership set to end.
+  Future<MembershipStatus> resume() => _guard(() async {
+    final response = await _client.dio.post<Map<String, dynamic>>(
+      '/customers/me/membership/resume',
+    );
+    return MembershipStatus.fromJson(response.data ?? const {});
+  });
+
   /// Sandbox only: confirms a test membership payment.
   Future<MembershipStatus> confirmTestPayment() => _guard(() async {
     final response = await _client.dio.post<Map<String, dynamic>>(

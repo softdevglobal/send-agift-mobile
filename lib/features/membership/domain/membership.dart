@@ -47,6 +47,7 @@ class MembershipDecision {
 class PlanOffer {
   const PlanOffer({
     required this.id,
+    this.tierCode = '',
     required this.name,
     required this.currency,
     required this.priceMinor,
@@ -64,6 +65,7 @@ class PlanOffer {
     final benefits = json['gift_benefits'];
     return PlanOffer(
       id: json['id'] as String? ?? '',
+      tierCode: json['tier_code'] as String? ?? '',
       name: json['name'] as String? ?? 'Membership',
       description: _text(json['description']),
       countryName: _text(json['country_name']),
@@ -81,6 +83,9 @@ class PlanOffer {
   }
 
   final String id;
+
+  /// The package; stays the same across its versions.
+  final String tierCode;
   final String name;
   final String? description;
   final String? countryName;
@@ -214,6 +219,15 @@ class MembershipSubscription {
   final String provider;
   final bool cancelAtPeriodEnd;
   final DateTime? currentPeriodEnd;
+
+  /// Still running, but set to end at the period end: renewal can be turned
+  /// back on.
+  bool get canResume =>
+      const {'active', 'cancelling'}.contains(status) && cancelAtPeriodEnd;
+
+  /// A membership that is not over: another package can't be joined yet.
+  bool get live =>
+      const {'incomplete', 'active', 'past_due', 'cancelling'}.contains(status);
 
   bool get canCancel =>
       const {'active', 'past_due', 'incomplete'}.contains(status) &&
