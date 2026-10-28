@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/utils/money.dart';
+import '../../../membership/domain/membership.dart';
 import '../../domain/checkout.dart';
 
 /// Subtotal, delivery and the final total.
@@ -20,9 +21,15 @@ class DeliverySummary extends StatelessWidget {
     required this.loading,
     required this.hasRecipient,
     required this.deliveryDate,
+    this.memberDiscount = 0,
+    this.memberDiscountBps = 0,
   });
 
   final int subtotal;
+
+  /// A member's discount on the gifts, previewed as the server prices it.
+  final int memberDiscount;
+  final int memberDiscountBps;
   final String currency;
   final DeliveryQuote? quote;
   final bool loading;
@@ -34,10 +41,35 @@ class DeliverySummary extends StatelessWidget {
     final theme = Theme.of(context);
     final priced = quote != null && quote!.complete;
     final combinable = priced && quote!.matchesCurrency(currency);
+    final gifts = subtotal - memberDiscount;
 
     return Column(
       children: [
         _row(context, 'Subtotal', Money.format(subtotal, currency)),
+        if (memberDiscount > 0) ...[
+          const SizedBox(height: 8),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Flexible(
+                child: Text(
+                  'Member discount (${formatBps(memberDiscountBps)})',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.purple,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+              Text(
+                '−${Money.format(memberDiscount, currency)}',
+                style: theme.textTheme.bodyMedium?.copyWith(
+                  color: AppColors.purple,
+                  fontWeight: FontWeight.w600,
+                ),
+              ),
+            ],
+          ),
+        ],
         const SizedBox(height: 8),
         _row(
           context,
@@ -104,8 +136,8 @@ class DeliverySummary extends StatelessWidget {
                 children: [
                   Text(
                     combinable
-                        ? Money.format(subtotal + quote!.amount, currency)
-                        : Money.format(subtotal, currency),
+                        ? Money.format(gifts + quote!.amount, currency)
+                        : Money.format(gifts, currency),
                     textAlign: TextAlign.end,
                     style: const TextStyle(
                       fontSize: 18,

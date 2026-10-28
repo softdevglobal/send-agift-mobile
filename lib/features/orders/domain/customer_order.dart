@@ -141,6 +141,7 @@ class CustomerOrder {
     this.deliveryDate,
     this.subtotalAmount = 0,
     this.deliveryAmount = 0,
+    this.memberDiscountAmount = 0,
     this.giftMessage,
     this.items = const [],
     this.giftPoints = 0,
@@ -163,6 +164,9 @@ class CustomerOrder {
   /// parts of [totalAmount].
   final int subtotalAmount;
   final int deliveryAmount;
+
+  /// A member's discount on the gifts, already taken off [totalAmount].
+  final int memberDiscountAmount;
 
   /// The note the sender attached, or null.
   final String? giftMessage;
@@ -226,6 +230,8 @@ class CustomerOrder {
       deliveryDate: DateTime.tryParse(json['delivery_date'] as String? ?? ''),
       subtotalAmount: (json['subtotal_amount'] as num?)?.toInt() ?? 0,
       deliveryAmount: (json['delivery_amount'] as num?)?.toInt() ?? 0,
+      memberDiscountAmount:
+          (json['member_discount_amount'] as num?)?.toInt() ?? 0,
       giftMessage: switch (json['gift_message']) {
         final String text when text.trim().isNotEmpty => text.trim(),
         _ => null,

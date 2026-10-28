@@ -11,6 +11,7 @@ import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/quantity_stepper.dart';
+import '../../../membership/domain/membership.dart';
 import '../../data/cart_controller.dart';
 import '../../domain/cart_item.dart';
 
@@ -235,6 +236,16 @@ class _CartSummaryBar extends StatelessWidget {
             label: 'Subtotal',
             value: Money.format(summary.subtotal, summary.currency),
           ),
+          if (summary.memberDiscount > 0) ...[
+            const SizedBox(height: 6),
+            _SummaryRow(
+              label:
+                  'Member discount (${formatBps(summary.memberDiscountBps)})',
+              value:
+                  '−${Money.format(summary.memberDiscount, summary.currency)}',
+              member: true,
+            ),
+          ],
           const SizedBox(height: 6),
           const _SummaryRow(label: 'Delivery', value: 'Calculated at dispatch'),
           const Padding(
@@ -265,11 +276,15 @@ class _SummaryRow extends StatelessWidget {
     required this.label,
     required this.value,
     this.emphasized = false,
+    this.member = false,
   });
 
   final String label;
   final String value;
   final bool emphasized;
+
+  /// The member discount line, in the membership violet.
+  final bool member;
 
   @override
   Widget build(BuildContext context) {
@@ -279,7 +294,11 @@ class _SummaryRow extends StatelessWidget {
             fontWeight: FontWeight.w700,
             color: AppColors.foreground,
           )
-        : const TextStyle(fontSize: 13.5, color: AppColors.mutedForeground);
+        : TextStyle(
+            fontSize: 13.5,
+            color: member ? AppColors.purple : AppColors.mutedForeground,
+            fontWeight: member ? FontWeight.w600 : null,
+          );
 
     // The value is flexible because it is not always a short amount. The
     // delivery row carries a phrase, which overflowed a narrow phone when both

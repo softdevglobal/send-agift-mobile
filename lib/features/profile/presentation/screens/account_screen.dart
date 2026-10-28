@@ -11,6 +11,7 @@ import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/pressable_scale.dart';
 import '../../../auth/data/auth_controller.dart';
 import '../../../games/data/games_providers.dart';
+import '../../../membership/data/membership_repository.dart';
 import '../../../messages/data/messages_providers.dart';
 import '../../../orders/data/orders_repository.dart';
 import '../../../saved/data/saved_controller.dart';
@@ -33,6 +34,9 @@ class AccountScreen extends ConsumerWidget {
         : null;
     final orderCount = auth.isSignedIn
         ? ref.watch(customerOrdersProvider).whenOrNull(data: (o) => o.length)
+        : null;
+    final membership = auth.isSignedIn
+        ? ref.watch(membershipStatusProvider).valueOrNull
         : null;
 
     void signedInOnly(String route) =>
@@ -174,6 +178,23 @@ class AccountScreen extends ConsumerWidget {
               child: _ShortcutSection(
                 title: 'Gifting',
                 items: [
+                  _Shortcut(
+                    icon: Icons.workspace_premium_rounded,
+                    color: AppColors.purple,
+                    tint: AppColors.categoryTints[1],
+                    label: 'Membership',
+                    subtitle: membership != null && membership.isMember
+                        ? '${membership.offer?.name ?? 'Member'} · your plan, '
+                              'bonus and renewal'
+                        : 'Gift discounts and bonus points',
+                    onTap: () => context.push(
+                      !auth.isSignedIn
+                          ? AppRoutes.login
+                          : membership != null && membership.state != 'none'
+                          ? AppRoutes.myMembership
+                          : AppRoutes.membership,
+                    ),
+                  ),
                   _Shortcut(
                     icon: Icons.redeem_rounded,
                     color: AppColors.tealForeground,

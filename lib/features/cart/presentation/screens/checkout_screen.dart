@@ -225,6 +225,8 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                     const SizedBox(height: 10),
                     DeliverySummary(
                       subtotal: summary.subtotal,
+                      memberDiscount: summary.memberDiscount,
+                      memberDiscountBps: summary.memberDiscountBps,
                       currency: summary.currency,
                       quote: _quote,
                       loading: _quoting,
@@ -268,13 +270,16 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                             setState(() => _recipientId = value),
                       ),
                       // Each shop that cannot deliver here, and the fixes.
-                      for (final shop in _quote?.blocked ?? const <ShopDeliveryCheck>[])
+                      for (final shop
+                          in _quote?.blocked ?? const <ShopDeliveryCheck>[])
                         Padding(
                           padding: const EdgeInsets.only(top: 12),
                           child: DeliveryProblemCard(
                             shop: shop,
                             giftCount: lines
-                                .where((line) => line.gift.shopId == shop.shopId)
+                                .where(
+                                  (line) => line.gift.shopId == shop.shopId,
+                                )
                                 .length,
                             onChangeRecipient: () =>
                                 setState(() => _recipientId = null),

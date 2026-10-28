@@ -8,6 +8,7 @@ import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/utils/money.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
@@ -256,6 +257,11 @@ class _PayNowCardState extends ConsumerState<_PayNowCard>
             widget.order.isFreeGift ? 'Gift (paid by the shop)' : 'Gifts',
             widget.order.subtotalLabel,
           ),
+          if (widget.order.memberDiscountAmount > 0)
+            _BreakdownRow(
+              'Member discount',
+              '−${Money.format(widget.order.memberDiscountAmount, widget.order.currency)}',
+            ),
           _BreakdownRow('Delivery', widget.order.deliveryLabel),
           const Divider(height: 18),
           _BreakdownRow('Total', widget.totalLabel, strong: true),
@@ -808,7 +814,8 @@ class _TrackingCard extends StatelessWidget {
     'draft': 'This order is still being prepared on our side.',
     'pending_payment': 'Waiting for your payment.',
     'paid': 'Payment is confirmed. Waiting for the seller to accept.',
-    'confirmed': 'Your free gift is confirmed. Waiting for the seller to accept.',
+    'confirmed':
+        'Your free gift is confirmed. Waiting for the seller to accept.',
     'accepted': 'The seller has accepted this gift order.',
     'preparing': 'The seller is preparing your gift.',
     'dispatched': 'The gift is on its way to the recipient.',

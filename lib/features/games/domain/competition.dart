@@ -714,6 +714,8 @@ class PointsEntry {
     'gift_points_sent' => 'Sent with a gift',
     'gift_points_returned' => 'Gift points returned',
     'prize_points' => 'Prize won',
+    'member_bonus' => 'Membership bonus',
+    'member_bonus_reversal' => 'Membership payment refunded',
     _ => 'Adjustment',
   };
 }
@@ -724,6 +726,7 @@ class PointsTotals {
     this.fromPurchases = 0,
     this.fromGifts = 0,
     this.fromPrizes = 0,
+    this.fromMembership = 0,
     this.spentOnGames = 0,
     this.sentAsGifts = 0,
   });
@@ -732,6 +735,7 @@ class PointsTotals {
     fromPurchases: _int(json['from_purchases']) ?? 0,
     fromGifts: _int(json['from_gifts']) ?? 0,
     fromPrizes: _int(json['from_prizes']) ?? 0,
+    fromMembership: _int(json['from_membership']) ?? 0,
     spentOnGames: _int(json['spent_on_games']) ?? 0,
     sentAsGifts: _int(json['sent_as_gifts']) ?? 0,
   );
@@ -739,6 +743,9 @@ class PointsTotals {
   final int fromPurchases;
   final int fromGifts;
   final int fromPrizes;
+
+  /// Membership bonuses, net of any taken back after a refund.
+  final int fromMembership;
   final int spentOnGames;
   final int sentAsGifts;
 }

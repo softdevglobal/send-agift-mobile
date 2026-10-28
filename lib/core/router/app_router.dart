@@ -22,6 +22,8 @@ import '../../features/games/presentation/screens/game_play_screen.dart';
 import '../../features/games/presentation/screens/games_screen.dart';
 import '../../features/home/presentation/screens/home_screen.dart';
 import '../../features/messages/presentation/screens/chat_screen.dart';
+import '../../features/membership/presentation/screens/membership_screen.dart';
+import '../../features/membership/presentation/screens/my_membership_screen.dart';
 import '../../features/messages/presentation/screens/messages_screen.dart';
 import '../../features/orders/presentation/screens/order_detail_screen.dart';
 import '../../features/orders/presentation/screens/order_list_screen.dart';
@@ -70,6 +72,10 @@ class AppRoutes {
 
   /// The customer's SendAgift Points balance and history.
   static const points = '/points';
+
+  /// The membership packages on sale, and the customer's own membership.
+  static const membership = '/membership';
+  static const myMembership = '/membership/mine';
 
   static const addresses = '/addresses';
   static const editProfile = '/profile/edit';
@@ -448,6 +454,22 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.points,
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) => _fadePage(state, const PointsScreen()),
+      ),
+      GoRoute(
+        path: AppRoutes.membership,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) =>
+            _fadePage(state, const MembershipScreen()),
+      ),
+      GoRoute(
+        path: AppRoutes.myMembership,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          MyMembershipScreen(
+            testCheckout: state.uri.queryParameters['test'] == '1',
+          ),
+        ),
       ),
       GoRoute(
         path: AppRoutes.editProfile,

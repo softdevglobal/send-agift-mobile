@@ -1,5 +1,6 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../membership/data/membership_repository.dart';
 import '../../products/data/catalog_providers.dart';
 import '../domain/cart_item.dart';
 import 'cart_storage.dart';
@@ -103,13 +104,25 @@ final cartLinesProvider = Provider<AsyncValue<List<CartLine>>>((ref) {
 /// There is no delivery line: the API has no customer-facing rate endpoint,
 /// and an order is created with delivery_amount = 0, so [total] is the
 /// subtotal. Quoting a flat fee here would show a charge that is never made.
+///
+/// A member's discount is previewed here as the server works it out; the
+/// server prices the order itself.
 class CartSummary {
-  const CartSummary({required this.subtotal, required this.currency});
+  const CartSummary({
+    required this.subtotal,
+    required this.currency,
+    this.memberDiscount = 0,
+    this.memberDiscountBps = 0,
+  });
 
   final int subtotal;
   final String currency;
 
-  int get total => subtotal;
+  /// Off the gift price, in minor units, while the customer is a member.
+  final int memberDiscount;
+  final int memberDiscountBps;
+
+  int get total => subtotal - memberDiscount;
 }
 
 final cartSummaryProvider = Provider<CartSummary>((ref) {
@@ -118,8 +131,14 @@ final cartSummaryProvider = Provider<CartSummary>((ref) {
     return const CartSummary(subtotal: 0, currency: 'USD');
   }
 
+  final bps = ref.watch(memberDiscountBpsProvider).valueOrNull ?? 0;
   return CartSummary(
     subtotal: lines.fold<int>(0, (sum, line) => sum + line.lineTotalAmount),
     currency: lines.first.gift.currency,
+    memberDiscount: memberDiscountMinor(
+      lines.map((line) => line.lineTotalAmount),
+      bps,
+    ),
+    memberDiscountBps: bps,
   );
 });

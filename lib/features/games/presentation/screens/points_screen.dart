@@ -6,6 +6,8 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/box_tabs.dart';
+import '../../../membership/data/membership_repository.dart';
+import '../../../membership/presentation/membership_widgets.dart';
 import '../../data/games_providers.dart';
 import '../../domain/competition.dart';
 import '../competition_format.dart';
@@ -25,6 +27,27 @@ enum _Filter { all, earned, spent }
 
 class _PointsScreenState extends ConsumerState<PointsScreen> {
   _Filter _filter = _Filter.all;
+
+  @override
+  void initState() {
+    super.initState();
+    // A new member's first visit after paying: welcome them here, as the
+    // website does on My points.
+    WidgetsBinding.instance.addPostFrameCallback((_) async {
+      try {
+        final status = await ref.read(membershipStatusProvider.future);
+        if (mounted) {
+          await maybeShowMembershipWelcome(
+            context,
+            status,
+            onPointsScreen: true,
+          );
+        }
+      } catch (_) {
+        // No membership to welcome.
+      }
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +146,13 @@ class _Totals extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final tiles = [
+      if (totals.fromMembership > 0)
+        (
+          'Member bonus',
+          totals.fromMembership,
+          Icons.workspace_premium_rounded,
+          AppColors.purple,
+        ),
       (
         'From purchases',
         totals.fromPurchases,
@@ -362,10 +392,11 @@ class _EntryRow extends StatelessWidget {
 
 IconData _icon(PointsEntry e) => switch (e.category) {
   'PRODUCT_PURCHASE' => Icons.shopping_bag_rounded,
-  'GIFT_REWARD' =>
-    e.entryType == 'prize_points'
-        ? Icons.emoji_events_rounded
-        : Icons.card_giftcard_rounded,
+  'GIFT_REWARD' => switch (e.entryType) {
+    'prize_points' => Icons.emoji_events_rounded,
+    'member_bonus' => Icons.workspace_premium_rounded,
+    _ => Icons.card_giftcard_rounded,
+  },
   'GIFT_SENT' => Icons.send_rounded,
   'GAME_ENTRY' => Icons.sports_esports_rounded,
   'REFUND' => Icons.undo_rounded,
