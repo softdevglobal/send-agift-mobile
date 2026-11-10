@@ -75,7 +75,7 @@
 	<key>FacebookAppID</key>
 	<string>1745907156491235</string>
 	<key>FacebookClientToken</key>
-	<string>REPLACE_WITH_FACEBOOK_CLIENT_TOKEN</string>
+	<string>b30684733aab2316e4bc1c19e4cf542c</string>
 	<key>FacebookDisplayName</key>
 	<string>SendAGift</string>
 	<key>CFBundleURLTypes</key>
@@ -86,7 +86,17 @@
 				<string>fb1745907156491235</string>
 			</array>
 		</dict>
+		<dict>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.googleusercontent.apps.78577228360-k0bmgl0tndg2eo3vflno1ahuinqipcff</string>
+			</array>
+		</dict>
 	</array>
+	<key>GIDClientID</key>
+	<string>78577228360-k0bmgl0tndg2eo3vflno1ahuinqipcff.apps.googleusercontent.com</string>
+	<key>GIDServerClientID</key>
+	<string>78577228360-om985ua9jcn20ng27oq5g5mom426q8hh.apps.googleusercontent.com</string>
 	<key>LSApplicationQueriesSchemes</key>
 	<array>
 		<string>fbapi</string>

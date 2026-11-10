@@ -4,6 +4,6 @@
          console: App settings > Advanced > Security > Client token.
          It is not a secret (it ships in every app build). -->
     <string name="facebook_app_id">1745907156491235</string>
-    <string name="facebook_client_token">REPLACE_WITH_FACEBOOK_CLIENT_TOKEN</string>
+    <string name="facebook_client_token">b30684733aab2316e4bc1c19e4cf542c</string>
     <string name="fb_login_protocol_scheme">fb1745907156491235</string>
 </resources>
