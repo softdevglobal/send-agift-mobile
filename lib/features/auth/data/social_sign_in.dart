@@ -70,6 +70,13 @@ class SocialSignInClient {
       );
     } on SignInWithAppleAuthorizationException catch (error) {
       if (error.code == AuthorizationErrorCode.canceled) return null;
+      // Error 1000: iOS has no Apple Account to sign in with.
+      if (error.code == AuthorizationErrorCode.unknown) {
+        throw const AppException(
+          'Sign in with Apple needs an Apple Account on this device. '
+          'Sign in to your Apple Account in Settings, then try again.',
+        );
+      }
       throw AppException(
         'Sign in with Apple is not available right now. ${error.message}'
             .trim(),
