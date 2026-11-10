@@ -202,6 +202,7 @@
 				3B06AD1E1E4923F5004D2608 /* Thin Binary */,
 				F75A8136E34D516B74CDBC14 /* [CP] Embed Pods Frameworks */,
 				C61A55C3B972257397D9F327 /* [CP] Copy Pods Resources */,
+				A1D5E0F12B3C4D5E6F708192 /* Generate Missing dSYMs */,
 			);
 			buildRules = (
 			);
@@ -380,6 +381,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-Runner/Pods-Runner-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
+		A1D5E0F12B3C4D5E6F708192 /* Generate Missing dSYMs */ = {
+			isa = PBXShellScriptBuildPhase;
+			alwaysOutOfDate = 1;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			name = "Generate Missing dSYMs";
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "# Generate dSYMs for Dart native-asset frameworks (e.g. objective_c.framework), which Flutter embeds without one\nif [ \"${CONFIGURATION}\" != \"Release\" ]; then exit 0; fi\nNA_DIR=\"${SRCROOT}/../build/native_assets/ios\"\nFW_DIR=\"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}\"\n[ -d \"$NA_DIR\" ] || exit 0\nfor src in \"$NA_DIR\"/*.framework; do\n  [ -d \"$src\" ] || continue\n  name=$(basename \"$src\" .framework)\n  bin=\"$FW_DIR/$name.framework/$name\"\n  dsym=\"${DWARF_DSYM_FOLDER_PATH}/$name.framework.dSYM\"\n  if [ -f \"$bin\" ]; then\n    echo \"Generating dSYM for $name.framework\"\n    rm -rf \"$dsym\"\n    xcrun dsymutil \"$bin\" -o \"$dsym\" || true\n  fi\ndone\n";
 			showEnvVarsInLog = 0;
 		};
 /* End PBXShellScriptBuildPhase section */
