@@ -103,9 +103,11 @@ class GamesScreen extends ConsumerWidget {
                           AppTheme.gutter,
                         ),
                         sliver: SliverGrid(
+                          // Two tiles across a phone; more on a tablet, so
+                          // each tile stays about phone-tile size.
                           gridDelegate:
-                              const SliverGridDelegateWithFixedCrossAxisCount(
-                                crossAxisCount: 2,
+                              const SliverGridDelegateWithMaxCrossAxisExtent(
+                                maxCrossAxisExtent: 260,
                                 mainAxisSpacing: 14,
                                 crossAxisSpacing: 14,
                                 childAspectRatio: 0.84,

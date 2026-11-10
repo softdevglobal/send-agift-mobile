@@ -1,11 +1,13 @@
 import 'package:flutter/material.dart';
 
+import '../../../../core/layout/responsive.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../domain/gift.dart';
 import 'gift_card.dart';
 
-/// Two-column gift grid shared by explore, saved and the home shelf.
+/// Gift grid shared by explore, saved and the home shelf: two columns on a
+/// phone, more on a tablet so cards stay a sensible size.
 class GiftGrid extends StatelessWidget {
   const GiftGrid({
     super.key,
@@ -24,17 +26,25 @@ class GiftGrid extends StatelessWidget {
   final bool sliver;
 
   static const double _spacing = 12;
-  static const int _columns = 2;
+
+  /// Narrowest a card gets before the grid drops a column.
+  static const double _minCardWidth = 190;
 
   /// Cards are sized from the actual column width rather than a fixed aspect
   /// ratio: the photo is square, so the cell is width + the text block, which
   /// scales with the user's font size. A guessed ratio overflows on devices
   /// whose text renders taller than the design assumed.
   SliverGridDelegate _delegate(BuildContext context, double maxWidth) {
-    final columnWidth = (maxWidth - _spacing * (_columns - 1)) / _columns;
+    final columns = gridColumns(
+      maxWidth,
+      minTileWidth: _minCardWidth,
+      spacing: _spacing,
+      max: 5,
+    );
+    final columnWidth = (maxWidth - _spacing * (columns - 1)) / columns;
 
     return SliverGridDelegateWithFixedCrossAxisCount(
-      crossAxisCount: _columns,
+      crossAxisCount: columns,
       crossAxisSpacing: _spacing,
       mainAxisSpacing: _spacing,
       mainAxisExtent: columnWidth + GiftCard.textBlockHeight(context),

@@ -1,8 +1,12 @@
+import 'dart:math' as math;
+
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/app_shell.dart';
+import '../layout/responsive.dart';
+import '../theme/app_colors.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
 import '../../features/auth/domain/code_signup.dart';
 import '../../features/auth/domain/social_signup.dart';
@@ -146,10 +150,15 @@ final _rootNavigatorKey = GlobalKey<NavigatorState>();
 /// Fade-and-rise transition for every pushed (non-tab) route, so moving
 /// deeper into the app. A gift, checkout, sign-in. Feels like a step
 /// forward rather than the platform's default hard slide.
-CustomTransitionPage<void> _fadePage(GoRouterState state, Widget child) {
+CustomTransitionPage<void> _fadePage(
+  GoRouterState state,
+  Widget child, {
+  double maxWidth = ContentWidth.reading,
+}) {
   return CustomTransitionPage(
     key: state.pageKey,
-    child: child,
+    // On a tablet the page is a centred column rather than edge to edge.
+    child: ResponsiveFrame(maxWidth: maxWidth, child: child),
     transitionDuration: const Duration(milliseconds: 320),
     reverseTransitionDuration: const Duration(milliseconds: 220),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -176,7 +185,11 @@ CustomTransitionPage<void> _fadePage(GoRouterState state, Widget child) {
 CustomTransitionPage<void> _gameWindowPage(GoRouterState state, Widget child) {
   return CustomTransitionPage(
     key: state.pageKey,
-    child: child,
+    child: ResponsiveFrame(
+      maxWidth: ContentWidth.game,
+      backgroundColor: AppColors.primary,
+      child: child,
+    ),
     transitionDuration: const Duration(milliseconds: 380),
     reverseTransitionDuration: const Duration(milliseconds: 260),
     transitionsBuilder: (context, animation, secondaryAnimation, child) {
@@ -215,9 +228,13 @@ CustomTransitionPage<void> _rightSheetPage(GoRouterState state, Widget child) {
       );
       return Align(
         alignment: Alignment.centerRight,
-        child: FractionallySizedBox(
-          widthFactor: 0.8,
-          heightFactor: 1,
+        child: SizedBox(
+          // Most of a phone's width; a fixed panel on a tablet.
+          width: math.min(
+            MediaQuery.sizeOf(context).width * 0.8,
+            ContentWidth.sidePanel,
+          ),
+          height: double.infinity,
           child: SlideTransition(
             position: Tween<Offset>(
               begin: const Offset(1, 0),
@@ -255,7 +272,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.home,
-                builder: (context, state) => const HomeScreen(),
+                builder: (context, state) => const ResponsiveFrame(
+                  maxWidth: ContentWidth.browse,
+                  child: HomeScreen(),
+                ),
               ),
             ],
           ),
@@ -263,7 +283,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.explore,
-                builder: (context, state) => const ExploreScreen(),
+                builder: (context, state) => const ResponsiveFrame(
+                  maxWidth: ContentWidth.browse,
+                  child: ExploreScreen(),
+                ),
               ),
             ],
           ),
@@ -272,7 +295,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.reels,
-                builder: (context, state) => const ReelsScreen(),
+                builder: (context, state) => const ResponsiveFrame(
+                  maxWidth: ContentWidth.reel,
+                  backgroundColor: Colors.black,
+                  child: ReelsScreen(),
+                ),
               ),
             ],
           ),
@@ -280,7 +307,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.saved,
-                builder: (context, state) => const SavedScreen(),
+                builder: (context, state) => const ResponsiveFrame(
+                  maxWidth: ContentWidth.browse,
+                  child: SavedScreen(),
+                ),
               ),
             ],
           ),
@@ -288,7 +318,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             routes: [
               GoRoute(
                 path: AppRoutes.account,
-                builder: (context, state) => const AccountScreen(),
+                builder: (context, state) => const ResponsiveFrame(
+                  maxWidth: ContentWidth.reading,
+                  child: AccountScreen(),
+                ),
               ),
             ],
           ),
@@ -384,7 +417,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.games,
         parentNavigatorKey: _rootNavigatorKey,
-        pageBuilder: (context, state) => _fadePage(state, const GamesScreen()),
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          const GamesScreen(),
+          maxWidth: ContentWidth.browse,
+        ),
       ),
       GoRoute(
         path: '${AppRoutes.games}/:slug',
@@ -395,7 +432,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           // A game this build of the app has no engine for falls back to
           // the list rather than a broken screen.
           if (definition == null) {
-            return _fadePage(state, const GamesScreen());
+            return _fadePage(
+              state,
+              const GamesScreen(),
+              maxWidth: ContentWidth.browse,
+            );
           }
           return _gameWindowPage(state, GamePlayScreen(definition: definition));
         },

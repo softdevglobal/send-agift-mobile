@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/layout/responsive.dart';
 import '../core/notifications/push_notifications.dart';
 import '../core/router/app_router.dart';
 import '../core/theme/app_theme.dart';
@@ -55,6 +56,8 @@ class _SendAGiftAppState extends ConsumerState<SendAGiftApp> {
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light,
       routerConfig: router,
+      // Tablets show the phone design scaled up rather than at phone size.
+      builder: (context, child) => TabletScale(child: child!),
     );
   }
 }
