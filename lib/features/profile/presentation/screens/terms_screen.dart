@@ -40,10 +40,10 @@ const policyLinks = <PolicyLink>[
   PolicyLink(
     slug: 'customer-terms',
     docId: 'CUST-01',
-    title: 'Marketplace Customer Terms',
+    title: 'Customer Terms',
     summary:
         'The terms for browsing, ordering, sending and receiving gifts on '
-        'SendAGift.',
+        'SendAGift, with regional safeguards.',
   ),
   PolicyLink(
     slug: 'delivery',
@@ -82,10 +82,41 @@ const policyLinks = <PolicyLink>[
     summary: 'How to contact us, what happens next and how to escalate.',
   ),
   PolicyLink(
+    slug: 'partner-terms',
+    docId: 'PART-01',
+    title: 'Partner Terms',
+    summary:
+        'The common and international terms for every seller, supplier and '
+        'courier.',
+    forSellers: true,
+  ),
+  PolicyLink(
     slug: 'seller-agreement',
-    docId: 'SELL-01',
-    title: 'Seller Agreement',
-    summary: 'What sellers agree to when they list on SendAGift.',
+    docId: 'PART-SELL',
+    title: 'Seller Terms',
+    summary:
+        'Listings, the 7.9% platform fee, payouts, refunds and chargebacks.',
+    forSellers: true,
+  ),
+  PolicyLink(
+    slug: 'supplier-terms',
+    docId: 'PART-SUP',
+    title: 'Supplier Terms',
+    summary: 'Supply contracts, three months free then \$99 a month.',
+    forSellers: true,
+  ),
+  PolicyLink(
+    slug: 'courier-terms',
+    docId: 'PART-COUR',
+    title: 'Courier Terms',
+    summary: 'Job offers, safe delivery, three months free then \$99 a month.',
+    forSellers: true,
+  ),
+  PolicyLink(
+    slug: 'partner-addenda',
+    docId: 'PART-INTL',
+    title: 'Partner Regional Addenda',
+    summary: 'Extra partner terms for the EU and EEA, UK, US and Australia.',
     forSellers: true,
   ),
   PolicyLink(
@@ -220,7 +251,7 @@ class TermsScreen extends StatelessWidget {
             const SizedBox(height: 22),
             group('For customers', customer),
             const SizedBox(height: 14),
-            group('For sellers', seller),
+            group('For partners', seller),
             const SizedBox(height: 8),
             Text(
               'Questions? Email $supportEmail.',

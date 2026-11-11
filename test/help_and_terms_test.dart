@@ -24,7 +24,7 @@ void main() {
     await tester.pumpWidget(const MaterialApp(home: TermsScreen()));
     for (final title in [
       'Privacy Policy',
-      'Marketplace Customer Terms',
+      'Customer Terms',
       'Delivery Policy',
       'Returns, Refunds and Cancellations',
       'Free Gift Promotion Terms',
