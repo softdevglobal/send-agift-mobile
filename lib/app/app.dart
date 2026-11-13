@@ -6,6 +6,7 @@ import '../core/notifications/push_notifications.dart';
 import '../core/router/app_router.dart';
 import '../core/theme/app_theme.dart';
 import '../features/auth/data/auth_controller.dart';
+import '../features/games/data/games_providers.dart';
 import '../features/notifications/data/notifications_repository.dart';
 
 class SendAGiftApp extends ConsumerStatefulWidget {
@@ -26,7 +27,11 @@ class _SendAGiftAppState extends ConsumerState<SendAGiftApp> {
     // so the bell's count is re-read and anything new is shown.
     _lifecycle = AppLifecycleListener(
       onResume: () {
-        ref.invalidate(notificationInboxProvider);
+        ref
+          ..invalidate(notificationInboxProvider)
+          // Entries may have been granted while away (a payment confirmed,
+          // a late order caught up).
+          ..invalidate(gameEntriesProvider);
         ref.read(pushNotificationsProvider).catchUp();
       },
     );

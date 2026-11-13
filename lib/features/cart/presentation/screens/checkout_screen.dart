@@ -633,7 +633,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         );
       }
       if (!mounted) return;
-      context.go('${AppRoutes.orders}/$orderId');
+      context.go('${AppRoutes.orders}/$orderId?placed=1');
     } on AppException catch (error) {
       if (mounted) setState(() => _error = error.message);
     } finally {

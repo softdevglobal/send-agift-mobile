@@ -6,6 +6,7 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/empty_state.dart';
+import '../../../../core/widgets/stat_hero.dart';
 import '../../../reviews/data/reviews_repository.dart';
 import '../../../reviews/domain/product_review.dart';
 import '../../../reviews/presentation/screens/write_review_screen.dart';
@@ -56,9 +57,20 @@ class ReceivedGiftsScreen extends ConsumerWidget {
                     AppTheme.gutter,
                     32,
                   ),
-                  itemCount: list.length,
+                  itemCount: list.length + 1,
                   separatorBuilder: (_, _) => const SizedBox(height: 18),
-                  itemBuilder: (context, i) => _GiftCard(gift: list[i]),
+                  itemBuilder: (context, i) => i == 0
+                      ? StatHero(
+                          label: 'Gifts received',
+                          value: Text(
+                            '${list.length} ${list.length == 1 ? 'gift' : 'gifts'}',
+                          ),
+                          caption: 'Every gift someone has sent you.',
+                          icon: Icons.favorite_rounded,
+                          color: AppColors.teal,
+                          stickerColor: AppColors.teal,
+                        )
+                      : _GiftCard(gift: list[i - 1]),
                 ),
         ),
       ),

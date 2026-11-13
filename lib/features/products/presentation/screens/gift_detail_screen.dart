@@ -21,6 +21,7 @@ import '../widgets/gift_gallery.dart';
 import '../widgets/save_gift_button.dart';
 import '../../../../core/widgets/entries_badge.dart';
 import '../../../../core/widgets/section_tag.dart';
+import '../../../games/data/games_providers.dart';
 
 /// Product page: large photo, shop line, price, description and a sticky
 /// add-to-cart bar. No sign-in required to reach or use any of it.
@@ -183,7 +184,12 @@ class _ContentState extends State<_Content> {
                   ),
                   if (gift.sponsored) ...[
                     const SizedBox(height: 16),
-                    EntriesRewardCard(entries: gift.gameEntries),
+                    Consumer(
+                      builder: (context, ref, _) => EntriesRewardCard(
+                        entries: gift.gameEntries,
+                        available: ref.watch(entriesEarnableProvider),
+                      ),
+                    ),
                   ],
                   if (gift.shopName != null) ...[
                     const SizedBox(height: 20),

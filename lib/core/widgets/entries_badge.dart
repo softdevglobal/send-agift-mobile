@@ -94,14 +94,22 @@ class SponsoredLabel extends StatelessWidget {
 
 /// On a sponsored gift's page: what buying it earns, as a slim gold strip.
 class EntriesRewardCard extends StatelessWidget {
-  const EntriesRewardCard({super.key, required this.entries});
+  const EntriesRewardCard({
+    super.key,
+    required this.entries,
+    this.available = true,
+  });
 
   final int entries;
+
+  /// False when the customer's state does not let them earn entries: the
+  /// strip then says so instead of promising them.
+  final bool available;
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
-    final earns = entries > 0;
+    final earns = entries > 0 && available;
     return Container(
       padding: const EdgeInsets.fromLTRB(10, 10, 12, 10),
       decoration: BoxDecoration(
@@ -159,6 +167,16 @@ class EntriesRewardCard extends StatelessWidget {
                     const SponsoredLabel(),
                   ],
                 ),
+                if (!available && entries > 0) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    'Game entries are not available where you live yet.',
+                    maxLines: 2,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.mutedForeground,
+                    ),
+                  ),
+                ],
                 if (earns) ...[
                   const SizedBox(height: 2),
                   Text(

@@ -11,6 +11,7 @@ import '../../../cart/data/cart_controller.dart';
 import '../../domain/gift.dart';
 import 'save_gift_button.dart';
 import '../../../../core/widgets/entries_badge.dart';
+import '../../../games/data/games_providers.dart';
 
 /// Grid card for a gift: photo, shop line, price, and a one-tap add to cart.
 class GiftCard extends ConsumerWidget {
@@ -142,7 +143,8 @@ class GiftCard extends ConsumerWidget {
                     ),
                   if (gift.sponsored)
                     const Positioned(left: 8, top: 8, child: SponsoredLabel()),
-                  if (gift.gameEntries > 0)
+                  if (gift.gameEntries > 0 &&
+                      ref.watch(entriesEarnableProvider))
                     Positioned(
                       left: 8,
                       right: 8,

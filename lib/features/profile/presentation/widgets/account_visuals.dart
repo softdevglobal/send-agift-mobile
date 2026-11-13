@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
+import '../../../../core/widgets/storefront_decor.dart';
 
 /// A stable colour for a name, so a person keeps the same tint everywhere.
 Color tintFor(String seed) {
@@ -51,13 +52,34 @@ class BrandHero extends StatelessWidget {
                 bottom: -70,
                 child: _Glow(size: 150, color: Colors.white, alpha: 0.10),
               ),
+              const Positioned(
+                right: 92,
+                top: 20,
+                child: Sparkle(size: 14, color: AppColors.teal),
+              ),
               Positioned(
-                right: 16,
-                top: 14,
-                child: Icon(
-                  icon,
-                  size: 70,
-                  color: Colors.white.withValues(alpha: 0.10),
+                right: 24,
+                bottom: 22,
+                child: Sparkle(
+                  size: 18,
+                  color: Colors.white.withValues(alpha: 0.8),
+                ),
+              ),
+              // The page's icon as a tilted white sticker.
+              Positioned(
+                right: 18,
+                top: 18,
+                child: Transform.rotate(
+                  angle: 0.12,
+                  child: Container(
+                    width: 54,
+                    height: 54,
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(15),
+                    ),
+                    child: Icon(icon, size: 26, color: AppColors.purple),
+                  ),
                 ),
               ),
               Padding(padding: padding, child: child),

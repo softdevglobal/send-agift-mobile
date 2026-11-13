@@ -15,6 +15,7 @@ import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/quantity_stepper.dart';
 import '../../../checkout/data/checkout_repository.dart';
 import '../../../checkout/presentation/in_app_payment.dart';
+import '../../../games/data/games_providers.dart';
 import '../../../messages/data/messages_providers.dart';
 import '../../../products/data/catalog_providers.dart';
 import '../../../reviews/data/reviews_repository.dart';
@@ -30,9 +31,16 @@ import 'order_list_screen.dart';
 /// customer messages that shop about their item. A delivery question, a
 /// change, or photos of a gift that arrived damaged.
 class OrderDetailScreen extends ConsumerWidget {
-  const OrderDetailScreen({super.key, required this.orderId});
+  const OrderDetailScreen({
+    super.key,
+    required this.orderId,
+    this.justPlaced = false,
+  });
 
   final String orderId;
+
+  /// Opened straight from checkout: offer a way back to shopping.
+  final bool justPlaced;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,7 +48,18 @@ class OrderDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       // The hero carries the order number; the bar just says where you are.
-      appBar: AppBar(title: const Text('Order details')),
+      appBar: AppBar(
+        title: const Text('Order details'),
+        // Nothing to go back to after checkout: offer home instead.
+        leading: Navigator.of(context).canPop()
+            ? null
+            : IconButton(
+                key: const Key('order-home'),
+                tooltip: 'Home',
+                icon: const Icon(Icons.home_rounded),
+                onPressed: () => context.go(AppRoutes.home),
+              ),
+      ),
       body: SafeArea(
         child: order.when(
           loading: () => const Center(
@@ -55,7 +74,9 @@ class OrderDetailScreen extends ConsumerWidget {
               child: const Text('Try again'),
             ),
           ),
-          data: (order) => FadeSlideIn(child: _OrderBody(order: order)),
+          data: (order) => FadeSlideIn(
+            child: _OrderBody(order: order, justPlaced: justPlaced),
+          ),
         ),
       ),
     );
@@ -63,9 +84,10 @@ class OrderDetailScreen extends ConsumerWidget {
 }
 
 class _OrderBody extends StatelessWidget {
-  const _OrderBody({required this.order});
+  const _OrderBody({required this.order, this.justPlaced = false});
 
   final CustomerOrder order;
+  final bool justPlaced;
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +102,7 @@ class _OrderBody extends StatelessWidget {
         32,
       ),
       children: [
+        if (justPlaced) ...[_PlacedBanner(), const SizedBox(height: 14)],
         _OrderHero(order: order, delivery: delivery),
         if (order.status == 'pending_payment') ...[
           const SizedBox(height: 14),
@@ -169,7 +192,9 @@ class _PayNowCardState extends ConsumerState<_PayNowCard>
           .read(checkoutRepositoryProvider)
           .syncPayment(widget.orderId);
       if (paid && mounted) {
-        ref.invalidate(customerOrderProvider(widget.orderId));
+        ref
+          ..invalidate(customerOrderProvider(widget.orderId))
+          ..invalidate(gameEntriesProvider);
       }
     } catch (_) {
       // Offline, or not signed in: the order simply stays as it is.
@@ -486,14 +511,18 @@ class _HeroFact extends StatelessWidget {
               fontSize: 11,
             ),
           ),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
+          // Shrinks to fit rather than cutting a long total short.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+              ),
             ),
           ),
         ],
@@ -1045,6 +1074,51 @@ class _TrackRow extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shown right after checkout: the order is in, and the way back to shopping.
+class _PlacedBanner extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.accent,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.accentForeground,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Your order is in. We will keep you posted here.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.accentForeground,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            key: const Key('order-continue-shopping'),
+            onPressed: () => context.go(AppRoutes.home),
+            icon: const Icon(Icons.storefront_rounded, size: 18),
+            label: const Text('Continue shopping'),
           ),
         ],
       ),

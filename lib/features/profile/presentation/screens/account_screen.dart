@@ -45,257 +45,269 @@ class AccountScreen extends ConsumerWidget {
     return Scaffold(
       body: SafeArea(
         bottom: false,
-        child: ListView(
-          padding: const EdgeInsets.only(bottom: 120),
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(
-                AppTheme.gutter,
-                10,
-                AppTheme.gutter,
-                18,
-              ),
-              child: Text('Account', style: AppTypography.display(28)),
-            ),
-            FadeSlideIn(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.gutter,
-                ),
-                child: auth.isSignedIn
-                    ? _ProfileHero(
-                        name: auth.displayName,
-                        email: auth.email,
-                        imageUrl: auth.imageUrl,
-                        points: points,
-                        onPointsTap: () => context.push(AppRoutes.gameEntries),
-                        onEdit: () => context.push(AppRoutes.editProfile),
-                      )
-                    : const _GuestHero(),
-              ),
-            ),
-            if (auth.isSignedIn && auth.passwordChangeRequired) ...[
-              const SizedBox(height: 14),
+        child: RefreshIndicator(
+          // Pull down to re-read the figures: entries, orders, membership.
+          onRefresh: () async {
+            if (!auth.isSignedIn) return;
+            ref
+              ..invalidate(customerOrdersProvider)
+              ..invalidate(membershipStatusProvider);
+            return ref.refresh(gameEntriesProvider.future);
+          },
+          child: ListView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            padding: const EdgeInsets.only(bottom: 120),
+            children: [
               Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.gutter,
+                padding: const EdgeInsets.fromLTRB(
+                  AppTheme.gutter,
+                  10,
+                  AppTheme.gutter,
+                  18,
                 ),
-                child: _TemporaryPasswordPrompt(
-                  onTap: () => context.push(AppRoutes.changePassword),
-                ),
+                child: Text('Account', style: AppTypography.display(28)),
               ),
-            ],
-            const SizedBox(height: 16),
-            FadeSlideIn(
-              delay: const Duration(milliseconds: 50),
-              child: Padding(
-                padding: const EdgeInsets.symmetric(
-                  horizontal: AppTheme.gutter,
-                ),
-                child: Row(
-                  children: [
-                    Expanded(
-                      child: _StatTile(
-                        icon: Icons.receipt_long_rounded,
-                        value: orderCount?.toString() ?? '-',
-                        label: 'Orders',
-                        tint: AppColors.categoryTints[0],
-                        iconColor: AppColors.primary,
-                        onTap: () => context.push(AppRoutes.orders),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _StatTile(
-                        icon: Icons.confirmation_number_outlined,
-                        value: points == null ? '-' : _compact(points),
-                        label: 'Entries',
-                        tint: AppColors.categoryTints[1],
-                        iconColor: AppColors.purple,
-                        onTap: () => signedInOnly(AppRoutes.gameEntries),
-                      ),
-                    ),
-                    const SizedBox(width: 10),
-                    Expanded(
-                      child: _StatTile(
-                        icon: Icons.favorite_rounded,
-                        value: '$savedCount',
-                        label: 'Saved',
-                        tint: AppColors.categoryTints[2],
-                        iconColor: AppColors.accentForeground,
-                        onTap: () => context.go(AppRoutes.saved),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-            const SizedBox(height: 26),
-            FadeSlideIn(
-              delay: const Duration(milliseconds: 90),
-              child: _ShortcutSection(
-                title: 'Shopping',
-                items: [
-                  _Shortcut(
-                    icon: Icons.receipt_long_rounded,
-                    color: AppColors.primary,
-                    tint: AppColors.categoryTints[0],
-                    label: 'My orders',
-                    subtitle: 'Track deliveries and history',
-                    onTap: () => context.push(AppRoutes.orders),
-                  ),
-                  _Shortcut(
-                    icon: Icons.confirmation_number_outlined,
-                    color: AppColors.purple,
-                    tint: AppColors.categoryTints[1],
-                    label: 'Game entries',
-                    subtitle: 'Your entries and where they came from',
-                    onTap: () => signedInOnly(AppRoutes.gameEntries),
-                  ),
-                  _Shortcut(
-                    icon: Icons.chat_bubble_rounded,
-                    color: AppColors.accentForeground,
-                    tint: AppColors.categoryTints[2],
-                    label: 'Messages',
-                    subtitle: 'Chat with shops',
-                    badge: unreadMessages,
-                    onTap: () => signedInOnly(AppRoutes.messages),
-                  ),
-                  _Shortcut(
-                    icon: Icons.star_rounded,
-                    color: const Color(0xFFB7791F),
-                    tint: const Color(0xFFFDF3E1),
-                    label: 'My reviews',
-                    subtitle: 'Ratings you left',
-                    onTap: () => signedInOnly(AppRoutes.reviews),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            FadeSlideIn(
-              delay: const Duration(milliseconds: 130),
-              child: _ShortcutSection(
-                title: 'Gifting',
-                items: [
-                  _Shortcut(
-                    icon: Icons.workspace_premium_rounded,
-                    color: AppColors.purple,
-                    tint: AppColors.categoryTints[1],
-                    label: 'Membership',
-                    subtitle: membership != null && membership.isMember
-                        ? '${membership.offer?.name ?? 'Member'} · your plan '
-                              'and renewal'
-                        : 'Gift discounts and member benefits',
-                    onTap: () => context.push(
-                      !auth.isSignedIn
-                          ? AppRoutes.login
-                          : membership != null && membership.state != 'none'
-                          ? AppRoutes.myMembership
-                          : AppRoutes.membership,
-                    ),
-                  ),
-                  _Shortcut(
-                    icon: Icons.redeem_rounded,
-                    color: AppColors.tealForeground,
-                    tint: AppColors.accent,
-                    label: 'Free gift',
-                    subtitle: 'Send one gift free. You pay delivery',
-                    onTap: () => context.push(AppRoutes.freeGift),
-                  ),
-                  _Shortcut(
-                    icon: Icons.card_giftcard_rounded,
-                    color: const Color(0xFFDB2777),
-                    tint: const Color(0xFFFCE7F1),
-                    label: 'Gifts received',
-                    subtitle: 'Gifts sent to you. Review them here',
-                    onTap: () => signedInOnly(AppRoutes.receivedGifts),
-                  ),
-                  _Shortcut(
-                    icon: Icons.people_alt_rounded,
-                    color: AppColors.purple,
-                    tint: AppColors.categoryTints[5],
-                    label: 'Recipients',
-                    subtitle: 'People you gift',
-                    onTap: () => signedInOnly(AppRoutes.recipients),
-                  ),
-                  _Shortcut(
-                    icon: Icons.location_on_rounded,
-                    color: AppColors.accentForeground,
-                    tint: AppColors.categoryTints[4],
-                    label: 'Addresses',
-                    subtitle: 'Delivery and return',
-                    onTap: () => signedInOnly(AppRoutes.addresses),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 24),
-            FadeSlideIn(
-              delay: const Duration(milliseconds: 170),
-              child: _MenuSection(
-                title: 'Support',
-                items: [
-                  _MenuItem(
-                    icon: Icons.headset_mic_outlined,
-                    color: AppColors.primary,
-                    label: 'Help centre',
-                    subtitle: 'Orders, payments, and delivery',
-                    onTap: () => context.push(AppRoutes.help),
-                  ),
-                  _MenuItem(
-                    icon: Icons.description_outlined,
-                    color: AppColors.mutedForeground,
-                    label: 'Policies & terms',
-                    subtitle: 'Privacy, delivery, refunds, free gifts',
-                    onTap: () => context.push(AppRoutes.terms),
-                  ),
-                  if (auth.isSignedIn) ...[
-                    _MenuItem(
-                      icon: Icons.alternate_email_rounded,
-                      color: AppColors.primary,
-                      label: 'Change email',
-                      onTap: () => context.push(AppRoutes.changeEmail),
-                    ),
-                    _MenuItem(
-                      icon: Icons.key_rounded,
-                      color: AppColors.primary,
-                      label: 'Change password',
-                      onTap: () => context.push(AppRoutes.changePassword),
-                    ),
-                    _MenuItem(
-                      key: const Key('account-delete'),
-                      icon: Icons.person_remove_rounded,
-                      color: AppColors.destructive,
-                      label: 'Delete account',
-                      subtitle: 'Permanently remove your account and data',
-                      onTap: () => _confirmDelete(context, points: points),
-                    ),
-                  ],
-                ],
-              ),
-            ),
-            if (auth.isSignedIn) ...[
-              const SizedBox(height: 20),
               FadeSlideIn(
-                delay: const Duration(milliseconds: 200),
                 child: Padding(
                   padding: const EdgeInsets.symmetric(
                     horizontal: AppTheme.gutter,
                   ),
-                  child: _SignOutButton(
-                    onTap: () => _confirmSignOut(
-                      context,
-                      ref,
-                      points: points,
-                      savedCount: savedCount,
-                      orderCount: orderCount,
-                    ),
+                  child: auth.isSignedIn
+                      ? _ProfileHero(
+                          name: auth.displayName,
+                          email: auth.email,
+                          imageUrl: auth.imageUrl,
+                          points: points,
+                          onPointsTap: () =>
+                              context.push(AppRoutes.gameEntries),
+                          onEdit: () => context.push(AppRoutes.editProfile),
+                        )
+                      : const _GuestHero(),
+                ),
+              ),
+              if (auth.isSignedIn && auth.passwordChangeRequired) ...[
+                const SizedBox(height: 14),
+                Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTheme.gutter,
+                  ),
+                  child: _TemporaryPasswordPrompt(
+                    onTap: () => context.push(AppRoutes.changePassword),
+                  ),
+                ),
+              ],
+              const SizedBox(height: 16),
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 50),
+                child: Padding(
+                  padding: const EdgeInsets.symmetric(
+                    horizontal: AppTheme.gutter,
+                  ),
+                  child: Row(
+                    children: [
+                      Expanded(
+                        child: _StatTile(
+                          icon: Icons.receipt_long_rounded,
+                          value: orderCount?.toString() ?? '-',
+                          label: 'Orders',
+                          tint: AppColors.categoryTints[0],
+                          iconColor: AppColors.primary,
+                          onTap: () => context.push(AppRoutes.orders),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _StatTile(
+                          icon: Icons.confirmation_number_outlined,
+                          value: points == null ? '-' : _compact(points),
+                          label: 'Entries',
+                          tint: AppColors.categoryTints[1],
+                          iconColor: AppColors.purple,
+                          onTap: () => signedInOnly(AppRoutes.gameEntries),
+                        ),
+                      ),
+                      const SizedBox(width: 10),
+                      Expanded(
+                        child: _StatTile(
+                          icon: Icons.favorite_rounded,
+                          value: '$savedCount',
+                          label: 'Saved',
+                          tint: AppColors.categoryTints[2],
+                          iconColor: AppColors.accentForeground,
+                          onTap: () => context.go(AppRoutes.saved),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
               ),
+              const SizedBox(height: 26),
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 90),
+                child: _ShortcutSection(
+                  title: 'Shopping',
+                  items: [
+                    _Shortcut(
+                      icon: Icons.receipt_long_rounded,
+                      color: AppColors.primary,
+                      tint: AppColors.categoryTints[0],
+                      label: 'My orders',
+                      subtitle: 'Track deliveries and history',
+                      onTap: () => context.push(AppRoutes.orders),
+                    ),
+                    _Shortcut(
+                      icon: Icons.confirmation_number_outlined,
+                      color: AppColors.purple,
+                      tint: AppColors.categoryTints[1],
+                      label: 'Game entries',
+                      subtitle: 'Your entries and where they came from',
+                      onTap: () => signedInOnly(AppRoutes.gameEntries),
+                    ),
+                    _Shortcut(
+                      icon: Icons.chat_bubble_rounded,
+                      color: AppColors.accentForeground,
+                      tint: AppColors.categoryTints[2],
+                      label: 'Messages',
+                      subtitle: 'Chat with shops',
+                      badge: unreadMessages,
+                      onTap: () => signedInOnly(AppRoutes.messages),
+                    ),
+                    _Shortcut(
+                      icon: Icons.star_rounded,
+                      color: const Color(0xFFB7791F),
+                      tint: const Color(0xFFFDF3E1),
+                      label: 'My reviews',
+                      subtitle: 'Ratings you left',
+                      onTap: () => signedInOnly(AppRoutes.reviews),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 130),
+                child: _ShortcutSection(
+                  title: 'Gifting',
+                  items: [
+                    _Shortcut(
+                      icon: Icons.workspace_premium_rounded,
+                      color: AppColors.purple,
+                      tint: AppColors.categoryTints[1],
+                      label: 'Membership',
+                      subtitle: membership != null && membership.isMember
+                          ? '${membership.offer?.name ?? 'Member'} · your plan '
+                                'and renewal'
+                          : 'Gift discounts and member benefits',
+                      onTap: () => context.push(
+                        !auth.isSignedIn
+                            ? AppRoutes.login
+                            : membership != null && membership.state != 'none'
+                            ? AppRoutes.myMembership
+                            : AppRoutes.membership,
+                      ),
+                    ),
+                    _Shortcut(
+                      icon: Icons.redeem_rounded,
+                      color: AppColors.tealForeground,
+                      tint: AppColors.accent,
+                      label: 'Free gift',
+                      subtitle: 'Send one gift free. You pay delivery',
+                      onTap: () => context.push(AppRoutes.freeGift),
+                    ),
+                    _Shortcut(
+                      icon: Icons.card_giftcard_rounded,
+                      color: const Color(0xFFDB2777),
+                      tint: const Color(0xFFFCE7F1),
+                      label: 'Gifts received',
+                      subtitle: 'Gifts sent to you. Review them here',
+                      onTap: () => signedInOnly(AppRoutes.receivedGifts),
+                    ),
+                    _Shortcut(
+                      icon: Icons.people_alt_rounded,
+                      color: AppColors.purple,
+                      tint: AppColors.categoryTints[5],
+                      label: 'Recipients',
+                      subtitle: 'People you gift',
+                      onTap: () => signedInOnly(AppRoutes.recipients),
+                    ),
+                    _Shortcut(
+                      icon: Icons.location_on_rounded,
+                      color: AppColors.accentForeground,
+                      tint: AppColors.categoryTints[4],
+                      label: 'Addresses',
+                      subtitle: 'Delivery and return',
+                      onTap: () => signedInOnly(AppRoutes.addresses),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 24),
+              FadeSlideIn(
+                delay: const Duration(milliseconds: 170),
+                child: _MenuSection(
+                  title: 'Support',
+                  items: [
+                    _MenuItem(
+                      icon: Icons.headset_mic_outlined,
+                      color: AppColors.primary,
+                      label: 'Help centre',
+                      subtitle: 'Orders, payments, and delivery',
+                      onTap: () => context.push(AppRoutes.help),
+                    ),
+                    _MenuItem(
+                      icon: Icons.description_outlined,
+                      color: AppColors.mutedForeground,
+                      label: 'Policies & terms',
+                      subtitle: 'Privacy, delivery, refunds, free gifts',
+                      onTap: () => context.push(AppRoutes.terms),
+                    ),
+                    if (auth.isSignedIn) ...[
+                      _MenuItem(
+                        icon: Icons.alternate_email_rounded,
+                        color: AppColors.primary,
+                        label: 'Change email',
+                        onTap: () => context.push(AppRoutes.changeEmail),
+                      ),
+                      _MenuItem(
+                        icon: Icons.key_rounded,
+                        color: AppColors.primary,
+                        label: 'Change password',
+                        onTap: () => context.push(AppRoutes.changePassword),
+                      ),
+                      _MenuItem(
+                        key: const Key('account-delete'),
+                        icon: Icons.person_remove_rounded,
+                        color: AppColors.destructive,
+                        label: 'Delete account',
+                        subtitle: 'Permanently remove your account and data',
+                        onTap: () => _confirmDelete(context, points: points),
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              if (auth.isSignedIn) ...[
+                const SizedBox(height: 20),
+                FadeSlideIn(
+                  delay: const Duration(milliseconds: 200),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: AppTheme.gutter,
+                    ),
+                    child: _SignOutButton(
+                      onTap: () => _confirmSignOut(
+                        context,
+                        ref,
+                        points: points,
+                        savedCount: savedCount,
+                        orderCount: orderCount,
+                      ),
+                    ),
+                  ),
+                ),
+              ],
             ],
-          ],
+          ),
         ),
       ),
     );

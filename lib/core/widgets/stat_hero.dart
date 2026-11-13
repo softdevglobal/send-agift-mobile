@@ -3,9 +3,11 @@ import 'package:flutter/material.dart';
 import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
+import 'storefront_decor.dart';
 
-/// The violet-to-teal card at the top of the "my" pages, shared by the other
-/// "my" pages: a small label, one big figure, and a line under it.
+/// The card at the top of the "my" pages: a small label, one big figure, a
+/// line under it, and the page's icon as a tilted sticker. Flat brand colour
+/// with a few sparkles, like the storefront.
 class StatHero extends StatelessWidget {
   const StatHero({
     super.key,
@@ -14,6 +16,8 @@ class StatHero extends StatelessWidget {
     this.caption,
     this.icon,
     this.trailing,
+    this.color = AppColors.purple,
+    this.stickerColor = AppColors.purple,
   });
 
   final String label;
@@ -22,29 +26,34 @@ class StatHero extends StatelessWidget {
   final Widget value;
   final String? caption;
 
-  /// Drawn large and faint in the corner.
+  /// Shown on a white sticker in the corner.
   final IconData? icon;
 
   /// Sits under the caption, e.g. a progress bar or a button.
   final Widget? trailing;
+
+  /// The card's colour: purple by default, ink for game entries.
+  final Color color;
+
+  /// The icon's colour on its white sticker.
+  final Color stickerColor;
 
   @override
   Widget build(BuildContext context) {
     final muted = TextStyle(color: Colors.white.withValues(alpha: 0.85));
     // Full width wherever it sits: in a start-aligned column it would
     // otherwise shrink to its content.
-    return Container(
-      width: double.infinity,
-      decoration: BoxDecoration(borderRadius: BorderRadius.circular(24)),
-      child: ClipRRect(
-        borderRadius: BorderRadius.circular(24),
-        child: Container(
-          decoration: const BoxDecoration(color: AppColors.purple),
+    return ClipRRect(
+      borderRadius: BorderRadius.circular(26),
+      child: ColoredBox(
+        color: color,
+        child: SizedBox(
+          width: double.infinity,
           child: Stack(
             children: [
               Positioned(
-                right: -30,
-                top: -40,
+                right: -36,
+                bottom: -46,
                 child: Container(
                   height: 150,
                   width: 150,
@@ -54,25 +63,62 @@ class StatHero extends StatelessWidget {
                   ),
                 ),
               ),
+              const Positioned(
+                right: 96,
+                top: 18,
+                child: Sparkle(size: 14, color: AppColors.teal),
+              ),
+              Positioned(
+                right: 26,
+                bottom: 22,
+                child: Sparkle(
+                  size: 20,
+                  color: Colors.white.withValues(alpha: 0.85),
+                ),
+              ),
+              Positioned(
+                right: 120,
+                bottom: 30,
+                child: Dot(size: 6, color: Colors.white.withValues(alpha: 0.5)),
+              ),
               if (icon != null)
                 Positioned(
-                  right: 18,
-                  top: 18,
-                  child: Icon(
-                    icon,
-                    size: 56,
-                    color: Colors.white.withValues(alpha: 0.18),
+                  right: 20,
+                  top: 20,
+                  child: Transform.rotate(
+                    angle: 0.12,
+                    child: Container(
+                      width: 58,
+                      height: 58,
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                      ),
+                      child: Icon(icon, size: 28, color: stickerColor),
+                    ),
                   ),
                 ),
               Padding(
-                padding: const EdgeInsets.all(20),
+                padding: const EdgeInsets.fromLTRB(20, 20, 20, 22),
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(label, style: muted),
-                    DefaultTextStyle.merge(
-                      style: AppTypography.display(34, color: Colors.white),
-                      child: value,
+                    Text(
+                      label.toUpperCase(),
+                      style: muted.copyWith(
+                        fontSize: 11.5,
+                        fontWeight: FontWeight.w800,
+                        letterSpacing: 1.2,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Padding(
+                      // Clear of the sticker.
+                      padding: EdgeInsets.only(right: icon != null ? 72 : 0),
+                      child: DefaultTextStyle.merge(
+                        style: AppTypography.display(36, color: Colors.white),
+                        child: value,
+                      ),
                     ),
                     if (caption != null) ...[
                       const SizedBox(height: 8),
@@ -93,7 +139,7 @@ class StatHero extends StatelessWidget {
   }
 }
 
-/// One small figure with a tinted icon, laid out two to a row.
+/// One small figure: a solid icon circle on a soft tint of its colour.
 class StatTile extends StatelessWidget {
   const StatTile({
     super.key,
@@ -117,31 +163,28 @@ class StatTile extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: selected ? color.withValues(alpha: 0.08) : AppColors.surface,
-      borderRadius: BorderRadius.circular(16),
+      color: color.withValues(alpha: selected ? 0.16 : 0.08),
+      borderRadius: BorderRadius.circular(18),
       child: InkWell(
         onTap: onTap,
-        borderRadius: BorderRadius.circular(16),
+        borderRadius: BorderRadius.circular(18),
         child: AnimatedContainer(
           duration: const Duration(milliseconds: 180),
           padding: const EdgeInsets.all(12),
           decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(16),
+            borderRadius: BorderRadius.circular(18),
             border: Border.all(
-              color: selected ? color : AppColors.boxBorder,
-              width: 1.5,
+              color: selected ? color : color.withValues(alpha: 0.22),
+              width: selected ? 2 : 1.2,
             ),
           ),
           child: Row(
             children: [
               Container(
-                width: 34,
-                height: 34,
-                decoration: BoxDecoration(
-                  color: color.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(10),
-                ),
-                child: Icon(icon, size: 18, color: color),
+                width: 38,
+                height: 38,
+                decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+                child: Icon(icon, size: 19, color: Colors.white),
               ),
               const SizedBox(width: 10),
               Expanded(
@@ -149,14 +192,13 @@ class StatTile extends StatelessWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Text(
-                      value,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                      style: const TextStyle(
-                        fontWeight: FontWeight.w800,
-                        fontSize: 17,
-                        color: AppColors.foreground,
+                    FittedBox(
+                      fit: BoxFit.scaleDown,
+                      alignment: Alignment.centerLeft,
+                      child: Text(
+                        value,
+                        maxLines: 1,
+                        style: AppTypography.poster(20),
                       ),
                     ),
                     Text(

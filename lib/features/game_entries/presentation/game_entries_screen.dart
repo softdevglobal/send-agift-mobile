@@ -8,6 +8,7 @@ import '../../../core/theme/app_theme.dart';
 import '../../../core/theme/app_typography.dart';
 import '../../../core/widgets/box_tabs.dart';
 import '../../../core/widgets/empty_state.dart';
+import '../../../core/widgets/stat_hero.dart';
 import '../../games/data/games_providers.dart';
 import '../../games/domain/game_entries.dart';
 import '../../games/presentation/competition_format.dart';
@@ -28,6 +29,18 @@ enum _Filter { all, earned, used }
 class _GameEntriesScreenState extends ConsumerState<GameEntriesScreen> {
   _Filter _filter = _Filter.all;
   bool _claiming = false;
+
+  @override
+  void initState() {
+    super.initState();
+    // The Account tab keeps the wallet loaded, so it can be from long ago:
+    // read it again whenever this page opens.
+    if (ref.exists(gameEntriesProvider)) {
+      Future.microtask(() {
+        if (mounted) ref.invalidate(gameEntriesProvider);
+      });
+    }
+  }
 
   Future<void> _claimFree() async {
     setState(() => _claiming = true);
@@ -195,30 +208,17 @@ class _Balance extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final muted = TextStyle(color: Colors.white.withValues(alpha: 0.85));
-    return Container(
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppColors.primary,
-        borderRadius: BorderRadius.circular(24),
+    return StatHero(
+      label: 'Available to play',
+      value: Text(
+        '${wallet.balance} ${wallet.balance == 1 ? 'entry' : 'entries'}',
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text('Available to play', style: muted),
-          Text(
-            '${wallet.balance} ${wallet.balance == 1 ? 'entry' : 'entries'}',
-            style: AppTypography.display(34, color: Colors.white),
-          ),
-          if (wallet.totals.pending > 0) ...[
-            const SizedBox(height: 6),
-            Text(
-              '${wallet.totals.pending} more arrive when your payment is confirmed.',
-              style: muted,
-            ),
-          ],
-        ],
-      ),
+      caption: wallet.totals.pending > 0
+          ? '${wallet.totals.pending} more arrive when your payment is confirmed.'
+          : 'Earned with sponsored gifts. Never bought.',
+      icon: Icons.confirmation_number_rounded,
+      color: AppColors.primary,
+      stickerColor: AppColors.gold,
     );
   }
 }
@@ -230,79 +230,32 @@ class _Totals extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final tiles = [
-      ('Earned', totals.earned, Icons.shopping_bag_rounded, AppColors.purple),
-      (
-        'Used on games',
-        totals.spent,
-        Icons.sports_esports_rounded,
-        AppColors.accentForeground,
-      ),
-      (
-        'Waiting for payment',
-        totals.pending,
-        Icons.hourglass_bottom_rounded,
-        AppColors.star,
-      ),
-      (
-        'Taken back',
-        totals.reversed,
-        Icons.undo_rounded,
-        AppColors.mutedForeground,
-      ),
-    ];
-    return GridView.count(
-      crossAxisCount: 2,
-      shrinkWrap: true,
-      physics: const NeverScrollableScrollPhysics(),
-      mainAxisSpacing: 10,
-      crossAxisSpacing: 10,
-      childAspectRatio: 2.1,
-      children: [
-        for (final (label, value, icon, color) in tiles)
-          Container(
-            padding: const EdgeInsets.all(12),
-            decoration: BoxDecoration(
-              color: AppColors.surface,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppColors.border),
-            ),
-            child: Row(
-              children: [
-                Container(
-                  width: 34,
-                  height: 34,
-                  decoration: BoxDecoration(
-                    color: color.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(10),
-                  ),
-                  child: Icon(icon, size: 18, color: color),
-                ),
-                const SizedBox(width: 10),
-                Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      Text(
-                        '$value',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          fontSize: 17,
-                        ),
-                      ),
-                      Text(
-                        label,
-                        maxLines: 1,
-                        overflow: TextOverflow.ellipsis,
-                        style: Theme.of(context).textTheme.bodySmall,
-                      ),
-                    ],
-                  ),
-                ),
-              ],
-            ),
-          ),
+    return StatGrid(
+      tiles: [
+        StatTile(
+          label: 'Earned',
+          value: '${totals.earned}',
+          icon: Icons.shopping_bag_rounded,
+          color: AppColors.purple,
+        ),
+        StatTile(
+          label: 'Used on games',
+          value: '${totals.spent}',
+          icon: Icons.sports_esports_rounded,
+          color: AppColors.teal,
+        ),
+        StatTile(
+          label: 'Waiting for payment',
+          value: '${totals.pending}',
+          icon: Icons.hourglass_bottom_rounded,
+          color: AppColors.star,
+        ),
+        StatTile(
+          label: 'Taken back',
+          value: '${totals.reversed}',
+          icon: Icons.undo_rounded,
+          color: AppColors.mutedForeground,
+        ),
       ],
     );
   }

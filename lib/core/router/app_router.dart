@@ -409,7 +409,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) => _fadePage(
           state,
-          OrderDetailScreen(orderId: state.pathParameters['id'] ?? ''),
+          OrderDetailScreen(
+            orderId: state.pathParameters['id'] ?? '',
+            justPlaced: state.uri.queryParameters['placed'] == '1',
+          ),
         ),
       ),
       GoRoute(

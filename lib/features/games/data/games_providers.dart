@@ -1,5 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../auth/data/auth_controller.dart';
+
 import '../../../core/network/providers.dart';
 import '../domain/competition.dart';
 import '../domain/game_entries.dart';
@@ -66,6 +68,8 @@ final livePrizeProvider = StreamProvider.autoDispose.family<LivePrize, String>(
 final gameEntriesProvider = FutureProvider.autoDispose<GameEntriesWallet>((
   ref,
 ) {
+  // Loaded again when a different customer signs in on this device.
+  ref.watch(authProvider.select((a) => a.customer?['id']));
   return ref.watch(gamesRepositoryProvider).gameEntries();
 });
 
@@ -88,3 +92,13 @@ final entryOffersProvider = FutureProvider.autoDispose
       if (key.isEmpty) return const EntryOffers(total: 0);
       return ref.watch(gamesRepositoryProvider).entryOffers(key.split(','));
     });
+
+/// Whether gifts may promise game entries to whoever is looking.
+///
+/// A guest sees what a gift can earn. A signed-in customer only does where
+/// their state lets them earn: otherwise "+3 entries" would promise what
+/// their order will not give.
+final entriesEarnableProvider = Provider.autoDispose<bool>((ref) {
+  if (!ref.watch(authProvider).isSignedIn) return true;
+  return ref.watch(gameEntriesProvider).valueOrNull?.earn?.allowed ?? true;
+});
