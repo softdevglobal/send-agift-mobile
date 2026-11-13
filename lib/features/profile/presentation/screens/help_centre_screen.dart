@@ -95,11 +95,6 @@ const _topics = [
       'Where do I see my entries?',
       'Account → Game entries shows your balance and every entry in and out.',
     ),
-    (
-      'What happened to my points?',
-      'Points are retired. Any balance you had is kept safely while we decide '
-          'how to settle it, and we will contact you. Nothing was deleted.',
-    ),
   ]),
   _Topic('Games', Icons.sports_esports_outlined, AppColors.star, [
     (
