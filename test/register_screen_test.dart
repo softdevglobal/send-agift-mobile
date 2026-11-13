@@ -22,6 +22,7 @@ void main() {
           countriesProvider.overrideWith(
             (ref) async => const [
               Country(id: 'lk', name: 'Sri Lanka', isoCode: 'LK'),
+              Country(id: 'au', name: 'Australia', isoCode: 'AU'),
             ],
           ),
         ],
@@ -30,6 +31,22 @@ void main() {
     );
     await tester.pumpAndSettle();
   }
+
+  testWidgets('choosing a country fills in its phone code', (tester) async {
+    await pumpRegister(tester, const Size(420, 1600));
+    expect(find.text('+94'), findsOneWidget);
+
+    final country = find.byType(DropdownButtonFormField<String>).first;
+    await tester.ensureVisible(country);
+    await tester.pumpAndSettle();
+    await tester.tap(country);
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('Australia (AU)').last);
+    await tester.pumpAndSettle();
+
+    expect(find.text('+61'), findsOneWidget);
+    expect(find.text('+94'), findsNothing);
+  });
 
   testWidgets('sign-up asks only for the essentials and fits a narrow phone', (
     tester,

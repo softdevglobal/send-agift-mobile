@@ -391,6 +391,19 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       onChanged: (value) => setState(() {
                         _countryId = value;
                         _stateId = null;
+                        // The phone code follows the country (+61 for
+                        // Australia), unless the phone came verified from a
+                        // text code. It can still be changed by hand.
+                        final iso = list
+                            .where((c) => c.id == value)
+                            .firstOrNull
+                            ?.isoCode
+                            .toUpperCase();
+                        if (!_phoneLocked &&
+                            iso != null &&
+                            dialCodes.any((d) => d.iso2 == iso)) {
+                          _dialIso = iso;
+                        }
                       }),
                     ),
                   ),
@@ -426,7 +439,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       SizedBox(
                         width: 108,
                         child: DropdownButtonFormField<String>(
-                          key: const Key('register-dial'),
+                          // Rebuilt when the country changes the code.
+                          key: ValueKey('register-dial-$_dialIso'),
                           initialValue: _dialIso,
                           isExpanded: true,
                           selectedItemBuilder: (_) => [
