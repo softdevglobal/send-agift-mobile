@@ -1,25 +1,16 @@
-import 'dart:async';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-
-import '../../../core/errors/app_exception.dart';
-import '../../../core/theme/app_colors.dart';
-import '../../auth/data/countries_provider.dart';
-import '../../delivery/data/delivery_providers.dart';
-import '../../delivery/data/delivery_repository.dart';
-import '../../delivery/domain/place.dart';
 
 import '../../games/data/games_providers.dart';
 import '../../games/domain/game_entries.dart';
 
-/// The customer's state or region, searched on Google Places within their
-/// country. Picking a suggestion checks it on the server and hands
-/// [onChanged] our state's id; typing again clears it.
+/// The state or region of a country, as a dropdown. The list comes from
+/// Google Places: the server fetches a country's states the first time they
+/// are asked for and keeps them, so the first person may wait a moment.
 ///
-/// Shown as soon as a country is chosen, and [onRequired] is told a state is
-/// needed. Someone whose country has no states can say so.
-class StatePicker extends ConsumerStatefulWidget {
+/// Renders nothing for a country without states. [onRequired] tells the form
+/// whether a choice is needed, so it can hold sign-up until one is made.
+class StatePicker extends ConsumerWidget {
   const StatePicker({
     super.key,
     required this.countryId,
@@ -36,255 +27,55 @@ class StatePicker extends ConsumerStatefulWidget {
   final bool enabled;
 
   @override
-  ConsumerState<StatePicker> createState() => _StatePickerState();
-}
-
-class _StatePickerState extends ConsumerState<StatePicker> {
-  final _query = TextEditingController();
-  final _session = DeliveryRepository.newSessionToken();
-  Timer? _debounce;
-  List<PlaceSuggestion> _suggestions = const [];
-  bool _searching = false;
-  bool _resolving = false;
-  bool _noStates = false;
-  String? _picked;
-  String? _error;
-
-  /// Ignores a search answer when a newer one was asked for.
-  int _searchId = 0;
-
-  @override
-  void initState() {
-    super.initState();
-    _countryChanged();
-  }
-
-  @override
-  void didUpdateWidget(StatePicker old) {
-    super.didUpdateWidget(old);
-    if (old.countryId != widget.countryId) _countryChanged();
-  }
-
-  @override
-  void dispose() {
-    _debounce?.cancel();
-    _query.dispose();
-    super.dispose();
-  }
-
-  /// A new country: clear the search, ask for a state, and show the one
-  /// already chosen by name.
-  void _countryChanged() {
-    _debounce?.cancel();
-    _query.clear();
-    _suggestions = const [];
-    _picked = null;
-    _error = null;
-    _noStates = false;
-    final countryId = widget.countryId;
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (!mounted) return;
-      widget.onRequired?.call(countryId.isNotEmpty);
+  Widget build(BuildContext context, WidgetRef ref) {
+    if (countryId.isEmpty) return const SizedBox.shrink();
+    final states = ref.watch(statesProvider(countryId));
+    ref.listen<AsyncValue<List<StateOption>>>(statesProvider(countryId), (
+      _,
+      next,
+    ) {
+      final list = next.valueOrNull;
+      if (list == null) return;
+      onRequired?.call(list.isNotEmpty);
+      if (value != null && !list.any((s) => s.id == value)) onChanged(null);
     });
-    final value = widget.value;
-    if (countryId.isEmpty || value == null) return;
-    ref.read(statesProvider(countryId).future).then((list) {
-      if (!mounted || widget.countryId != countryId) return;
-      final current = list.where((s) => s.id == value).firstOrNull;
-      if (current == null) {
-        widget.onChanged(null);
-        return;
-      }
-      setState(() {
-        _picked = current.name;
-        _query.text = current.name;
-      });
-    }, onError: (_) {});
-  }
-
-  /// The country's ISO code, so Google only suggests states inside it.
-  Future<String?> _countryCode() async {
-    try {
-      final countries = await ref.read(countriesProvider.future);
-      final iso = countries
-          .where((c) => c.id == widget.countryId)
-          .firstOrNull
-          ?.isoCode;
-      return iso == null || iso.isEmpty ? null : iso;
-    } catch (_) {
-      return null;
-    }
-  }
-
-  void _typed(String text) {
-    if (_picked != null && text != _picked) {
-      _picked = null;
-      widget.onChanged(null);
-    }
-    _debounce?.cancel();
-    setState(() => _error = null);
-    if (text.trim().length < 2) {
-      setState(() => _suggestions = const []);
-      return;
-    }
-    _debounce = Timer(const Duration(milliseconds: 300), () => _search(text));
-  }
-
-  Future<void> _search(String text) async {
-    final id = ++_searchId;
-    setState(() => _searching = true);
-    try {
-      final found = await ref
-          .read(deliveryRepositoryProvider)
-          .autocomplete(
-            text,
-            sessionToken: _session,
-            types: 'states',
-            countryCode: await _countryCode(),
-          );
-      if (!mounted || id != _searchId) return;
-      setState(() => _suggestions = found);
-    } on AppException catch (error) {
-      if (mounted && id == _searchId) setState(() => _error = error.message);
-    } finally {
-      if (mounted && id == _searchId) setState(() => _searching = false);
-    }
-  }
-
-  Future<void> _pick(PlaceSuggestion suggestion) async {
-    FocusScope.of(context).unfocus();
-    final label = suggestion.mainText.isNotEmpty
-        ? suggestion.mainText
-        : suggestion.description;
-    setState(() {
-      _resolving = true;
-      _suggestions = const [];
-      _query.text = label;
-      _error = null;
-    });
-    try {
-      final state = await ref
-          .read(gamesRepositoryProvider)
-          .resolveState(widget.countryId, suggestion.placeId);
-      if (!mounted) return;
-      setState(() {
-        _picked = state.name;
-        _query.text = state.name;
-      });
-      widget.onChanged(state.id);
-    } on AppException catch (error) {
-      if (!mounted) return;
-      setState(() => _error = error.message);
-      widget.onChanged(null);
-    } finally {
-      if (mounted) setState(() => _resolving = false);
-    }
-  }
-
-  void _toggleNoStates() {
-    setState(() {
-      _noStates = !_noStates;
-      _query.clear();
-      _suggestions = const [];
-      _picked = null;
-      _error = null;
-    });
-    widget.onChanged(null);
-    widget.onRequired?.call(!_noStates);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    if (widget.countryId.isEmpty) return const SizedBox.shrink();
-    final theme = Theme.of(context);
-    final busy = _searching || _resolving;
-    return Padding(
-      padding: const EdgeInsets.only(top: 14),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (!_noStates)
-            TextField(
-              key: const Key('state-search'),
-              controller: _query,
-              enabled: widget.enabled && !_resolving,
-              onChanged: _typed,
-              textInputAction: TextInputAction.search,
-              decoration: InputDecoration(
-                labelText: 'State or region',
-                hintText: 'Start typing your state or region',
-                prefixIcon: const Icon(Icons.map_outlined),
-                suffixIcon: busy
-                    ? const Padding(
-                        padding: EdgeInsets.all(14),
-                        child: SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        ),
-                      )
-                    : _picked != null && widget.value != null
-                    ? const Icon(
-                        Icons.check_circle_rounded,
-                        color: AppColors.teal,
-                      )
-                    : null,
-              ),
-            ),
-          if (_suggestions.isNotEmpty)
-            Container(
-              margin: const EdgeInsets.only(top: 6),
-              decoration: BoxDecoration(
-                color: theme.colorScheme.surface,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: AppColors.border),
-              ),
-              child: Column(
-                children: [
-                  for (final s in _suggestions.take(6))
-                    ListTile(
-                      dense: true,
-                      leading: const Icon(Icons.place_outlined, size: 20),
-                      title: Text(
-                        s.mainText.isNotEmpty ? s.mainText : s.description,
-                      ),
-                      subtitle: s.secondaryText.isEmpty
-                          ? null
-                          : Text(s.secondaryText),
-                      onTap: () => _pick(s),
-                    ),
-                ],
-              ),
-            ),
-          const SizedBox(height: 6),
-          if (_error != null)
-            Text(
-              _error!,
-              style: theme.textTheme.bodySmall?.copyWith(
-                color: AppColors.destructive,
-              ),
-            ),
-          Wrap(
-            crossAxisAlignment: WrapCrossAlignment.center,
+    if (states.isLoading) {
+      return const Padding(
+        padding: EdgeInsets.only(top: 14),
+        child: InputDecorator(
+          decoration: InputDecoration(labelText: 'State or region'),
+          child: Row(
             children: [
-              Text(
-                _noStates
-                    ? 'No state needed.'
-                    : 'Games are offered state by state, so we need yours.',
-                style: theme.textTheme.bodySmall?.copyWith(
-                  color: AppColors.mutedForeground,
-                ),
+              SizedBox(
+                width: 16,
+                height: 16,
+                child: CircularProgressIndicator(strokeWidth: 2),
               ),
-              TextButton(
-                key: const Key('state-none'),
-                onPressed: widget.enabled ? _toggleNoStates : null,
-                child: Text(
-                  _noStates ? 'Choose a state' : 'My country has no states',
-                ),
-              ),
+              SizedBox(width: 10),
+              Text('Loading states…'),
             ],
           ),
+        ),
+      );
+    }
+    final list = states.valueOrNull ?? const <StateOption>[];
+    if (list.isEmpty) return const SizedBox.shrink();
+    return Padding(
+      padding: const EdgeInsets.only(top: 14),
+      child: DropdownButtonFormField<String>(
+        key: const Key('state-dropdown'),
+        initialValue: list.any((s) => s.id == value) ? value : null,
+        isExpanded: true,
+        hint: const Text('Choose your state or region'),
+        decoration: const InputDecoration(
+          labelText: 'State or region',
+          helperText: 'Games are offered state by state.',
+        ),
+        items: [
+          for (final s in list)
+            DropdownMenuItem(value: s.id, child: Text(s.name)),
         ],
+        onChanged: enabled ? onChanged : null,
       ),
     );
   }
@@ -412,7 +203,7 @@ class _StateSheetState extends ConsumerState<_StateSheet> {
           Text(
             changing
                 ? 'You can change it once in a while, and only with a verified phone number.'
-                : 'Games are offered state by state. Search for the one you live in.',
+                : 'Games are offered state by state. Choose the one you live in.',
           ),
           StatePicker(
             countryId: widget.current.countryId,
