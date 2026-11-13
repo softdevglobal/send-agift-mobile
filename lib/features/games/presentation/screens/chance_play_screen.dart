@@ -72,7 +72,7 @@ class _ChancePlayScreenState extends ConsumerState<ChancePlayScreen> {
     } on AppException catch (error) {
       if (!mounted) return;
       final transient = switch (error.code) {
-        'INSUFFICIENT_POINTS' ||
+        'INSUFFICIENT_ENTRIES' ||
         'PLAY_LIMIT_REACHED' ||
         'GAME_NOT_ACTIVE' ||
         'OUTSIDE_GAME_WINDOW' ||
@@ -83,16 +83,16 @@ class _ChancePlayScreenState extends ConsumerState<ChancePlayScreen> {
       };
       if (!transient) _playKey = null;
       final d = error.details;
-      final need = d['points_required'];
-      final have = d['points_balance'];
+      final need = d['entries_required'];
+      final have = d['entries_balance'];
       setState(() {
         _loading = false;
         _retryable = transient;
-        _errorRoute = error.code == 'INSUFFICIENT_POINTS'
-            ? AppRoutes.points
+        _errorRoute = error.code == 'INSUFFICIENT_ENTRIES'
+            ? AppRoutes.gameEntries
             : null;
-        _error = error.code == 'INSUFFICIENT_POINTS' && need != null
-            ? 'A play costs $need points and you have $have. Nothing was '
+        _error = error.code == 'INSUFFICIENT_ENTRIES' && need != null
+            ? 'A play costs $need game entries and you have $have. Nothing was '
                   'charged.'
             : transient
             ? error.message
@@ -137,7 +137,7 @@ class _ChancePlayScreenState extends ConsumerState<ChancePlayScreen> {
                   actionLabel: _retryable
                       ? 'Try again'
                       : _errorRoute != null
-                      ? 'See my points'
+                      ? 'See my game entries'
                       : 'Back to the competition',
                   onAction: _retryable
                       ? _start
@@ -164,12 +164,12 @@ class _ChancePlayScreenState extends ConsumerState<ChancePlayScreen> {
     final play = _play!;
     final result = play.result;
     final currency = competition?.prizeCurrency;
-    final cost = competition?.pointsPerAttempt ?? play.pointsSpent;
+    final cost = competition?.entriesPerAttempt ?? play.entriesSpent;
     final canPlayAgain =
         _revealed &&
         !(result?.won ?? false) &&
         play.attemptsRemaining != 0 && // -1: no limit
-        play.walletPointsRemaining >= cost &&
+        play.entriesRemaining >= cost &&
         (competition?.isLive ?? true);
 
     Widget reveal;
@@ -222,7 +222,11 @@ class _ChancePlayScreenState extends ConsumerState<ChancePlayScreen> {
               minimumSize: const Size.fromHeight(52),
             ),
             onPressed: _start,
-            child: Text(cost > 0 ? 'Play again · $cost points' : 'Play again'),
+            child: Text(
+              cost > 0
+                  ? 'Play again · $cost ${cost == 1 ? 'entry' : 'entries'}'
+                  : 'Play again',
+            ),
           ),
         if (_revealed) ...[
           const SizedBox(height: 10),
@@ -263,8 +267,8 @@ class _Receipt extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final parts = [
-      if (play.pointsSpent > 0)
-        '−${play.pointsSpent} pts · ${play.walletPointsRemaining} left',
+      if (play.entriesSpent > 0)
+        '−${play.entriesSpent} pts · ${play.entriesRemaining} left',
       if (currency != null && play.prizeIncrementCents > 0)
         'prize +${formatMoneyCents(play.prizeIncrementCents, currency)}',
       if (play.replayed) 'already played. Not charged again',

@@ -9,6 +9,7 @@ import '../../../core/errors/app_exception.dart';
 import '../../../core/network/api_client.dart';
 import '../domain/competition.dart';
 import '../domain/game.dart';
+import '../domain/game_entries.dart';
 import 'guest_player_id.dart';
 
 /// The skill-game collection.
@@ -124,7 +125,7 @@ class GamesRepository {
     return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
   }
 
-  /// Plays once: spends the round's points, grows its prize and opens the
+  /// Plays once: spends the round's game entries, grows its prize and opens the
   /// official session, all in one server transaction. Its score is submitted
   /// through [submitScore] like any other game.
   ///
@@ -151,18 +152,59 @@ class GamesRepository {
     return AttemptStart.fromJson(_map(response.data));
   });
 
-  /// How the signed-in customer earns points in their country.
-  Future<PointsEarningRule> pointsEarningRule() => _guard(() async {
+  /// The signed-in customer's game entries, history and whether they can
+  /// earn and play where they live.
+  Future<GameEntriesWallet> gameEntries() => _guard(() async {
     final response = await _client.dio.get<dynamic>(
-      '/customers/me/points/earning',
+      '/customers/me/game-entries',
     );
-    return PointsEarningRule.fromJson(_map(response.data));
+    return GameEntriesWallet.fromJson(_map(response.data));
   });
 
-  /// The signed-in customer's points balance and history.
-  Future<PointsWallet> pointsWallet() => _guard(() async {
-    final response = await _client.dio.get<dynamic>('/customers/me/points');
-    return PointsWallet.fromJson(_map(response.data));
+  /// The day's free entries, where the customer's region offers them.
+  Future<String> claimFreeEntries() => _guard(() async {
+    final response = await _client.dio.post<dynamic>(
+      '/customers/me/game-entries/free',
+    );
+    return _map(response.data)['message'] as String? ?? 'Done.';
+  });
+
+  /// What these products would earn, worked out on the server.
+  Future<EntryOffers> entryOffers(List<String> productIds) => _guard(() async {
+    final response = await _client.dio.post<dynamic>(
+      '/customers/me/game-entries/offers',
+      data: {'product_ids': productIds},
+    );
+    return EntryOffers.fromJson(_map(response.data));
+  });
+
+  /// The active states of a country.
+  Future<List<StateOption>> states(String countryId) => _guard(() async {
+    final response = await _client.dio.get<dynamic>(
+      '/countries/$countryId/states',
+    );
+    final items = _map(response.data)['items'];
+    return items is List
+        ? items
+              .whereType<Map<String, dynamic>>()
+              .map(StateOption.fromJson)
+              .toList(growable: false)
+        : const <StateOption>[];
+  });
+
+  /// The state on the customer's account.
+  Future<CustomerState> myState() => _guard(() async {
+    final response = await _client.dio.get<dynamic>('/customers/me/state');
+    return CustomerState.fromJson(_map(response.data));
+  });
+
+  /// Records the state the customer lives in.
+  Future<CustomerState> setMyState(String stateId) => _guard(() async {
+    final response = await _client.dio.put<dynamic>(
+      '/customers/me/state',
+      data: {'state_id': stateId},
+    );
+    return CustomerState.fromJson(_map(response.data));
   });
 
   /// The round's live prize, as it changes (Server-Sent Events).

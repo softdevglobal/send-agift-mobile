@@ -90,6 +90,7 @@ class AuthController extends StateNotifier<AuthState> {
     required String displayName,
     required String countryId,
     required String phone,
+    String? stateId,
     String customerType = 'individual',
     String? signupToken,
   }) async {
@@ -100,6 +101,7 @@ class AuthController extends StateNotifier<AuthState> {
         password: password,
         displayName: displayName,
         countryId: countryId,
+        stateId: stateId,
         phone: phone,
         customerType: customerType,
         signupToken: signupToken,
@@ -148,11 +150,13 @@ class AuthController extends StateNotifier<AuthState> {
     required String countryId,
     required String phone,
     required String displayName,
+    String? stateId,
     String customerType = 'individual',
   }) async {
     await _repository.completeSocialSignup(
       signup: signup,
       countryId: countryId,
+      stateId: stateId,
       phone: phone,
       displayName: displayName,
       customerType: customerType,

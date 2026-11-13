@@ -111,27 +111,6 @@ class _GiftCard extends StatelessWidget {
                   'From ${gift.senderName}',
                   style: AppTypography.display(24, color: Colors.white),
                 ),
-                if (gift.giftPoints > 0) ...[
-                  const SizedBox(height: 10),
-                  Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 10,
-                      vertical: 5,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.white24,
-                      borderRadius: BorderRadius.circular(999),
-                    ),
-                    child: Text(
-                      '★ ${gift.giftPoints} points included',
-                      style: const TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                      ),
-                    ),
-                  ),
-                ],
               ],
             ),
           ),

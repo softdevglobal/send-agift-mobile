@@ -19,7 +19,7 @@ import '../../data/catalog_providers.dart';
 import '../../domain/gift.dart';
 import '../widgets/gift_gallery.dart';
 import '../widgets/save_gift_button.dart';
-import '../../../../core/widgets/reward_points_badge.dart';
+import '../../../../core/widgets/entries_badge.dart';
 
 /// Product page: large photo, shop line, price, description and a sticky
 /// add-to-cart bar. No sign-in required to reach or use any of it.
@@ -174,19 +174,20 @@ class _ContentState extends State<_Content> {
                       ],
                     ],
                   ),
-                  if (gift.rewardPoints > 0) ...[
+                  if (gift.sponsored) ...[
                     const SizedBox(height: 12),
                     Row(
                       children: [
-                        RewardPointsBadge(
-                          points: gift.rewardPoints,
-                          large: true,
-                        ),
+                        const SponsoredLabel(),
                         const SizedBox(width: 8),
-                        const Expanded(
+                        EntriesBadge(entries: gift.gameEntries, large: true),
+                        const SizedBox(width: 8),
+                        Expanded(
                           child: Text(
-                            'per item, added to your points when you '
-                            'order. Spend them on games.',
+                            gift.gameEntries > 0
+                                ? 'per purchase, added once your payment is '
+                                      'confirmed, where games are open in your state.'
+                                : 'A promoted gift.',
                             style: TextStyle(
                               fontSize: 12,
                               color: AppColors.mutedForeground,

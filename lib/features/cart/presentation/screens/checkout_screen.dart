@@ -20,11 +20,11 @@ import '../../../checkout/presentation/widgets/delivery_summary.dart';
 import '../../../checkout/presentation/widgets/new_recipient_sheet.dart';
 import '../../../checkout/presentation/widgets/recipient_picker.dart';
 import '../../../../core/errors/app_exception.dart';
-import '../../../../core/widgets/reward_points_badge.dart';
+import '../../../../core/widgets/entries_badge.dart';
+import '../../../games/data/games_providers.dart';
 import '../../../delivery/data/delivery_providers.dart';
 import '../../../delivery/domain/delivery_intent.dart';
 import '../../data/cart_controller.dart';
-import '../../domain/cart_item.dart';
 
 /// The one place the app asks for an account. Everything up to here. Search,
 /// product pages, cart, saved gifts. Works as a guest.
@@ -144,6 +144,12 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     }
     final summary = ref.watch(cartSummaryProvider);
     final lines = ref.watch(cartLinesProvider).valueOrNull ?? const [];
+    // What the order would earn, from the server: each promoted line earns
+    // its award once, and only where games are open for this customer.
+    final offerKey = auth.isSignedIn
+        ? ({for (final l in lines) l.gift.id}.toList()..sort()).join(',')
+        : '';
+    final offers = ref.watch(entryOffersProvider(offerKey)).valueOrNull;
 
     // Re-price whenever the recipient, date or cart changes.
     final token = [
@@ -207,17 +213,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       ),
                       const SizedBox(height: 10),
                     ],
-                    if (_rewardPoints(lines) > 0) ...[
+                    if (offers != null && offers.total > 0) ...[
                       Row(
                         children: [
                           Expanded(
                             child: Text(
-                              'You earn with this order',
+                              'You earn with this order, once it is paid',
                               style: Theme.of(context).textTheme.bodySmall,
                             ),
                           ),
-                          RewardPointsBadge(points: _rewardPoints(lines)),
+                          EntriesBadge(entries: offers.total),
                         ],
+                      ),
+                      const SizedBox(height: 10),
+                    ] else if (offers?.message != null) ...[
+                      Text(
+                        offers!.message!,
+                        style: Theme.of(context).textTheme.bodySmall,
                       ),
                       const SizedBox(height: 10),
                     ],
@@ -503,12 +515,6 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (!quote.complete) return 'Cannot deliver there';
     return null;
   }
-
-  /// What the lines promise on delivery; the server decides the rest.
-  static int _rewardPoints(List<CartLine> lines) => lines.fold(
-    0,
-    (sum, line) => sum + line.gift.rewardPoints * line.quantity,
-  );
 
   static bool _isSameDay(DateTime a, DateTime b) =>
       a.year == b.year && a.month == b.month && a.day == b.day;

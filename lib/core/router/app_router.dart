@@ -20,7 +20,7 @@ import '../../features/games/presentation/screens/competition_leaderboard_screen
 import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/games/presentation/screens/competition_screen.dart';
 import '../../features/games/presentation/screens/chance_play_screen.dart';
-import '../../features/games/presentation/screens/points_screen.dart';
+import '../../features/game_entries/presentation/game_entries_screen.dart';
 import '../../features/games/presentation/screens/game_leaderboard_screen.dart';
 import '../../features/games/presentation/screens/game_play_screen.dart';
 import '../../features/games/presentation/screens/games_screen.dart';
@@ -74,8 +74,8 @@ class AppRoutes {
   static const competitions = '/competitions';
   static const notifications = '/notifications';
 
-  /// The customer's SendAgift Points balance and history.
-  static const points = '/points';
+  /// The customer's game entries and history.
+  static const gameEntries = '/game-entries';
 
   /// The membership packages on sale, and the customer's own membership.
   static const membership = '/membership';
@@ -492,10 +492,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         ),
       ),
       GoRoute(
-        path: AppRoutes.points,
+        path: AppRoutes.gameEntries,
         parentNavigatorKey: _rootNavigatorKey,
-        pageBuilder: (context, state) => _fadePage(state, const PointsScreen()),
+        pageBuilder: (context, state) =>
+            _fadePage(state, const GameEntriesScreen()),
       ),
+      // Old links to the retired points screen.
+      GoRoute(path: '/points', redirect: (_, _) => AppRoutes.gameEntries),
       GoRoute(
         path: AppRoutes.membership,
         parentNavigatorKey: _rootNavigatorKey,

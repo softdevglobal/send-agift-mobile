@@ -231,9 +231,7 @@ class _PrizeCard extends StatelessWidget {
     final c = competition;
     final visual = GameVisual.of(c.gameSlug);
     final open = c.isLive || c.isPaused;
-    final prize = c.prizeType == 'points'
-        ? c.prizeDescription
-        : c.prizeValueLabel ?? c.prizeDescription;
+    final prize = c.prizeValueLabel ?? c.prizeDescription;
     final me = c.me;
 
     return PressableScale(
@@ -431,8 +429,8 @@ class _PrizeCard extends StatelessWidget {
                                     open
                                         ? (compact
                                               ? 'Play'
-                                              : c.pointsPerAttempt > 0
-                                              ? 'Play · ${c.pointsPerAttempt} pts'
+                                              : c.entriesPerAttempt > 0
+                                              ? 'Play · ${c.entriesPerAttempt} pts'
                                               : 'Play free')
                                         : c.isUpcoming
                                         ? (compact ? 'Details' : 'See details')

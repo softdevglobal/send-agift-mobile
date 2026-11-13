@@ -2,6 +2,7 @@ import 'package:send_agift_mobile/core/errors/app_exception.dart';
 import 'package:send_agift_mobile/features/games/data/games_repository.dart';
 import 'package:send_agift_mobile/features/games/domain/competition.dart';
 import 'package:send_agift_mobile/features/games/domain/game.dart';
+import 'package:send_agift_mobile/features/games/domain/game_entries.dart';
 
 /// Stands in for the API so game screens can be driven without a backend.
 class FakeGamesRepository implements GamesRepository {
@@ -214,29 +215,39 @@ class FakeGamesRepository implements GamesRepository {
   /// Failures the next plays throw, one per call, before any succeed.
   final List<AppException> playFailures = [];
 
-  /// Points the signed-in customer holds, for [pointsWallet].
-  int pointsBalance = 100;
+  /// Game entries the signed-in customer holds, for [gameEntries].
+  int entriesBalance = 100;
 
   @override
   Stream<LivePrize> livePrize(String competitionId) => const Stream.empty();
 
-  @override
-  Future<PointsEarningRule> pointsEarningRule() async =>
-      const PointsEarningRule(
-        enabled: true,
-        pointsPerUnit: 2,
-        signupBonus: 0,
-        currency: 'NZD',
-        earningAllowed: true,
-      );
+  /// Whether the customer's region has games switched on.
+  bool gamesOpen = true;
 
   @override
-  Future<PointsWallet> pointsWallet() async => PointsWallet(
-    balance: pointsBalance,
-    lifetimeEarned: pointsBalance,
-    lifetimeSpent: 0,
-    entries: const [],
+  Future<GameEntriesWallet> gameEntries() async => GameEntriesWallet(
+    balance: entriesBalance,
+    totals: GameEntriesTotals(earned: entriesBalance),
+    earn: EntryGate(allowed: gamesOpen),
+    play: EntryGate(allowed: gamesOpen, minAge: 18),
   );
+
+  @override
+  Future<String> claimFreeEntries() async => 'Nothing to claim.';
+
+  @override
+  Future<EntryOffers> entryOffers(List<String> productIds) async =>
+      const EntryOffers(total: 0);
+
+  @override
+  Future<List<StateOption>> states(String countryId) async => const [];
+
+  @override
+  Future<CustomerState> myState() async =>
+      const CustomerState(countryId: 'c', stateRequired: false);
+
+  @override
+  Future<CustomerState> setMyState(String stateId) async => myState();
 
   @override
   Future<AttemptStart> startAttempt(
@@ -259,8 +270,8 @@ class FakeGamesRepository implements GamesRepository {
         config: officialConfig,
         expiresAt: DateTime.now().add(const Duration(hours: 1)),
       ),
-      pointsSpent: competition.pointsPerAttempt,
-      walletPointsRemaining: pointsBalance - competition.pointsPerAttempt,
+      entriesSpent: competition.entriesPerAttempt,
+      entriesRemaining: entriesBalance - competition.entriesPerAttempt,
       result: chanceResult,
     );
   }

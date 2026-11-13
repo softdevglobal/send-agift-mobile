@@ -54,8 +54,8 @@ class Competition {
     required this.countryName,
     required this.startsAt,
     required this.endsAt,
-    required this.pointsPerAttempt,
-    required this.pointsDeductionEnabled,
+    required this.entriesPerAttempt,
+    required this.entriesDeductionEnabled,
     required this.maxAttempts,
     required this.minAge,
     required this.requiresIdentityVerification,
@@ -99,9 +99,9 @@ class Competition {
       countryName: json['country_name'] as String? ?? '',
       startsAt: _date(json['starts_at']) ?? DateTime.now(),
       endsAt: _date(json['ends_at']) ?? DateTime.now(),
-      pointsPerAttempt: _int(json['points_per_attempt']) ?? 0,
-      pointsDeductionEnabled:
-          json['points_deduction_enabled'] as bool? ?? false,
+      entriesPerAttempt: _int(json['entries_per_attempt']) ?? 0,
+      entriesDeductionEnabled:
+          json['entries_deduction_enabled'] as bool? ?? false,
       maxAttempts: _int(json['max_attempts_per_customer']) ?? 0,
       minAge: _int(json['min_age']) ?? 18,
       requiresIdentityVerification:
@@ -159,8 +159,8 @@ class Competition {
       countryName: countryName,
       startsAt: startsAt,
       endsAt: endsAt,
-      pointsPerAttempt: pointsPerAttempt,
-      pointsDeductionEnabled: pointsDeductionEnabled,
+      entriesPerAttempt: entriesPerAttempt,
+      entriesDeductionEnabled: entriesDeductionEnabled,
       maxAttempts: maxAttempts,
       minAge: minAge,
       requiresIdentityVerification: requiresIdentityVerification,
@@ -215,10 +215,10 @@ class Competition {
   final String countryName;
   final DateTime startsAt;
   final DateTime endsAt;
-  final int pointsPerAttempt;
+  final int entriesPerAttempt;
 
   /// False until SendAgift Points go live; attempts are free until then.
-  final bool pointsDeductionEnabled;
+  final bool entriesDeductionEnabled;
 
   /// 0 means no limit: players play as long as their points last.
   final int maxAttempts;
@@ -347,7 +347,7 @@ class CompetitionMe {
     this.rank,
     this.ineligibleReason,
     this.win,
-    this.pointsBalance = 0,
+    this.entriesBalance = 0,
     this.playsLeftToday,
     this.dailyResetAt,
   });
@@ -362,7 +362,7 @@ class CompetitionMe {
       rank: _int(json['rank']),
       ineligibleReason: json['ineligible_reason'] as String?,
       win: rawWin is Map<String, dynamic> ? MyWin.fromJson(rawWin) : null,
-      pointsBalance: _int(json['points_balance']) ?? 0,
+      entriesBalance: _int(json['entries_balance']) ?? 0,
       playsLeftToday: _int(json['plays_left_today']),
       dailyResetAt: _date(json['daily_reset_at']),
     );
@@ -379,7 +379,7 @@ class CompetitionMe {
   final MyWin? win;
 
   /// SendAgift Points available to spend on plays.
-  final int pointsBalance;
+  final int entriesBalance;
 
   /// Plays left today when the round has a daily limit, and when they reset.
   final int? playsLeftToday;
@@ -543,8 +543,8 @@ class AttemptStart {
     required this.attemptsRemaining,
     required this.session,
     this.playId = '',
-    this.pointsSpent = 0,
-    this.walletPointsRemaining = 0,
+    this.entriesSpent = 0,
+    this.entriesRemaining = 0,
     this.prizeBeforeCents = 0,
     this.prizeIncrementCents = 0,
     this.prizeAfterCents = 0,
@@ -562,8 +562,8 @@ class AttemptStart {
         rawSession is Map<String, dynamic> ? rawSession : const {},
       ),
       playId: json['play_id'] as String? ?? '',
-      pointsSpent: _int(json['points_spent']) ?? 0,
-      walletPointsRemaining: _int(json['wallet_points_remaining']) ?? 0,
+      entriesSpent: _int(json['entries_spent']) ?? 0,
+      entriesRemaining: _int(json['entries_remaining']) ?? 0,
       prizeBeforeCents: _int(json['prize_before_cents']) ?? 0,
       prizeIncrementCents: _int(json['prize_increment_cents']) ?? 0,
       prizeAfterCents: _int(json['prize_after_cents']) ?? 0,
@@ -579,8 +579,8 @@ class AttemptStart {
   final int attemptsRemaining;
   final GameSession session;
   final String playId;
-  final int pointsSpent;
-  final int walletPointsRemaining;
+  final int entriesSpent;
+  final int entriesRemaining;
   final int prizeBeforeCents;
   final int prizeIncrementCents;
   final int prizeAfterCents;
@@ -646,171 +646,4 @@ class ChanceResult {
   final int? entryNumber;
 
   bool get isDrawEntry => mechanic == 'draw';
-}
-
-/// One change to the customer's points.
-class PointsEntry {
-  const PointsEntry({
-    required this.id,
-    required this.entryType,
-    required this.amountDelta,
-    required this.balanceAfter,
-    required this.createdAt,
-    this.category = '',
-    this.description,
-    this.reason,
-    this.competitionTitle,
-  });
-
-  factory PointsEntry.fromJson(Map<String, dynamic> json) => PointsEntry(
-    id: json['id'] as String? ?? '',
-    entryType: json['entry_type'] as String? ?? '',
-    amountDelta: _int(json['amount_delta']) ?? 0,
-    balanceAfter: _int(json['balance_after']) ?? 0,
-    createdAt: _date(json['created_at']) ?? DateTime.now(),
-    category: json['category'] as String? ?? '',
-    description: json['description'] as String?,
-    reason: json['reason'] as String?,
-    competitionTitle: json['competition_title'] as String?,
-  );
-
-  final String id;
-
-  /// The ledger type, e.g. play_debit, product_reward, gift_points_received.
-  final String entryType;
-  final int amountDelta;
-  final int balanceAfter;
-  final DateTime createdAt;
-
-  /// The kind of change: PRODUCT_PURCHASE, GIFT_REWARD, GIFT_SENT,
-  /// GAME_ENTRY, REFUND or ADMIN_ADJUSTMENT.
-  final String category;
-
-  /// The server's own wording, e.g. "Purchased Wireless Headphones".
-  final String? description;
-  final String? reason;
-  final String? competitionTitle;
-
-  bool get isCredit => amountDelta > 0;
-
-  /// The line to show: the server's description, or one built here for an
-  /// older server that does not send it.
-  String get label {
-    final d = description;
-    if (d != null && d.isNotEmpty) return d;
-    return _fallbackLabel;
-  }
-
-  String get _fallbackLabel => switch (entryType) {
-    'play_debit' => 'Played ${competitionTitle ?? 'a competition'}',
-    'play_refund' => 'Refund · ${competitionTitle ?? 'competition play'}',
-    'admin_grant' => 'Points added',
-    'admin_deduction' => 'Points removed',
-    'order_reward' => 'Earned from an order',
-    'order_reversal' => 'Order refunded',
-    'signup_bonus' => 'Welcome bonus',
-    'product_reward' => 'Purchase reward',
-    'gift_points_received' => 'Gift received',
-    'gift_points_sent' => 'Sent with a gift',
-    'gift_points_returned' => 'Gift points returned',
-    'prize_points' => 'Prize won',
-    'member_bonus' => 'Membership bonus',
-    'member_bonus_reversal' => 'Membership payment refunded',
-    _ => 'Adjustment',
-  };
-}
-
-/// Where a customer's points came from and went.
-class PointsTotals {
-  const PointsTotals({
-    this.fromPurchases = 0,
-    this.fromGifts = 0,
-    this.fromPrizes = 0,
-    this.fromMembership = 0,
-    this.spentOnGames = 0,
-    this.sentAsGifts = 0,
-  });
-
-  factory PointsTotals.fromJson(Map<String, dynamic> json) => PointsTotals(
-    fromPurchases: _int(json['from_purchases']) ?? 0,
-    fromGifts: _int(json['from_gifts']) ?? 0,
-    fromPrizes: _int(json['from_prizes']) ?? 0,
-    fromMembership: _int(json['from_membership']) ?? 0,
-    spentOnGames: _int(json['spent_on_games']) ?? 0,
-    sentAsGifts: _int(json['sent_as_gifts']) ?? 0,
-  );
-
-  final int fromPurchases;
-  final int fromGifts;
-  final int fromPrizes;
-
-  /// Membership bonuses, net of any taken back after a refund.
-  final int fromMembership;
-  final int spentOnGames;
-  final int sentAsGifts;
-}
-
-/// How the customer earns points in their country.
-class PointsEarningRule {
-  const PointsEarningRule({
-    required this.enabled,
-    required this.pointsPerUnit,
-    required this.signupBonus,
-    required this.currency,
-    required this.earningAllowed,
-  });
-
-  factory PointsEarningRule.fromJson(Map<String, dynamic> json) =>
-      PointsEarningRule(
-        enabled: json['enabled'] as bool? ?? false,
-        pointsPerUnit: _int(json['points_per_unit']) ?? 0,
-        signupBonus: _int(json['signup_bonus']) ?? 0,
-        currency: json['currency'] as String? ?? '',
-        earningAllowed: json['earning_allowed'] as bool? ?? false,
-      );
-
-  final bool enabled;
-  final int pointsPerUnit;
-  final int signupBonus;
-  final String currency;
-  final bool earningAllowed;
-
-  /// Whether orders earn anything at all.
-  bool get earnsOnOrders => enabled && earningAllowed && pointsPerUnit > 0;
-}
-
-/// The customer's points balance and history.
-class PointsWallet {
-  const PointsWallet({
-    required this.balance,
-    required this.lifetimeEarned,
-    required this.lifetimeSpent,
-    required this.entries,
-    this.totals = const PointsTotals(),
-  });
-
-  factory PointsWallet.fromJson(Map<String, dynamic> json) {
-    final raw = json['entries'];
-    final totals = json['totals'];
-    return PointsWallet(
-      balance: _int(json['balance']) ?? 0,
-      lifetimeEarned: _int(json['lifetime_earned']) ?? 0,
-      lifetimeSpent: _int(json['lifetime_spent']) ?? 0,
-      totals: totals is Map<String, dynamic>
-          ? PointsTotals.fromJson(totals)
-          : const PointsTotals(),
-      entries: raw is List
-          ? raw
-                .whereType<Map<String, dynamic>>()
-                .map(PointsEntry.fromJson)
-                .toList(growable: false)
-          : const [],
-    );
-  }
-
-  final int balance;
-  final int lifetimeEarned;
-  final int lifetimeSpent;
-  final PointsTotals totals;
-  final List<PointsEntry> entries;
 }

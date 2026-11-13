@@ -185,10 +185,10 @@ class _Hero extends StatelessWidget {
     final oneCurrency =
         currency != null && gifts.every((g) => g.currency == currency);
     final worth = gifts.fold<int>(0, (sum, g) => sum + g.priceAmount);
-    final points = gifts.fold<int>(0, (sum, g) => sum + g.rewardPoints);
+    final entries = gifts.fold<int>(0, (sum, g) => sum + g.gameEntries);
     final parts = [
       if (oneCurrency) 'Worth ${Money.format(worth, currency)}',
-      if (points > 0) 'earn up to $points points',
+      if (entries > 0) 'earn up to $entries game entries',
     ];
 
     return StatHero(

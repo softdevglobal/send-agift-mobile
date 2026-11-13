@@ -43,8 +43,8 @@ Competition _competition({
     countryName: 'New Zealand',
     startsAt: DateTime.now().subtract(const Duration(hours: 1)),
     endsAt: DateTime.now().add(const Duration(hours: 5)),
-    pointsPerAttempt: 50,
-    pointsDeductionEnabled: false,
+    entriesPerAttempt: 50,
+    entriesDeductionEnabled: false,
     maxAttempts: 3,
     minAge: 18,
     requiresIdentityVerification: true,
@@ -70,7 +70,7 @@ const _eligible = CompetitionMe(
   attemptsUsed: 1,
   attemptsRemaining: 2,
   eligible: true,
-  pointsBalance: 120,
+  entriesBalance: 120,
 );
 
 Future<FakeGamesRepository> _openCompetition(
@@ -126,11 +126,11 @@ void main() {
         ),
       );
 
-      expect(find.text('Play now · 50 points'), findsOneWidget);
+      expect(find.text('Play now · 50 entries'), findsOneWidget);
       expect(find.textContaining('pre-funded by SendAgift'), findsOneWidget);
       expect(find.textContaining('Chance plays no part'), findsOneWidget);
       expect(find.text('2 of 3 left'), findsOneWidget);
-      expect(find.text('50 points per play'), findsOneWidget);
+      expect(find.text('50 entries per play'), findsOneWidget);
 
       await tester.scrollUntilVisible(
         find.text('Sarah M.'),
@@ -203,7 +203,7 @@ void main() {
       expect(find.textContaining('reached its maximum'), findsWidgets);
     });
 
-    testWidgets('without enough points the player is shown their balance', (
+    testWidgets('without enough entries the player is shown their balance', (
       tester,
     ) async {
       await _openCompetition(
@@ -213,13 +213,13 @@ void main() {
             attemptsUsed: 0,
             attemptsRemaining: 3,
             eligible: true,
-            pointsBalance: 10,
+            entriesBalance: 10,
           ),
         ),
       );
-      expect(find.text('Not enough points'), findsOneWidget);
+      expect(find.text('Not enough game entries'), findsOneWidget);
       expect(
-        find.text('A play costs 50 points and you have 10.'),
+        find.textContaining('A play costs 50 entries and you have 10.'),
         findsOneWidget,
       );
     });
@@ -242,7 +242,7 @@ void main() {
             attemptsUsed: 1,
             attemptsRemaining: 2,
             eligible: true,
-            pointsBalance: 120,
+            entriesBalance: 120,
             playsLeftToday: 0,
             dailyResetAt: DateTime.now().add(const Duration(hours: 3)),
           ),
@@ -354,21 +354,21 @@ void main() {
           ..competitions = [_competition(me: _eligible)]
           ..playFailures.add(
             const AppException(
-              'You do not have enough points to play.',
+              'You do not have enough game entries to play.',
               statusCode: 422,
-              code: 'INSUFFICIENT_POINTS',
-              details: {'points_required': 50, 'points_balance': 10},
+              code: 'INSUFFICIENT_ENTRIES',
+              details: {'entries_required': 50, 'entries_balance': 10},
             ),
           );
         await launch(tester, repo);
         expect(
           find.text(
-            'A play costs 50 points and you have 10. Nothing was charged.',
+            'A play costs 50 game entries and you have 10. Nothing was charged.',
           ),
           findsOneWidget,
         );
         expect(find.text('Try again'), findsNothing);
-        expect(find.text('See my points'), findsOneWidget);
+        expect(find.text('See my game entries'), findsOneWidget);
         expect(repo.attemptCount, 0);
       },
     );

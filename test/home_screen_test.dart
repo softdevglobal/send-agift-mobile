@@ -18,11 +18,12 @@ void main() {
 
     const rewarding = Gift(
       id: 'pts',
-      name: 'Points hamper',
+      name: 'Sponsored hamper',
       priceAmount: 4000,
       currency: 'USD',
       image: '',
-      rewardPoints: 300,
+      gameEntries: 3,
+      sponsored: true,
     );
 
     await tester.pumpWidget(
@@ -51,11 +52,11 @@ void main() {
     expect(find.text('Orders'), findsNothing);
     expect(find.text('UNFORGETTABLE'), findsOneWidget);
     await tester.scrollUntilVisible(
-      find.text('GIFTS THAT PAY YOU BACK'),
+      find.text('GIFTS THAT EARN GAME ENTRIES'),
       300,
       scrollable: find.byType(Scrollable).first,
     );
-    expect(find.text('GIFTS THAT PAY YOU BACK'), findsOneWidget);
+    expect(find.text('GIFTS THAT EARN GAME ENTRIES'), findsOneWidget);
     expect(tester.takeException(), isNull);
 
     // Let the carousel's timer go before the tree is torn down.

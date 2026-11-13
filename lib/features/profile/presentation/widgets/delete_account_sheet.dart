@@ -155,12 +155,12 @@ class _DeleteAccountSheetState extends ConsumerState<_DeleteAccountSheet> {
                   'and saved gifts are deleted.',
             ),
             _Point(
-              icon: Icons.stars_rounded,
+              icon: Icons.confirmation_number_outlined,
               color: AppColors.purple,
               text: points > 0
-                  ? 'Your $points points are lost. They cannot be moved or '
+                  ? 'Your $points game entries are lost. They cannot be moved or '
                         'paid out.'
-                  : 'Any points you have are lost.',
+                  : 'Any game entries you have are lost.',
             ),
             _Point(
               icon: Icons.receipt_long_rounded,

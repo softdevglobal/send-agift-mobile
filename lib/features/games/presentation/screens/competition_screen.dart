@@ -23,7 +23,7 @@ import '../widgets/leaderboard_list.dart';
 
 const _prizeDisclosure =
     'Competition prizes are pre-funded by SendAgift or an approved sponsor. '
-    'SendAgift Points do not fund prize pools.';
+    'Game entries do not fund prize pools.';
 
 const _growingDisclosure =
     'The prize grows with every eligible play, and the full amount up to its '
@@ -202,7 +202,7 @@ class _CompetitionViewState extends ConsumerState<_CompetitionView> {
   }
 
   /// The entry button, or nothing once play is over. Every state says what
-  /// happens next (spec §6): sign in, wait, get points, come back tomorrow.
+  /// happens next (spec §6): sign in, wait, earn entries, come back tomorrow.
   Widget? _playBar(
     BuildContext context,
     WidgetRef ref,
@@ -211,7 +211,7 @@ class _CompetitionViewState extends ConsumerState<_CompetitionView> {
   ) {
     if (!c.isLive && !c.isUpcoming && !c.isPaused) return null;
     final me = c.me;
-    final cost = c.pointsPerAttempt;
+    final cost = c.entriesPerAttempt;
 
     String label;
     String? note;
@@ -262,24 +262,28 @@ class _CompetitionViewState extends ConsumerState<_CompetitionView> {
           'The prize reached its ${c.maxPrizeLabel ?? 'maximum'} and this '
           'round has stopped taking plays.';
       icon = Icons.lock_outline_rounded;
-    } else if (me.pointsBalance < cost) {
-      label = 'Not enough points';
-      note = 'A play costs $cost points and you have ${me.pointsBalance}.';
+    } else if (me.entriesBalance < cost) {
+      label = 'Not enough game entries';
+      note =
+          'A play costs ${_entries(cost)} and you have ${me.entriesBalance}. '
+          'Earn them by buying gifts marked "Earn game entries".';
       icon = Icons.account_balance_wallet_outlined;
       onPressed = () async {
-        await context.push(AppRoutes.points);
+        await context.push(AppRoutes.gameEntries);
         if (context.mounted) _refreshCompetition(ref, c.id);
       };
     } else {
-      label = cost > 0 ? 'Play now · $cost points' : 'Play now · free';
+      label = cost > 0 ? 'Play now · ${_entries(cost)}' : 'Play now · free';
       final daily = me.playsLeftToday == null
           ? ''
           : ' · ${me.playsLeftToday} today';
       note = c.unlimitedPlays
-          ? 'Play as often as you like$daily · ${me.pointsBalance} points'
+          ? 'Play as often as you like$daily · ${_entries(me.entriesBalance)}'
           : '${me.attemptsRemaining} of ${c.maxAttempts} plays left$daily · '
-                '${me.pointsBalance} points';
-      if (c.isDraw) label = cost > 0 ? 'Enter · $cost points' : 'Enter · free';
+                '${_entries(me.entriesBalance)}';
+      if (c.isDraw) {
+        label = cost > 0 ? 'Enter · ${_entries(cost)}' : 'Enter · free';
+      }
       onPressed = () async {
         await context.push(
           c.isChance
@@ -751,8 +755,8 @@ class _EntryCard extends StatelessWidget {
 
   String get _cost {
     final c = competition;
-    if (c.pointsPerAttempt == 0) return 'Free';
-    return '${c.pointsPerAttempt} points per play';
+    if (c.entriesPerAttempt == 0) return 'Free';
+    return '${_entries(c.entriesPerAttempt)} per play';
   }
 
   @override
@@ -770,7 +774,7 @@ class _EntryCard extends StatelessWidget {
             icon: Icons.replay_rounded,
             label: 'Plays',
             value: c.unlimitedPlays
-                ? 'No limit · play while your points last'
+                ? 'No limit · play while your game entries last'
                 : me == null
                 ? '${c.maxAttempts} per player'
                 : '${me.attemptsRemaining} of ${c.maxAttempts} left',
@@ -786,12 +790,12 @@ class _EntryCard extends StatelessWidget {
           _Fact(icon: Icons.stars_rounded, label: 'Entry', value: _cost),
           if (me != null)
             InkWell(
-              onTap: () => context.push(AppRoutes.points),
+              onTap: () => context.push(AppRoutes.gameEntries),
               borderRadius: BorderRadius.circular(12),
               child: _Fact(
                 icon: Icons.account_balance_wallet_outlined,
-                label: 'Your points',
-                value: '${me.pointsBalance} · see history ›',
+                label: 'Your game entries',
+                value: '${me.entriesBalance} · see history ›',
               ),
             ),
           _Fact(
@@ -1274,3 +1278,5 @@ class _ClaimSheetState extends ConsumerState<_ClaimSheet> {
     );
   }
 }
+
+String _entries(int n) => '$n ${n == 1 ? 'entry' : 'entries'}';

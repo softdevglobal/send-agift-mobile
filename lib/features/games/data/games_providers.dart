@@ -2,6 +2,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/providers.dart';
 import '../domain/competition.dart';
+import '../domain/game_entries.dart';
 import '../domain/game.dart';
 import 'games_repository.dart';
 
@@ -61,14 +62,29 @@ final livePrizeProvider = StreamProvider.autoDispose.family<LivePrize, String>(
   (ref, id) => ref.watch(gamesRepositoryProvider).livePrize(id),
 );
 
-/// The signed-in customer's points balance and history.
-final pointsWalletProvider = FutureProvider.autoDispose<PointsWallet>((ref) {
-  return ref.watch(gamesRepositoryProvider).pointsWallet();
+/// The signed-in customer's game entries and history.
+final gameEntriesProvider = FutureProvider.autoDispose<GameEntriesWallet>((
+  ref,
+) {
+  return ref.watch(gamesRepositoryProvider).gameEntries();
 });
 
-/// How the signed-in customer earns points in their country.
-final pointsEarningRuleProvider = FutureProvider.autoDispose<PointsEarningRule>(
-  (ref) {
-    return ref.watch(gamesRepositoryProvider).pointsEarningRule();
-  },
-);
+/// The state on the signed-in customer's account.
+final myStateProvider = FutureProvider.autoDispose<CustomerState>((ref) {
+  return ref.watch(gamesRepositoryProvider).myState();
+});
+
+/// The active states of a country, for sign-up and the state picker.
+final statesProvider = FutureProvider.autoDispose
+    .family<List<StateOption>, String>((ref, countryId) {
+      if (countryId.isEmpty) return const <StateOption>[];
+      return ref.watch(gamesRepositoryProvider).states(countryId);
+    });
+
+/// What a cart would earn the signed-in customer, worked out on the server.
+/// The key is the cart's product ids, sorted and joined with commas.
+final entryOffersProvider = FutureProvider.autoDispose
+    .family<EntryOffers, String>((ref, key) {
+      if (key.isEmpty) return const EntryOffers(total: 0);
+      return ref.watch(gamesRepositoryProvider).entryOffers(key.split(','));
+    });

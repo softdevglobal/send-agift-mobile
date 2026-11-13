@@ -71,7 +71,7 @@ void main() {
     final (container, result) = await _open(tester, accounts);
 
     expect(find.text('Delete your account?'), findsOneWidget);
-    expect(find.textContaining('240 points are lost'), findsOneWidget);
+    expect(find.textContaining('240 game entries are lost'), findsOneWidget);
     expect(find.textContaining('kept as the law requires'), findsOneWidget);
 
     final submit = find.byKey(const Key('delete-account-submit'));

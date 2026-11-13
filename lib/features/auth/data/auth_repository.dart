@@ -39,6 +39,7 @@ class AuthRepository {
     required String displayName,
     required String countryId,
     required String phone,
+    String? stateId,
     String customerType = 'individual',
     String? signupToken,
   }) async {
@@ -50,6 +51,7 @@ class AuthRepository {
           'password': password,
           'display_name': displayName,
           'country_id': countryId,
+          'state_id': ?stateId,
           'phone': phone,
           'customer_type': customerType,
           'signup_token': ?signupToken,
@@ -137,6 +139,7 @@ class AuthRepository {
     required String countryId,
     required String phone,
     required String displayName,
+    String? stateId,
     String customerType = 'individual',
   }) async {
     try {
@@ -145,6 +148,7 @@ class AuthRepository {
         data: {
           'signup_token': signup.signupToken,
           'country_id': countryId,
+          'state_id': ?stateId,
           'phone': phone,
           'display_name': displayName,
           'customer_type': customerType,

@@ -140,7 +140,6 @@ class CheckoutRepository {
     required List<CartLine> lines,
     required String recipientId,
     String? giftMessage,
-    int giftPoints = 0,
   }) async {
     try {
       final response = await _client.dio.post<Map<String, dynamic>>(
@@ -152,9 +151,6 @@ class CheckoutRepository {
           'recipient_id': recipientId,
           if (giftMessage != null && giftMessage.trim().isNotEmpty)
             'gift_message': giftMessage.trim(),
-          // Points from the customer's own balance, sent with the gift. The
-          // server checks the balance and the recipient's email.
-          if (giftPoints > 0) 'gift_points': giftPoints,
           'items': [
             for (final line in lines)
               {'product_id': line.gift.id, 'quantity': line.quantity},

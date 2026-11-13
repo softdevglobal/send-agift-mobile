@@ -17,14 +17,13 @@ import '../../domain/gift.dart';
 import '../../domain/gift_category.dart';
 import '../widgets/gift_grid.dart';
 
-enum _Sort { recommended, priceLow, priceHigh, rating, points }
+enum _Sort { recommended, priceLow, priceHigh, rating }
 
 const _sortLabels = {
   _Sort.recommended: 'Recommended',
   _Sort.priceLow: 'Lowest price',
   _Sort.priceHigh: 'Highest price',
   _Sort.rating: 'Top rated',
-  _Sort.points: 'Most points',
 };
 
 /// Full catalog with search, occasion filters and sorting.
@@ -40,13 +39,22 @@ class _ExploreScreenState extends ConsumerState<ExploreScreen> {
   _Sort _sort = _Sort.recommended;
 
   List<Gift> _sorted(List<Gift> gifts) {
-    if (_sort == _Sort.recommended) return gifts;
+    // Recommended keeps the catalog order with promoted gifts first. A
+    // stable sort, so the order is the same on every refresh.
+    if (_sort == _Sort.recommended) {
+      final indexed = gifts.indexed.toList()
+        ..sort(
+          (a, b) => a.$2.sponsored == b.$2.sponsored
+              ? a.$1.compareTo(b.$1)
+              : (a.$2.sponsored ? -1 : 1),
+        );
+      return [for (final (_, g) in indexed) g];
+    }
     return [...gifts]..sort(
       (a, b) => switch (_sort) {
         _Sort.priceLow => a.priceAmount.compareTo(b.priceAmount),
         _Sort.priceHigh => b.priceAmount.compareTo(a.priceAmount),
         _Sort.rating => b.rating.compareTo(a.rating),
-        _Sort.points => b.rewardPoints.compareTo(a.rewardPoints),
         _Sort.recommended => 0,
       },
     );

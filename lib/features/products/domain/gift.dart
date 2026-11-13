@@ -24,7 +24,8 @@ class Gift {
     this.reviewCount = 0,
     this.prepMinutes = 0,
     this.occasionTags = const [],
-    this.rewardPoints = 0,
+    this.gameEntries = 0,
+    this.sponsored = false,
     this.media = const [],
   });
 
@@ -45,9 +46,12 @@ class Gift {
   final int prepMinutes;
   final List<String> occasionTags;
 
-  /// Points earned per unit once the order is delivered. The API sends 0 when
-  /// the seller cannot currently pay the reward, so any value here is real.
-  final int rewardPoints;
+  /// Game entries one purchase earns: the gift's level in a seller's
+  /// advertising package, while it still has budget. 0 when not promoted.
+  final int gameEntries;
+
+  /// On a seller's promoted list: listed higher and labelled Sponsored.
+  final bool sponsored;
 
   /// Every photo and video the seller added, photos first starting with the
   /// cover, then videos. Empty for a gift with only [image].
@@ -76,7 +80,8 @@ class Gift {
     reviewCount: reviewCount,
     prepMinutes: prepMinutes,
     occasionTags: occasionTags,
-    rewardPoints: rewardPoints,
+    gameEntries: gameEntries,
+    sponsored: sponsored,
     media: media,
   );
 
@@ -134,7 +139,8 @@ class Gift {
       sellerId: shop?.sellerId,
       prepMinutes: (json['prep_minutes'] as num?)?.toInt() ?? 0,
       occasionTags: tags,
-      rewardPoints: (json['reward_points'] as num?)?.toInt() ?? 0,
+      gameEntries: (json['game_entries'] as num?)?.toInt() ?? 0,
+      sponsored: json['sponsored'] as bool? ?? false,
     );
   }
 

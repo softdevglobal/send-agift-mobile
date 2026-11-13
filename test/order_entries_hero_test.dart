@@ -8,9 +8,7 @@ import 'package:send_agift_mobile/features/orders/presentation/screens/order_det
 import 'support/fake_auth.dart';
 
 void main() {
-  testWidgets('the order hero and points card fit a small phone', (
-    tester,
-  ) async {
+  testWidgets('the order hero fits a small phone', (tester) async {
     tester.view.physicalSize = const Size(1080, 2400);
     tester.view.devicePixelRatio = 3; // 360 × 800
     addTearDown(tester.view.reset);
@@ -23,8 +21,6 @@ void main() {
       'currency': 'AUD',
       'created_at': '2026-09-29T05:04:30Z',
       'delivery_date': '2026-10-06T00:00:00Z',
-      'gift_points': 25,
-      'gift_points_status': 'held',
       'items': const [],
     });
     final withReward = CustomerOrder(
@@ -35,10 +31,8 @@ void main() {
       currency: order.currency,
       createdAt: order.createdAt,
       deliveryDate: order.deliveryDate,
-      giftPoints: 25,
-      giftPointsStatus: 'held',
-      // Item cards need the catalog and chat; the hero and points card
-      // are what is under test.
+      // Item cards need the catalog and chat; the hero is what is under
+      // test.
       items: const [],
     );
 
@@ -56,11 +50,37 @@ void main() {
     }
 
     expect(find.text('SAG-20260929-ABCDEF12'), findsOneWidget);
-    expect(find.text('POINTS FROM THIS ORDER'), findsOneWidget);
-    expect(
-      find.text('25 points are travelling with this gift.'),
-      findsOneWidget,
-    );
+    expect(find.text('Game entries'), findsOneWidget);
     expect(tester.takeException(), isNull);
+  });
+
+  test('game entries on order lines read as where they are', () {
+    final order = CustomerOrder.fromJson({
+      'id': 'o2',
+      'order_number': 'SAG-2',
+      'status': 'paid',
+      'total_amount': 2500,
+      'currency': 'AUD',
+      'created_at': '2026-09-29T05:04:30Z',
+      'delivery_date': '2026-10-06T00:00:00Z',
+      'items': [
+        {
+          'id': 'i1',
+          'product_id': 'p1',
+          'quantity': 1,
+          'unit_amount': 2500,
+          'total_amount': 2500,
+          'fulfilment_status': 'pending',
+          'game_entries': 3,
+          'entries_status': 'reserved',
+        },
+      ],
+    });
+    expect(order.gameEntriesTotal, 3);
+    expect(order.entriesGranted, isFalse);
+    expect(
+      order.items.first.entriesLabel,
+      'Earns 3 game entries once your payment is confirmed',
+    );
   });
 }

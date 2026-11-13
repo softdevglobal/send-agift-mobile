@@ -4,7 +4,7 @@ import '../theme/app_colors.dart';
 import '../theme/app_theme.dart';
 import '../theme/app_typography.dart';
 
-/// The violet-to-teal card at the top of My points, shared by the other
+/// The violet-to-teal card at the top of the "my" pages, shared by the other
 /// "my" pages: a small label, one big figure, and a line under it.
 class StatHero extends StatelessWidget {
   const StatHero({

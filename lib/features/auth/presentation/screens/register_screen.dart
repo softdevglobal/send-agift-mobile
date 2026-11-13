@@ -16,6 +16,7 @@ import '../widgets/auth_scaffold.dart';
 import '../widgets/social_sign_in_buttons.dart';
 import '../../domain/code_signup.dart';
 import '../../domain/social_signup.dart';
+import '../../../game_entries/presentation/state_picker.dart';
 
 /// Customer registration. Just enough to start gifting. A photo and
 /// delivery addresses are added later from the Account tab. Sellers and
@@ -66,6 +67,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   String _customerType = 'individual';
   String? _countryId;
+  String? _stateId;
+  bool _stateRequired = false;
   String _dialIso = 'LK';
   bool _submitting = false;
   String? _error;
@@ -142,6 +145,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       setState(() => _error = 'Choose the country you are gifting from.');
       return;
     }
+    if (_stateRequired && _stateId == null) {
+      setState(() => _error = 'Choose your state or region.');
+      return;
+    }
 
     setState(() {
       _submitting = true;
@@ -157,6 +164,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             .completeSocialSignup(
               signup: social,
               countryId: _countryId!,
+              stateId: _stateId,
               phone: '$_dial ${_phoneController.text.trim()}',
               displayName: _nameController.text.trim(),
               customerType: _customerType,
@@ -187,6 +195,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             password: _passwordController.text,
             displayName: _nameController.text.trim(),
             countryId: _countryId!,
+            stateId: _stateId,
             phone: '$_dial ${_phoneController.text.trim()}',
             customerType: _customerType,
             signupToken: _code?.signupToken,
@@ -378,9 +387,24 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             child: Text('${country.name} (${country.isoCode})'),
                           ),
                       ],
-                      onChanged: (value) => setState(() => _countryId = value),
+                      onChanged: (value) => setState(() {
+                        _countryId = value;
+                        _stateId = null;
+                      }),
                     ),
                   ),
+                  if (_countryId != null)
+                    StatePicker(
+                      countryId: _countryId!,
+                      value: _stateId,
+                      enabled: !_submitting,
+                      onChanged: (v) => setState(() => _stateId = v),
+                      onRequired: (required) {
+                        if (required != _stateRequired) {
+                          setState(() => _stateRequired = required);
+                        }
+                      },
+                    ),
                 ],
               ),
             ),

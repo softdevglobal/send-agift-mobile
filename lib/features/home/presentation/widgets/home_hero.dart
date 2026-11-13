@@ -52,7 +52,7 @@ class _Slide {
   final bool push;
 
   /// Guests are sent to sign in first.
-  bool get needsAccount => route == AppRoutes.points;
+  bool get needsAccount => route == AppRoutes.gameEntries;
 }
 
 const _slides = [
@@ -72,19 +72,19 @@ const _slides = [
     route: AppRoutes.explore,
   ),
   _Slide(
-    eyebrow: 'Earn as you gift',
-    lead: 'EVERY GIFT',
-    marker: 'PAYS YOU',
-    tail: 'BACK.',
-    cta: 'See my points',
-    icon: Icons.stars_rounded,
+    eyebrow: 'Sponsored gifts',
+    lead: 'SOME GIFTS',
+    marker: 'EARN',
+    tail: 'GAME ENTRIES.',
+    cta: 'See my entries',
+    icon: Icons.confirmation_number_outlined,
     image:
         'https://images.unsplash.com/photo-1544947950-fa07a98d237f?auto=format&fit=crop&w=600&q=80',
     background: AppColors.teal,
     foreground: AppColors.foreground,
     markerColor: AppColors.foreground,
     markerText: Colors.white,
-    route: AppRoutes.points,
+    route: AppRoutes.gameEntries,
     push: true,
   ),
   _Slide(
@@ -105,7 +105,7 @@ const _slides = [
   ),
 ];
 
-/// A swipeable carousel of the app's three promises. Gifts, points and
+/// A swipeable carousel of the app's three promises. Gifts, game entries and
 /// games. That moves on by itself every few seconds.
 ///
 /// The games slide stays about skill, like the games teaser: no prizes or

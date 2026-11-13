@@ -37,7 +37,8 @@ const _gifts = [
     image: '',
     shopName: 'PD Gifts',
     occasionTags: ['birthday', 'love'],
-    rewardPoints: 250,
+    gameEntries: 2,
+    sponsored: true,
     rating: 4.5,
   ),
   Gift(
@@ -137,7 +138,7 @@ void main() {
   ) async {
     await _pump(tester, const SavedScreen());
     expect(find.text('2 gifts'), findsWidgets);
-    expect(find.textContaining('earn up to 250 points'), findsOneWidget);
+    expect(find.textContaining('earn up to 2 game entries'), findsOneWidget);
 
     await tester.ensureVisible(find.text('Birthday · 1'));
     await tester.pump(const Duration(milliseconds: 300));

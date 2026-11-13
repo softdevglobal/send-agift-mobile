@@ -112,7 +112,7 @@ class CompetitionCard extends StatelessWidget {
   }
 }
 
-/// The spec's game card (§6.1): "WIN UP TO $348. +$1 a play · 10 points ·
+/// The spec's game card (§6.1): "WIN UP TO $348. +$1 a play · 1 entry ·
 /// 248 plays", in the space one line of prize text used to take.
 class _GrowingPrize extends StatelessWidget {
   const _GrowingPrize({required this.competition});
@@ -132,8 +132,8 @@ class _GrowingPrize extends StatelessWidget {
         : c.prizeCapReached
         ? 'maximum reached'
         : '+${c.incrementLabel} every play';
-    final cost = c.pointsPerAttempt > 0
-        ? '${c.pointsPerAttempt} pts to play'
+    final cost = c.entriesPerAttempt > 0
+        ? '${c.entriesPerAttempt} pts to play'
         : 'free to play';
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,

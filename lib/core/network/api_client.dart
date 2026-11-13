@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../config/app_config.dart';
 import '../errors/app_exception.dart';
@@ -14,6 +15,9 @@ class ApiClient {
           connectTimeout: const Duration(seconds: 15),
           receiveTimeout: const Duration(seconds: 15),
           contentType: 'application/json',
+          // Names the app to the server: games are played in the mobile app
+          // only, and the server checks this before starting a play.
+          headers: {'X-Client-Channel': _channel},
         ),
       ) {
     dio.interceptors.add(
@@ -33,6 +37,12 @@ class ApiClient {
   }
 
   final Dio dio;
+
+  static String get _channel => switch (defaultTargetPlatform) {
+    TargetPlatform.iOS => 'ios',
+    TargetPlatform.android => 'android',
+    _ => kIsWeb ? 'web' : 'android',
+  };
   final TokenStorage _tokenStorage;
 
   AppException mapError(DioException error) {

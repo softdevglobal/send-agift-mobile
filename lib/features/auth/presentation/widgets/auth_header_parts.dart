@@ -45,7 +45,7 @@ class AuthPerkChips extends StatelessWidget {
 
   static const _perks = <({IconData icon, String label})>[
     (icon: Icons.local_shipping_outlined, label: 'Live tracking'),
-    (icon: Icons.star_outline_rounded, label: 'Earn points'),
+    (icon: Icons.star_outline_rounded, label: 'Save favourites'),
     (icon: Icons.auto_awesome_outlined, label: 'Win prizes'),
   ];
 

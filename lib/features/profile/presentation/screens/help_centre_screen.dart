@@ -66,38 +66,52 @@ const _topics = [
           'address for you.',
     ),
   ]),
-  _Topic('Points', Icons.stars_rounded, AppColors.purple, [
+  _Topic('Game entries', Icons.confirmation_number_outlined, AppColors.purple, [
     (
-      'How do I earn points?',
-      'Gifts that show "Earn points" pay them to you, the buyer, once that '
-          'gift is delivered. You can see them coming on the order page.',
+      'How do I earn game entries?',
+      'Gifts marked "Sponsored" with "Earn game entries" give you entries when '
+          'you buy them. They arrive as soon as your payment is confirmed, and '
+          'only where games are available in your state.',
     ),
     (
-      'What happens to points if an order is cancelled or refunded?',
-      'Points that were not paid yet are never paid. Points already paid '
-          'are taken back. A cancellation is refused if you have already '
-          'spent them.',
+      'Can I buy game entries or send them to someone?',
+      'No. Game entries are only earned by buying promoted gifts. They cannot '
+          'be bought, sent to someone else or exchanged for money.',
     ),
     (
-      'Where do I see my balance?',
-      'Account → My points shows your balance and every point in and out.',
+      'What happens if an order is cancelled or refunded?',
+      'Entries not yet granted are never granted. Entries already granted are '
+          'taken back. If you already used some, we review it; your balance '
+          'never goes below zero and a refund is never held up.',
     ),
     (
-      'What can I spend points on?',
-      'Playing games and entering competitions for prizes.',
+      'Why do you need my state?',
+      'Games and competitions are allowed state by state, so they are switched '
+          'on only where they are approved. We use the state you give us, never '
+          'a guess from where you connect from. You can change it once in a '
+          'while, with a verified phone number.',
+    ),
+    (
+      'Where do I see my entries?',
+      'Account → Game entries shows your balance and every entry in and out.',
+    ),
+    (
+      'What happened to my points?',
+      'Points are retired. Any balance you had is kept safely while we decide '
+          'how to settle it, and we will contact you. Nothing was deleted.',
     ),
   ]),
   _Topic('Games & competitions', Icons.emoji_events_outlined, AppColors.star, [
     (
       'How do competitions work?',
-      'Each round has a prize, a game and a points cost to play. Your best '
-          'score counts on the leaderboard; chance rounds show their odds '
-          'before you play.',
+      'Each round has a prize, a skill game and a cost in game entries to '
+          'play. Your best score counts on the leaderboard. A round can be '
+          'limited to some states, and is only shown where you can play it.',
     ),
     (
       'Can I practise?',
       'Yes. Every game can be played outside a competition, with its own '
-          'leaderboard. Some games cost points per play. Practice never '
+          'leaderboard. Some games cost game entries per play. Practice never '
           'counts towards a prize.',
     ),
   ]),
@@ -105,7 +119,7 @@ const _topics = [
     (
       'Do I need an account to shop?',
       'No. You can search, save gifts and fill a cart as a guest. You only '
-          'sign in to check out, track orders and earn points.',
+          'sign in to check out, track orders and use game entries.',
     ),
     (
       'How do I manage recipients?',
@@ -192,7 +206,7 @@ class _HelpCentreScreenState extends State<HelpCentreScreen> {
               controller: _search,
               onChanged: (value) => setState(() => _query = value),
               decoration: InputDecoration(
-                hintText: 'Search orders, delivery, points…',
+                hintText: 'Search orders, delivery, games…',
                 prefixIcon: const Icon(Icons.search_rounded),
                 suffixIcon: _query.isEmpty
                     ? null

@@ -39,7 +39,7 @@ void main() {
     for (var i = 0; i < 5; i++) {
       await tester.pump(const Duration(milliseconds: 200));
     }
-    expect(find.text('Most points'), findsOneWidget);
+    expect(find.text('Top rated'), findsOneWidget);
     await tester.tap(find.text('Lowest price').last);
     for (var i = 0; i < 5; i++) {
       await tester.pump(const Duration(milliseconds: 200));

@@ -5,11 +5,11 @@ class AppException implements Exception {
   final int? statusCode;
 
   /// The API's machine code for the failure, when it sends one. E.g.
-  /// `INSUFFICIENT_POINTS`. So a screen can react to the reason rather than
+  /// `INSUFFICIENT_ENTRIES`. So a screen can react to the reason rather than
   /// parse the message.
   final String? code;
 
-  /// Whatever else the API sent with the failure (points required, when a
+  /// Whatever else the API sent with the failure (entries required, when a
   /// limit resets…).
   final Map<String, dynamic> details;
 

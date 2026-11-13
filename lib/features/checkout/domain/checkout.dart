@@ -98,7 +98,7 @@ class Recipient {
   final String name;
   final String? relationship;
 
-  /// Gift points reach the recipient's account by this address.
+  /// We email the recipient here when the gift is delivered.
   final String? email;
   final String? phone;
   final String? defaultAddressId;

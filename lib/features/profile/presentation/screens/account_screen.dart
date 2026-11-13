@@ -30,7 +30,7 @@ class AccountScreen extends ConsumerWidget {
     final unreadMessages = ref.watch(unreadMessagesProvider);
     // Only signed-in customers have a wallet or orders to load.
     final points = auth.isSignedIn
-        ? ref.watch(pointsWalletProvider).whenOrNull(data: (w) => w.balance)
+        ? ref.watch(gameEntriesProvider).whenOrNull(data: (w) => w.balance)
         : null;
     final orderCount = auth.isSignedIn
         ? ref.watch(customerOrdersProvider).whenOrNull(data: (o) => o.length)
@@ -68,7 +68,7 @@ class AccountScreen extends ConsumerWidget {
                         email: auth.email,
                         imageUrl: auth.imageUrl,
                         points: points,
-                        onPointsTap: () => context.push(AppRoutes.points),
+                        onPointsTap: () => context.push(AppRoutes.gameEntries),
                         onEdit: () => context.push(AppRoutes.editProfile),
                       )
                     : const _GuestHero(),
@@ -107,12 +107,12 @@ class AccountScreen extends ConsumerWidget {
                     const SizedBox(width: 10),
                     Expanded(
                       child: _StatTile(
-                        icon: Icons.stars_rounded,
+                        icon: Icons.confirmation_number_outlined,
                         value: points == null ? '-' : _compact(points),
-                        label: 'Points',
+                        label: 'Entries',
                         tint: AppColors.categoryTints[1],
                         iconColor: AppColors.purple,
-                        onTap: () => signedInOnly(AppRoutes.points),
+                        onTap: () => signedInOnly(AppRoutes.gameEntries),
                       ),
                     ),
                     const SizedBox(width: 10),
@@ -145,12 +145,12 @@ class AccountScreen extends ConsumerWidget {
                     onTap: () => context.push(AppRoutes.orders),
                   ),
                   _Shortcut(
-                    icon: Icons.stars_rounded,
+                    icon: Icons.confirmation_number_outlined,
                     color: AppColors.purple,
                     tint: AppColors.categoryTints[1],
-                    label: 'My points',
-                    subtitle: 'Balance and history',
-                    onTap: () => signedInOnly(AppRoutes.points),
+                    label: 'Game entries',
+                    subtitle: 'Your entries and where they came from',
+                    onTap: () => signedInOnly(AppRoutes.gameEntries),
                   ),
                   _Shortcut(
                     icon: Icons.chat_bubble_rounded,
@@ -184,9 +184,9 @@ class AccountScreen extends ConsumerWidget {
                     tint: AppColors.categoryTints[1],
                     label: 'Membership',
                     subtitle: membership != null && membership.isMember
-                        ? '${membership.offer?.name ?? 'Member'} · your plan, '
-                              'bonus and renewal'
-                        : 'Gift discounts and bonus points',
+                        ? '${membership.offer?.name ?? 'Member'} · your plan '
+                              'and renewal'
+                        : 'Gift discounts and member benefits',
                     onTap: () => context.push(
                       !auth.isSignedIn
                           ? AppRoutes.login
@@ -240,7 +240,7 @@ class AccountScreen extends ConsumerWidget {
                     icon: Icons.headset_mic_outlined,
                     color: AppColors.primary,
                     label: 'Help centre',
-                    subtitle: 'Orders, points, and competitions',
+                    subtitle: 'Orders, payments, and competitions',
                     onTap: () => context.push(AppRoutes.help),
                   ),
                   _MenuItem(
@@ -544,8 +544,8 @@ class _ProfileHero extends StatelessWidget {
                       shape: BoxShape.circle,
                     ),
                     child: const Icon(
-                      Icons.star_rounded,
-                      size: 20,
+                      Icons.confirmation_number_outlined,
+                      size: 18,
                       color: Colors.white,
                     ),
                   ),
@@ -561,7 +561,7 @@ class _ProfileHero extends StatelessWidget {
                               fontWeight: FontWeight.w700,
                             ),
                           ),
-                          const TextSpan(text: '  points to spend'),
+                          const TextSpan(text: '  game entries to play with'),
                         ],
                       ),
                       style: Theme.of(context).textTheme.bodyMedium?.copyWith(
@@ -605,7 +605,7 @@ class _GuestHero extends StatelessWidget {
           const SizedBox(height: 8),
           Text(
             'Search, save gifts, and build a cart without an account. Sign in '
-            'to check out, track deliveries, and earn points.',
+            'to check out and track deliveries.',
             style: Theme.of(context).textTheme.bodyMedium?.copyWith(
               color: Colors.white.withValues(alpha: 0.75),
             ),

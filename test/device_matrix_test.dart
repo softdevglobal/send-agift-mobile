@@ -11,7 +11,7 @@ import 'package:send_agift_mobile/features/cart/presentation/screens/cart_screen
 import 'package:send_agift_mobile/features/cart/presentation/screens/checkout_screen.dart';
 import 'package:send_agift_mobile/features/free_gift/presentation/screens/free_gift_screen.dart';
 import 'package:send_agift_mobile/features/games/presentation/screens/games_screen.dart';
-import 'package:send_agift_mobile/features/games/presentation/screens/points_screen.dart';
+import 'package:send_agift_mobile/features/game_entries/presentation/game_entries_screen.dart';
 import 'package:send_agift_mobile/features/home/presentation/screens/home_screen.dart';
 import 'package:send_agift_mobile/features/orders/presentation/screens/order_list_screen.dart';
 import 'package:send_agift_mobile/features/products/data/catalog_providers.dart';
@@ -54,7 +54,7 @@ final _screens = <(String, Widget Function())>[
   ('Free gift', () => const FreeGiftScreen()),
   ('Orders', () => const OrderListScreen()),
   ('Games', () => const GamesScreen()),
-  ('Points', () => const PointsScreen()),
+  ('Game entries', () => const GameEntriesScreen()),
   ('Edit profile', () => const EditProfileScreen()),
   ('Addresses', () => const AddressesScreen()),
   ('Recipients', () => const RecipientsScreen()),

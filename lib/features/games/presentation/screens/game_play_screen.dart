@@ -96,7 +96,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
   AttemptStart? _receipt;
 
   /// Whether starting failed for a reason worth retrying (a network blip),
-  /// rather than a refusal like not having enough points.
+  /// rather than a refusal like not having enough game entries.
   bool _loadRetryable = true;
 
   /// Where a refusal points the player next, when somewhere helps.
@@ -159,7 +159,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
         _receipt = attempt;
         session = attempt.session;
         attemptNumber = attempt.attemptNumber;
-        // The prize and the points balance moved; screens behind this one
+        // The prize and the game entries balance moved; screens behind this one
         // should show it.
         _invalidateBoards(ref.invalidate, _slug, competitionId);
       } else {
@@ -168,7 +168,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
           level: widget.definition.hasLevels ? _level : 1,
         );
         // The play was paid for; balances elsewhere should show it.
-        if (session.pointsCharged > 0) ref.invalidate(pointsWalletProvider);
+        if (session.entriesCharged > 0) ref.invalidate(gameEntriesProvider);
       }
       if (!mounted) return;
       setState(() {
@@ -200,17 +200,17 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
     final d = error.details;
     int? n(String key) => d[key] is num ? (d[key] as num).toInt() : null;
     switch (error.code) {
-      case 'INSUFFICIENT_POINTS':
-        final need = n('points_required');
-        final have = n('points_balance');
+      case 'INSUFFICIENT_ENTRIES':
+        final need = n('entries_required');
+        final have = n('entries_balance');
         return (
           message: need != null && have != null
-              ? 'A play costs $need points and you have $have. '
+              ? 'A play costs $need game entries and you have $have. '
                     'Nothing was charged.'
               : error.message,
           retryable: false,
-          route: AppRoutes.points,
-          action: 'See my points',
+          route: AppRoutes.gameEntries,
+          action: 'See my game entries',
         );
       case 'SIGN_IN_REQUIRED':
         return (
@@ -608,7 +608,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
 }
 
 /// Marks a round that counts on a competition board, with the play's
-/// receipt: the points it cost and what it added to the prize.
+/// receipt: the game entries it cost and what it added to the prize.
 class _OfficialBadge extends StatelessWidget {
   const _OfficialBadge({
     required this.attemptNumber,
@@ -626,8 +626,8 @@ class _OfficialBadge extends StatelessWidget {
     String? detail;
     if (r != null) {
       final parts = <String>[
-        if (r.pointsSpent > 0)
-          '−${r.pointsSpent} pts · ${r.walletPointsRemaining} left',
+        if (r.entriesSpent > 0)
+          '−${r.entriesSpent} pts · ${r.entriesRemaining} left',
         if (r.prizeIncrementCents > 0 && currency != null)
           'prize +${formatMoneyCents(r.prizeIncrementCents, currency)} → '
               '${formatMoneyCents(r.prizeAfterCents, currency)}'
