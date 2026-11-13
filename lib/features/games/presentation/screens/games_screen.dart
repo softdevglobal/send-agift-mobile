@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/capabilities/competitions_capability.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -25,13 +26,17 @@ class GamesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final games = ref.watch(gamesListProvider);
+    // Competitions are only asked for once the server says they are on, so
+    // with them off this screen never fetches or shows one.
+    final competitionsOn = ref.watch(competitionsOnProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Game zone')),
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
-          ref.invalidate(competitionsProvider);
+          ref.invalidate(competitionsEnabledProvider);
+          if (competitionsOn) ref.invalidate(competitionsProvider);
           return ref.refresh(gamesListProvider.future);
         },
         child: CustomScrollView(
@@ -46,7 +51,8 @@ class GamesScreen extends ConsumerWidget {
               ),
               sliver: SliverToBoxAdapter(child: _Header()),
             ),
-            const SliverToBoxAdapter(child: CompetitionsArena()),
+            if (competitionsOn)
+              const SliverToBoxAdapter(child: CompetitionsArena()),
             // Games get their own section below the competitions band, so
             // practice play never reads as part of a prize round.
             SliverPadding(

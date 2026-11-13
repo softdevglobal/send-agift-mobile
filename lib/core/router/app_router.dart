@@ -5,6 +5,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/app_shell.dart';
+import '../capabilities/competitions_gate.dart';
 import '../layout/responsive.dart';
 import '../theme/app_colors.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -449,13 +450,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GameLeaderboardScreen(slug: state.pathParameters['slug'] ?? ''),
         ),
       ),
+      // A link to the competitions list itself: the games tab when they are
+      // on, the "not available" screen when they are off.
+      GoRoute(
+        path: AppRoutes.competitions,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          const CompetitionsGate(child: ForwardTo(AppRoutes.games)),
+        ),
+      ),
       GoRoute(
         path: '${AppRoutes.competitions}/:id/leaderboard',
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) => _fadePage(
           state,
-          CompetitionLeaderboardScreen(
-            competitionId: state.pathParameters['id'] ?? '',
+          CompetitionsGate(
+            child: CompetitionLeaderboardScreen(
+              competitionId: state.pathParameters['id'] ?? '',
+            ),
           ),
         ),
       ),
@@ -464,7 +477,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) => _fadePage(
           state,
-          CompetitionScreen(competitionId: state.pathParameters['id'] ?? ''),
+          CompetitionsGate(
+            child: CompetitionScreen(
+              competitionId: state.pathParameters['id'] ?? '',
+            ),
+          ),
         ),
       ),
       GoRoute(
@@ -475,11 +492,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final definition =
               gameDefinitions[state.uri.queryParameters['game'] ?? ''];
           if (definition == null) {
-            return _fadePage(state, CompetitionScreen(competitionId: id));
+            return _fadePage(
+              state,
+              CompetitionsGate(child: CompetitionScreen(competitionId: id)),
+            );
           }
           return _gameWindowPage(
             state,
-            GamePlayScreen(definition: definition, competitionId: id),
+            CompetitionsGate(
+              child: GamePlayScreen(definition: definition, competitionId: id),
+            ),
           );
         },
       ),
@@ -488,7 +510,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) => _fadePage(
           state,
-          ChancePlayScreen(competitionId: state.pathParameters['id'] ?? ''),
+          CompetitionsGate(
+            child: ChancePlayScreen(
+              competitionId: state.pathParameters['id'] ?? '',
+            ),
+          ),
         ),
       ),
       GoRoute(

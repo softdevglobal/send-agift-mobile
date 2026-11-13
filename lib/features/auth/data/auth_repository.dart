@@ -1,5 +1,6 @@
 import 'package:dio/dio.dart';
 
+import '../../../core/config/terms_versions.dart';
 import '../../../core/errors/app_exception.dart';
 import '../../../core/network/api_client.dart';
 import '../../../core/network/token_storage.dart';
@@ -20,6 +21,7 @@ class AuthRepository {
     try {
       final response = await _client.dio.post<Map<String, dynamic>>(
         '/customers/login',
+        options: ApiClient.noAuth,
         data: {'email': email, 'password': password},
       );
 
@@ -46,6 +48,7 @@ class AuthRepository {
     try {
       await _client.dio.post<Map<String, dynamic>>(
         '/customers/register',
+        options: ApiClient.noAuth,
         data: {
           'email': email,
           'password': password,
@@ -55,6 +58,7 @@ class AuthRepository {
           'phone': phone,
           'customer_type': customerType,
           'signup_token': ?signupToken,
+          'terms_version': customerTermsVersion,
         },
       );
       await login(email: email, password: password);
@@ -72,6 +76,7 @@ class AuthRepository {
     try {
       final response = await _client.dio.post<Map<String, dynamic>>(
         '/customers/login/code',
+        options: ApiClient.noAuth,
         data: {'channel': channel.name, 'destination': destination},
       );
       return response.data?['message'] as String? ??
@@ -91,6 +96,7 @@ class AuthRepository {
     try {
       final response = await _client.dio.post<Map<String, dynamic>>(
         '/customers/login/code/verify',
+        options: ApiClient.noAuth,
         data: {
           'channel': channel.name,
           'destination': destination,
@@ -116,6 +122,7 @@ class AuthRepository {
     try {
       final response = await _client.dio.post<Map<String, dynamic>>(
         '/auth/social',
+        options: ApiClient.noAuth,
         data: {
           'provider': provider.provider,
           'token': provider.token,
@@ -145,6 +152,7 @@ class AuthRepository {
     try {
       final response = await _client.dio.post<Map<String, dynamic>>(
         '/auth/social/complete',
+        options: ApiClient.noAuth,
         data: {
           'signup_token': signup.signupToken,
           'country_id': countryId,
@@ -152,6 +160,7 @@ class AuthRepository {
           'phone': phone,
           'display_name': displayName,
           'customer_type': customerType,
+          'terms_version': customerTermsVersion,
         },
       );
       await _saveToken(response.data ?? const {});
@@ -168,14 +177,26 @@ class AuthRepository {
     await _tokenStorage.saveTokens(accessToken: token);
   }
 
+  /// The signed-in customer, or null when there is no session.
+  ///
+  /// Only the server turning the token down (401) ends the session: the
+  /// token is then cleared so it is not sent on guest requests. A network or
+  /// server failure throws instead, so a blip at start-up does not look like
+  /// signing out.
   Future<Map<String, dynamic>?> me() async {
+    if (!await hasSession()) return null;
     try {
       final response = await _client.dio.get<Map<String, dynamic>>(
         '/customers/me',
       );
       return response.data;
-    } on DioException {
-      return null;
+    } on DioException catch (error) {
+      final mapped = _client.mapError(error);
+      if (mapped is UnauthorizedException) {
+        await _tokenStorage.clear();
+        return null;
+      }
+      throw mapped;
     }
   }
 

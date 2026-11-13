@@ -110,7 +110,7 @@ class _GameEntriesScreenState extends ConsumerState<GameEntriesScreen> {
                   _Notice(
                     icon: Icons.sports_esports_outlined,
                     text:
-                        'Use your entries on the games and competitions open where you live.'
+                        'Use your entries on the games open where you live.'
                         '${(w.play?.minAge ?? 0) > 0 ? ' You must be ${w.play!.minAge} or older.' : ''}',
                     action: TextButton(
                       onPressed: () => context.push(AppRoutes.games),

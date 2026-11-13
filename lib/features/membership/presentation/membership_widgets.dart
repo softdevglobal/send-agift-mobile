@@ -46,10 +46,12 @@ import '../domain/membership.dart';
       label: 'Game entries',
       tab: false,
     ),
+    // Competitions are not on offer at launch: send people shopping
+    // instead of to a screen that says so.
     'view_competitions' => (
-      route: AppRoutes.games,
-      label: 'See competitions',
-      tab: false,
+      route: AppRoutes.explore,
+      label: 'Send a gift',
+      tab: true,
     ),
     'contact_support' => (
       route: AppRoutes.help,

@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 
+import '../../../core/capabilities/competitions_capability.dart';
 import '../../../core/router/app_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/theme/app_theme.dart';
@@ -106,6 +107,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   void _open(AppNotification n) {
     final id = n.competitionId;
+    // With competitions off, an old competition notice opens nothing.
+    if (!ref.read(competitionsOnProvider)) return;
     if (id != null && id.isNotEmpty) {
       context.push(AppRoutes.competitionPath(id));
     }
@@ -115,6 +118,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
   Widget build(BuildContext context) {
     final signedIn = ref.watch(authProvider.select((a) => a.isSignedIn));
     final inbox = ref.watch(notificationInboxProvider);
+    final competitionsOn = ref.watch(competitionsOnProvider);
     ref.listen(
       notificationInboxProvider,
       (_, next) => next.whenData(_onLoaded),
@@ -220,6 +224,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                   _unreadOnOpen?.contains(n.id) ?? n.isUnread,
                               onTap: () => _open(n),
                               onClear: () => _dismiss(n),
+                              competitionsOn: competitionsOn,
                             ),
                           );
                         },
@@ -286,12 +291,16 @@ class _NotificationTile extends StatelessWidget {
     required this.highlighted,
     required this.onTap,
     required this.onClear,
+    required this.competitionsOn,
   });
 
   final AppNotification notification;
   final bool highlighted;
   final VoidCallback onTap;
   final VoidCallback onClear;
+
+  /// Whether a competition notice may offer to open its competition.
+  final bool competitionsOn;
 
   /// "Just now", "5m", "3h", "2d", then the date.
   static String _when(DateTime at) {
@@ -403,7 +412,7 @@ class _NotificationTile extends StatelessWidget {
                               n.body,
                               style: Theme.of(context).textTheme.bodyMedium,
                             ),
-                            if (n.competitionId != null) ...[
+                            if (competitionsOn && n.competitionId != null) ...[
                               const SizedBox(height: 10),
                               Container(
                                 padding: const EdgeInsets.symmetric(

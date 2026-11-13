@@ -17,6 +17,7 @@ import '../widgets/social_sign_in_buttons.dart';
 import '../../domain/code_signup.dart';
 import '../../domain/social_signup.dart';
 import '../../../game_entries/presentation/state_picker.dart';
+import '../../../profile/presentation/screens/terms_screen.dart';
 
 /// Customer registration. Just enough to start gifting. A photo and
 /// delivery addresses are added later from the Account tab. Sellers and
@@ -545,6 +546,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 label: 'Create my account',
               ),
             ),
+            const SizedBox(height: 14),
+            _TermsAssent(),
           ],
         ),
       ),
@@ -950,6 +953,38 @@ class _CountryPlaceholder extends StatelessWidget {
         border: Border.all(color: AppColors.border),
       ),
       child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+    );
+  }
+}
+
+/// What creating an account agrees to, with each document one tap away.
+class _TermsAssent extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final style = Theme.of(
+      context,
+    ).textTheme.bodySmall?.copyWith(color: AppColors.mutedForeground);
+    Widget link(String docId, String label) => InkWell(
+      onTap: () => openPolicy(context, policyById(docId)),
+      child: Text(
+        label,
+        style: style?.copyWith(
+          color: AppColors.foreground,
+          fontWeight: FontWeight.w600,
+          decoration: TextDecoration.underline,
+        ),
+      ),
+    );
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text('By creating an account you agree to the ', style: style),
+        link('CUST-01', 'Customer Terms'),
+        Text(' and ', style: style),
+        link('PRIV-01', 'Privacy Policy'),
+        Text('.', style: style),
+      ],
     );
   }
 }

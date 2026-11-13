@@ -23,9 +23,11 @@ class ApiClient {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          final token = await _tokenStorage.accessToken;
-          if (token != null) {
-            options.headers['Authorization'] = 'Bearer $token';
+          if (options.extra[_noAuthKey] != true) {
+            final token = await _tokenStorage.accessToken;
+            if (token != null) {
+              options.headers['Authorization'] = 'Bearer $token';
+            }
           }
           handler.next(options);
         },
@@ -37,6 +39,12 @@ class ApiClient {
   }
 
   final Dio dio;
+
+  static const _noAuthKey = 'noAuth';
+
+  /// For sign-in and sign-up calls: they must never carry a saved token,
+  /// least of all one left behind by an earlier account.
+  static final noAuth = Options(extra: {_noAuthKey: true});
 
   static String get _channel => switch (defaultTargetPlatform) {
     TargetPlatform.iOS => 'ios',

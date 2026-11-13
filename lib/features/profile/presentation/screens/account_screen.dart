@@ -240,7 +240,7 @@ class AccountScreen extends ConsumerWidget {
                     icon: Icons.headset_mic_outlined,
                     color: AppColors.primary,
                     label: 'Help centre',
-                    subtitle: 'Orders, payments, and competitions',
+                    subtitle: 'Orders, payments, and delivery',
                     onTap: () => context.push(AppRoutes.help),
                   ),
                   _MenuItem(

@@ -9,6 +9,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
+import '../capabilities/competitions_capability.dart';
 import '../network/api_client.dart';
 import '../network/providers.dart';
 import '../router/app_router.dart';
@@ -278,6 +279,10 @@ class PushNotifications {
     required String body,
     String? competitionId,
   }) async {
+    // A competition notice is not shown while competitions are off; the
+    // backend should not be sending them, and an old one must not invite
+    // anyone to play. Ordinary notices are unaffected.
+    if (competitionId != null && !await _competitionsOn()) return;
     await _local.show(
       id: id,
       title: title,
@@ -304,9 +309,19 @@ class PushNotifications {
     );
   }
 
+  /// The competition route is gated, so with competitions off this lands
+  /// on the "not available" screen rather than anything playable.
   void _openCompetition(String? id) {
     if (id == null || id.isEmpty) return;
     _router?.push(AppRoutes.competitionPath(id));
+  }
+
+  Future<bool> _competitionsOn() async {
+    try {
+      return await _ref.read(competitionsEnabledProvider.future);
+    } catch (_) {
+      return false;
+    }
   }
 }
 

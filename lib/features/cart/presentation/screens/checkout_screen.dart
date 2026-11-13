@@ -1,5 +1,3 @@
-import 'dart:math' as math;
-
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
@@ -37,6 +35,13 @@ class CheckoutScreen extends ConsumerStatefulWidget {
 
 class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
   String? _recipientId;
+
+  /// One of the recipient's addresses; null means their default.
+  String? _addressId;
+
+  /// The Idempotency-Key for the order being placed, and what it was for.
+  /// Sending the same order again reuses it; anything changed gets a new one.
+  ({String fingerprint, String key})? _orderAttempt;
 
   /// The note that goes with the gift. Optional.
   final _giftNote = TextEditingController();
@@ -84,52 +89,40 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     if (intent == null || !intent.hasAddress) return;
 
     final repository = ref.read(checkoutRepositoryProvider);
-    Recipient? match;
+    final hits = <(Recipient, RecipientAddress)>[];
     try {
       // The list does not carry addresses, so read each recipient in full.
       final all = await Future.wait(
         saved.map((recipient) => repository.getRecipient(recipient.id)),
       );
       for (final recipient in all) {
-        if (recipient.addresses.any((a) => _sameAddress(intent, a))) {
-          match = recipient;
-          break;
+        for (final address in recipient.addresses) {
+          if (searchedAddressMatches(intent, address)) {
+            hits.add((recipient, address));
+          }
         }
       }
     } on AppException {
       // Could not compare: fall through to asking for a new recipient.
     }
     if (!mounted || _recipientId != null) return;
-    if (match != null) {
-      setState(() => _recipientId = match!.id);
+    // Exactly one saved address is this one: pick that recipient and that
+    // address. Several (neighbours in one building), and the customer picks.
+    if (hits.length == 1) {
+      setState(() {
+        _recipientId = hits.single.$1.id;
+        _addressId = hits.single.$2.id;
+      });
       return;
     }
+    if (hits.length > 1) return;
     final created = await showNewRecipientSheet(context);
-    if (created != null && mounted) setState(() => _recipientId = created.id);
-  }
-
-  /// Within about 100 m when both have a map point, else the same street and
-  /// city.
-  static bool _sameAddress(DeliveryIntent intent, RecipientAddress address) {
-    if (intent.hasPoint && address.hasPoint) {
-      const earthRadius = 6371000.0;
-      double rad(double deg) => deg * math.pi / 180;
-      final dLat = rad(address.latitude! - intent.latitude!);
-      final dLng = rad(address.longitude! - intent.longitude!);
-      final a =
-          math.pow(math.sin(dLat / 2), 2) +
-          math.cos(rad(intent.latitude!)) *
-              math.cos(rad(address.latitude!)) *
-              math.pow(math.sin(dLng / 2), 2);
-      final meters = 2 * earthRadius * math.asin(math.sqrt(a));
-      return meters <= 100;
+    if (created != null && mounted) {
+      setState(() {
+        _recipientId = created.id;
+        _addressId = null;
+      });
     }
-    String norm(String? v) =>
-        (v ?? '').toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
-    final line1 = norm(intent.line1 ?? intent.address);
-    return line1.isNotEmpty &&
-        norm(address.line1) == line1 &&
-        norm(address.city) == norm(intent.city);
   }
 
   @override
@@ -154,6 +147,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
     // Re-price whenever the recipient, date or cart changes.
     final token = [
       _recipientId ?? '',
+      _addressId ?? '',
       _dateKey(_deliveryDate),
       for (final line in lines) '${line.gift.id}:${line.quantity}',
     ].join('|');
@@ -278,8 +272,13 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                       const SizedBox(height: 12),
                       RecipientPicker(
                         selectedId: _recipientId,
-                        onChanged: (value) =>
-                            setState(() => _recipientId = value),
+                        onChanged: (value) => setState(() {
+                          _recipientId = value;
+                          _addressId = null;
+                        }),
+                        selectedAddressId: _addressId,
+                        onAddressChanged: (id) =>
+                            setState(() => _addressId = id),
                       ),
                       // Each shop that cannot deliver here, and the fixes.
                       for (final shop
@@ -293,8 +292,10 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
                                   (line) => line.gift.shopId == shop.shopId,
                                 )
                                 .length,
-                            onChangeRecipient: () =>
-                                setState(() => _recipientId = null),
+                            onChangeRecipient: () => setState(() {
+                              _recipientId = null;
+                              _addressId = null;
+                            }),
                             onEditAddress: _recipientId == null
                                 ? null
                                 : () => context.push(
@@ -542,6 +543,7 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
           .read(checkoutRepositoryProvider)
           .quoteDelivery(
             recipientId: recipientId,
+            recipientAddressId: _addressId,
             deliveryDate: _deliveryDate,
             lines: lines,
           );
@@ -581,8 +583,23 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
       // Deliver to the recipient's own country, so the order is not filed
       // under the buyer's country by default.
       final recipient = await repository.getRecipient(recipientId);
-      var countryId = recipient.deliveryAddress?.countryId ?? '';
+      final shipTo = recipient.addressOrDefault(_addressId);
+      var countryId = shipTo?.countryId ?? '';
       if (countryId.isEmpty) countryId = await repository.myCountryId();
+
+      // Same order, same key: a retry after a timeout cannot place it twice.
+      final fingerprint = [
+        recipientId,
+        shipTo?.id ?? '',
+        countryId,
+        _dateKey(_deliveryDate),
+        _giftNote.text.trim(),
+        for (final line in lines) '${line.gift.id}:${line.quantity}',
+      ].join('|');
+      final attempt = _orderAttempt?.fingerprint == fingerprint
+          ? _orderAttempt!
+          : (fingerprint: fingerprint, key: CheckoutRepository.newOrderKey());
+      _orderAttempt = attempt;
 
       // Delivery is not sent: the server prices it from each shop's zones.
       final orderId = await repository.placeOrder(
@@ -590,7 +607,9 @@ class _CheckoutScreenState extends ConsumerState<CheckoutScreen> {
         deliveryDate: _deliveryDate,
         lines: lines,
         recipientId: recipientId,
+        recipientAddressId: shipTo?.id,
         giftMessage: _giftNote.text,
+        idempotencyKey: attempt.key,
       );
 
       ref.read(cartProvider.notifier).clear();
@@ -712,4 +731,25 @@ class _SignedInAs extends StatelessWidget {
       ),
     );
   }
+}
+
+/// Whether a saved address is the one searched for: the same street line,
+/// and the same postcode (or, with no postcode on either side, the same
+/// city). Never "close enough" on the map, and never part of a street
+/// ("12 Main St" is not "112 Main St"): next door is a different address.
+bool searchedAddressMatches(DeliveryIntent intent, RecipientAddress address) {
+  String norm(String? v) =>
+      (v ?? '').toLowerCase().replaceAll(RegExp(r'[^a-z0-9]'), '');
+  String street(String? v) => norm((v ?? '').split(',').first);
+  final line1 = street(intent.line1).isNotEmpty
+      ? street(intent.line1)
+      : street(intent.address);
+  if (line1.isEmpty || norm(address.line1) != line1) return false;
+  final savedPostal = norm(address.postalCode);
+  final searchedPostal = norm(intent.postalCode);
+  if (savedPostal.isNotEmpty || searchedPostal.isNotEmpty) {
+    return savedPostal == searchedPostal;
+  }
+  final city = norm(address.city);
+  return city.isNotEmpty && city == norm(intent.city);
 }

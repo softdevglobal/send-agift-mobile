@@ -117,6 +117,16 @@ class Recipient {
     return addresses.isEmpty ? null : addresses.first;
   }
 
+  /// The address with [id] when it is one of theirs, else [deliveryAddress].
+  RecipientAddress? addressOrDefault(String? id) {
+    if (id != null) {
+      for (final address in addresses) {
+        if (address.id == id) return address;
+      }
+    }
+    return deliveryAddress;
+  }
+
   factory Recipient.fromJson(Map<String, dynamic> json) {
     final raw = json['addresses'];
     return Recipient(
@@ -222,7 +232,9 @@ class ShopDeliveryCheck {
 
   factory ShopDeliveryCheck.fromJson(Map<String, dynamic> json) {
     final option = json['seller_delivery'];
-    final o = option is Map<String, dynamic> ? option : const <String, dynamic>{};
+    final o = option is Map<String, dynamic>
+        ? option
+        : const <String, dynamic>{};
     return ShopDeliveryCheck(
       shopId: json['shop_id'] as String? ?? '',
       shopName: json['shop_name'] as String? ?? '',

@@ -1,3 +1,5 @@
+import 'dart:math';
+
 import 'package:flutter/foundation.dart';
 import 'package:dio/dio.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -100,8 +102,10 @@ class CheckoutRepository {
     required String recipientId,
     required DateTime deliveryDate,
     required List<CartLine> lines,
+    String? recipientAddressId,
   }) => quoteItems(
     recipientId: recipientId,
+    recipientAddressId: recipientAddressId,
     deliveryDate: deliveryDate,
     items: [for (final line in lines) (line.gift.id, line.quantity)],
   );
@@ -112,12 +116,15 @@ class CheckoutRepository {
     required String recipientId,
     required DateTime deliveryDate,
     required List<(String productId, int quantity)> items,
+    String? recipientAddressId,
   }) async {
     try {
       final response = await _client.dio.post<Map<String, dynamic>>(
         '/customers/me/shipping/quote',
         data: {
           'recipient_id': recipientId,
+          // The address picked at checkout; without it, their default.
+          'recipient_address_id': ?recipientAddressId,
           'delivery_date': _dateOnly(deliveryDate),
           'items': [
             for (final (productId, quantity) in items)
@@ -131,24 +138,42 @@ class CheckoutRepository {
     }
   }
 
+  /// A fresh Idempotency-Key for one order the customer means to place.
+  static String newOrderKey() {
+    final random = Random.secure();
+    final bytes = List<int>.generate(16, (_) => random.nextInt(256));
+    return bytes.map((b) => b.toRadixString(16).padLeft(2, '0')).join();
+  }
+
   /// Places the order. A recipient is required: the server prices delivery
   /// from each shop's zones to their address, and ignores any amount the app
   /// could send.
+  ///
+  /// [idempotencyKey] stays the same when the same order is sent again (a
+  /// timeout, a second tap): the server then returns the order it already
+  /// made rather than a second one.
   Future<String> placeOrder({
     required String countryId,
     required DateTime deliveryDate,
     required List<CartLine> lines,
     required String recipientId,
+    String? recipientAddressId,
     String? giftMessage,
+    String? idempotencyKey,
   }) async {
     try {
       final response = await _client.dio.post<Map<String, dynamic>>(
         '/customers/me/orders',
+        options: idempotencyKey == null
+            ? null
+            : Options(headers: {'Idempotency-Key': idempotencyKey}),
         data: {
           'country_id': countryId,
           'customer_type': 'personal',
           'delivery_date': _dateOnly(deliveryDate),
           'recipient_id': recipientId,
+          // The exact address the delivery was quoted for.
+          'recipient_address_id': ?recipientAddressId,
           if (giftMessage != null && giftMessage.trim().isNotEmpty)
             'gift_message': giftMessage.trim(),
           'items': [

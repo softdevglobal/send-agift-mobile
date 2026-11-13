@@ -86,7 +86,7 @@ const _topics = [
     ),
     (
       'Why do you need my state?',
-      'Games and competitions are allowed state by state, so they are switched '
+      'Games are allowed state by state, so they are switched '
           'on only where they are approved. We use the state you give us, never '
           'a guess from where you connect from. You can change it once in a '
           'while, with a verified phone number.',
@@ -101,18 +101,12 @@ const _topics = [
           'how to settle it, and we will contact you. Nothing was deleted.',
     ),
   ]),
-  _Topic('Games & competitions', Icons.emoji_events_outlined, AppColors.star, [
+  _Topic('Games', Icons.sports_esports_outlined, AppColors.star, [
     (
-      'How do competitions work?',
-      'Each round has a prize, a skill game and a cost in game entries to '
-          'play. Your best score counts on the leaderboard. A round can be '
-          'limited to some states, and is only shown where you can play it.',
-    ),
-    (
-      'Can I practise?',
-      'Yes. Every game can be played outside a competition, with its own '
-          'leaderboard. Some games cost game entries per play. Practice never '
-          'counts towards a prize.',
+      'How do the games work?',
+      'Each game is a quick skill game with its own leaderboard. Some games '
+          'use game entries per play. Games are only shown where they are '
+          'switched on for your state.',
     ),
   ]),
   _Topic('Account', Icons.person_outline_rounded, AppColors.accentForeground, [
