@@ -36,6 +36,7 @@ import '../../features/orders/presentation/screens/received_gifts_screen.dart';
 import '../../features/reviews/presentation/screens/my_reviews_screen.dart';
 import '../../features/products/presentation/screens/explore_screen.dart';
 import '../../features/products/presentation/screens/gift_detail_screen.dart';
+import '../../features/products/presentation/screens/shop_screen.dart';
 import '../../features/profile/presentation/screens/account_screen.dart';
 import '../../features/profile/presentation/screens/addresses_screen.dart';
 import '../../features/profile/presentation/screens/change_email_screen.dart';
@@ -60,6 +61,10 @@ class AppRoutes {
 
   // Pushed screens
   static const gift = '/gift';
+
+  /// A shop's own page: who runs it and everything it sells.
+  static const shop = '/shop';
+  static String shopPath(String id) => '$shop/$id';
   // Not a tab: opens as a right-side panel over whatever's on screen.
   static const cart = '/cart';
   static const checkout = '/checkout';
@@ -333,6 +338,14 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) =>
             _rightSheetPage(state, const CartScreen()),
+      ),
+      GoRoute(
+        path: '${AppRoutes.shop}/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          ShopScreen(shopId: state.pathParameters['id'] ?? ''),
+        ),
       ),
       GoRoute(
         path: '${AppRoutes.gift}/:id',

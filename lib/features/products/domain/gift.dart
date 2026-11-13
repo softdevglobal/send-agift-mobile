@@ -18,6 +18,7 @@ class Gift {
     this.shopId,
     this.shopName,
     this.shopImageUrl,
+    this.sellerImageUrl,
     this.sellerId,
     this.compareAtAmount,
     this.rating = 0,
@@ -39,6 +40,9 @@ class Gift {
   final String? shopId;
   final String? shopName;
   final String? shopImageUrl;
+
+  /// The seller's profile photo, shown beside the shop on the gift page.
+  final String? sellerImageUrl;
   final String? sellerId;
   final int? compareAtAmount;
   final double rating;
@@ -74,6 +78,7 @@ class Gift {
     shopId: shopId,
     shopName: name.trim().isEmpty ? shopName : name,
     shopImageUrl: shopImageUrl,
+    sellerImageUrl: sellerImageUrl,
     sellerId: sellerId,
     compareAtAmount: compareAtAmount,
     rating: rating,
@@ -111,7 +116,8 @@ class Gift {
       'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=900&q=80';
 
   factory Gift.fromJson(Map<String, dynamic> json, {Shop? shop}) {
-    final tags = (json['occasion_tags'] as List?)
+    final tags =
+        (json['occasion_tags'] as List?)
             ?.map((tag) => tag.toString())
             .toList() ??
         const <String>[];
@@ -136,6 +142,11 @@ class Gift {
       shopId: json['shop_id'] as String?,
       shopName: shop?.name,
       shopImageUrl: shop?.imageUrl,
+      sellerImageUrl:
+          shop?.sellerImageUrl ??
+          ((json['seller_image_url'] as String?)?.trim().isNotEmpty == true
+              ? (json['seller_image_url'] as String).trim()
+              : null),
       sellerId: shop?.sellerId,
       prepMinutes: (json['prep_minutes'] as num?)?.toInt() ?? 0,
       occasionTags: tags,
@@ -159,16 +170,23 @@ class Gift {
   bool matchesQuery(String query) {
     final normalized = query.trim().toLowerCase();
     if (normalized.isEmpty) return true;
-    return [name, description, shopName ?? '', categoryId, ...occasionTags]
-        .join(' ')
-        .toLowerCase()
-        .contains(normalized);
+    return [
+      name,
+      description,
+      shopName ?? '',
+      categoryId,
+      ...occasionTags,
+    ].join(' ').toLowerCase().contains(normalized);
   }
 }
 
 /// One photo or video on a gift.
 class GiftMedia {
-  const GiftMedia({required this.url, required this.isVideo, this.position = 0});
+  const GiftMedia({
+    required this.url,
+    required this.isVideo,
+    this.position = 0,
+  });
 
   final String url;
   final bool isVideo;

@@ -236,43 +236,73 @@ class _ShopRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Tapping the seller's photo or the shop name opens the shop's page.
+    final shopId = gift.shopId;
+    void openShop() {
+      if (shopId != null && shopId.isNotEmpty) {
+        context.push(AppRoutes.shopPath(shopId));
+      }
+    }
+
     return AppPanel(
       padding: const EdgeInsets.all(14),
       child: Row(
         children: [
-          Container(
-            height: 42,
-            width: 42,
-            decoration: BoxDecoration(
-              color: AppColors.accent,
-              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: gift.shopImageUrl != null
-                ? AppNetworkImage(url: gift.shopImageUrl!)
-                : const Icon(
-                    Icons.storefront_rounded,
-                    size: 20,
-                    color: AppColors.primary,
-                  ),
-          ),
-          const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  gift.shopName!,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Sold and fulfilled by this shop',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+            child: InkWell(
+              key: const Key('gift-open-shop'),
+              onTap: openShop,
+              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+              child: Row(
+                children: [
+                  // The seller's own photo, round; else the shop's logo; else an icon.
+                  Container(
+                    height: 46,
+                    width: 46,
+                    decoration: BoxDecoration(
+                      color: AppColors.accent,
+                      shape: gift.sellerImageUrl != null
+                          ? BoxShape.circle
+                          : BoxShape.rectangle,
+                      borderRadius: gift.sellerImageUrl != null
+                          ? null
+                          : BorderRadius.circular(AppTheme.radiusMd),
+                      border: gift.sellerImageUrl != null
+                          ? Border.all(color: AppColors.teal, width: 2)
+                          : null,
+                    ),
+                    clipBehavior: Clip.antiAlias,
+                    child: gift.sellerImageUrl != null
+                        ? AppNetworkImage(url: gift.sellerImageUrl!)
+                        : gift.shopImageUrl != null
+                        ? AppNetworkImage(url: gift.shopImageUrl!)
+                        : const Icon(
+                            Icons.storefront_rounded,
+                            size: 20,
+                            color: AppColors.primary,
+                          ),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          gift.shopName!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Sold and fulfilled by this shop',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 8),

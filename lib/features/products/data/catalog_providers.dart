@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/providers.dart';
 import '../../delivery/data/delivery_providers.dart';
 import '../domain/gift.dart';
+import '../domain/shop.dart';
 import 'catalog_repository.dart';
 
 final catalogRepositoryProvider = Provider<CatalogRepository>((ref) {
@@ -36,17 +37,31 @@ final filteredGiftsProvider = Provider<AsyncValue<List<Gift>>>((ref) {
   final catalog = switch (deliverable) {
     AsyncData(value: final gifts?) => AsyncValue.data(gifts),
     AsyncData() => ref.watch(catalogProvider),
-    AsyncError(:final error, :final stackTrace) =>
-      AsyncValue<List<Gift>>.error(error, stackTrace),
+    AsyncError(:final error, :final stackTrace) => AsyncValue<List<Gift>>.error(
+      error,
+      stackTrace,
+    ),
     _ => const AsyncValue<List<Gift>>.loading(),
   };
   final query = ref.watch(exploreQueryProvider);
   final category = ref.watch(exploreCategoryProvider);
 
   return catalog.whenData((gifts) {
-    return gifts.where((gift) {
-      final matchesCategory = category == 'all' || gift.inCategory(category);
-      return matchesCategory && gift.matchesQuery(query);
-    }).toList(growable: false);
+    return gifts
+        .where((gift) {
+          final matchesCategory =
+              category == 'all' || gift.inCategory(category);
+          return matchesCategory && gift.matchesQuery(query);
+        })
+        .toList(growable: false);
   });
 });
+
+/// A shop and its published gifts, for the shop page.
+final shopPageProvider = FutureProvider.autoDispose
+    .family<(Shop, List<Gift>)?, String>((ref, id) async {
+      final repository = ref.watch(catalogRepositoryProvider);
+      final shop = await repository.shop(id);
+      if (shop == null) return null;
+      return (shop, await repository.shopGifts(shop));
+    });
