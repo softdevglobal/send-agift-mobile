@@ -192,6 +192,18 @@ class GamesRepository {
         : const <StateOption>[];
   });
 
+  /// Turns a state picked from Google Places into one of ours, adding it to
+  /// the country's list the first time. Its id is what sign-up and
+  /// [setMyState] take.
+  Future<StateOption> resolveState(String countryId, String placeId) =>
+      _guard(() async {
+        final response = await _client.dio.post<dynamic>(
+          '/states/resolve',
+          data: {'country_id': countryId, 'place_id': placeId},
+        );
+        return StateOption.fromJson(_map(response.data));
+      });
+
   /// The state on the customer's account.
   Future<CustomerState> myState() => _guard(() async {
     final response = await _client.dio.get<dynamic>('/customers/me/state');

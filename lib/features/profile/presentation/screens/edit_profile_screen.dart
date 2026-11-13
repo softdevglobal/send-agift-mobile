@@ -13,6 +13,7 @@ import '../../../../core/utils/dial_codes.dart';
 import '../../../../core/widgets/app_network_image.dart';
 import '../../../../core/widgets/sheet_header.dart';
 import '../../../auth/data/auth_controller.dart';
+import '../../../game_entries/presentation/state_picker.dart';
 import '../../data/account_repository.dart';
 import '../widgets/account_visuals.dart';
 import '../widgets/address_form_sheet.dart' show errorMessage;
@@ -341,6 +342,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
             const SizedBox(height: 10),
             // Checks the saved phone, so a new number is saved first.
             const VerifyPhoneCard(),
+            const SizedBox(height: 12),
+            // Saved on its own: changing it has its own rules.
+            const StateSettingTile(),
             const SizedBox(height: 12),
             TextField(
               key: const Key('profile-email'),

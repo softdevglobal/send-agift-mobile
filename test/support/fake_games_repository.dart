@@ -243,6 +243,10 @@ class FakeGamesRepository implements GamesRepository {
   Future<List<StateOption>> states(String countryId) async => const [];
 
   @override
+  Future<StateOption> resolveState(String countryId, String placeId) async =>
+      StateOption(id: 'state-$placeId', code: 'ST', name: placeId);
+
+  @override
   Future<CustomerState> myState() async =>
       const CustomerState(countryId: 'c', stateRequired: false);
 

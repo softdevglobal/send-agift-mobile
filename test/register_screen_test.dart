@@ -130,6 +130,10 @@ void registerTakenEmailTest() {
     await tester.pumpAndSettle();
     await tester.tap(find.text('Sri Lanka (LK)').last);
     await tester.pumpAndSettle();
+    // No state list in this test: say the country has none.
+    await tester.ensureVisible(find.byKey(const Key('state-none')));
+    await tester.tap(find.byKey(const Key('state-none')));
+    await tester.pumpAndSettle();
 
     await tester.ensureVisible(find.byKey(const Key('register-submit')));
     await tester.tap(find.byKey(const Key('register-submit')));

@@ -8,7 +8,15 @@ import 'package:send_agift_mobile/features/auth/data/auth_controller.dart';
 import 'package:send_agift_mobile/features/auth/data/auth_repository.dart';
 import 'package:send_agift_mobile/features/cart/presentation/screens/checkout_screen.dart';
 import 'package:send_agift_mobile/features/checkout/domain/checkout.dart';
+import 'package:send_agift_mobile/features/auth/data/countries_provider.dart';
+import 'package:send_agift_mobile/features/delivery/data/delivery_providers.dart';
+import 'package:send_agift_mobile/features/delivery/data/delivery_repository.dart';
 import 'package:send_agift_mobile/features/delivery/domain/delivery_intent.dart';
+import 'package:send_agift_mobile/features/delivery/domain/place.dart';
+import 'package:send_agift_mobile/features/game_entries/presentation/state_picker.dart';
+import 'package:send_agift_mobile/features/games/data/games_providers.dart';
+
+import 'support/fake_games_repository.dart';
 
 void main() {
   group('competitions capability', () {
@@ -142,6 +150,55 @@ void main() {
     });
   });
 
+  testWidgets('the state is searched on Google within the country', (
+    tester,
+  ) async {
+    final delivery = _FakeDelivery();
+    String? chosen;
+    bool? required;
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          deliveryRepositoryProvider.overrideWithValue(delivery),
+          gamesRepositoryProvider.overrideWithValue(FakeGamesRepository()),
+          countriesProvider.overrideWith(
+            (ref) async => const [
+              Country(id: 'au', name: 'Australia', isoCode: 'AU'),
+            ],
+          ),
+        ],
+        child: MaterialApp(
+          home: Scaffold(
+            body: StatefulBuilder(
+              builder: (context, setState) => StatePicker(
+                countryId: 'au',
+                value: chosen,
+                onChanged: (id) => setState(() => chosen = id),
+                onRequired: (r) => required = r,
+              ),
+            ),
+          ),
+        ),
+      ),
+    );
+    await tester.pump();
+    expect(required, isTrue);
+
+    await tester.enterText(find.byKey(const Key('state-search')), 'New S');
+    await tester.pump(const Duration(milliseconds: 350));
+    await tester.pump();
+    expect(delivery.searches.single, 'states:AU:New S');
+
+    await tester.tap(find.text('New South Wales'));
+    await tester.pumpAndSettle();
+    expect(chosen, 'state-nsw');
+
+    // Typing over it un-chooses it.
+    await tester.enterText(find.byKey(const Key('state-search')), 'Vic');
+    await tester.pump(const Duration(milliseconds: 350));
+    expect(chosen, isNull);
+  });
+
   group('restoring a session', () {
     test(
       'a network failure keeps the session instead of signing out',
@@ -205,6 +262,32 @@ class _ScriptedAuth implements AuthRepository {
 
   @override
   Future<void> logout() async => cleared = true;
+
+  @override
+  dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);
+}
+
+/// A state search that answers from a fixed list instead of Google.
+class _FakeDelivery implements DeliveryRepository {
+  final List<String> searches = [];
+
+  @override
+  Future<List<PlaceSuggestion>> autocomplete(
+    String input, {
+    String? sessionToken,
+    String types = 'address',
+    String? countryCode,
+  }) async {
+    searches.add('$types:$countryCode:$input');
+    return const [
+      PlaceSuggestion(
+        placeId: 'nsw',
+        description: 'New South Wales, Australia',
+        mainText: 'New South Wales',
+        secondaryText: 'Australia',
+      ),
+    ];
+  }
 
   @override
   dynamic noSuchMethod(Invocation invocation) => super.noSuchMethod(invocation);

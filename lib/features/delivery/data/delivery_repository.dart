@@ -23,9 +23,14 @@ class DeliveryRepository {
         '${random.nextInt(1 << 32).toRadixString(36)}';
   }
 
+  /// [types] narrows the kind of place: 'address' (the default), or
+  /// 'states' for top-level states only. [countryCode] (ISO, e.g. 'AU')
+  /// keeps results inside one country.
   Future<List<PlaceSuggestion>> autocomplete(
     String input, {
     String? sessionToken,
+    String types = 'address',
+    String? countryCode,
   }) async {
     final trimmed = input.trim();
     if (trimmed.isEmpty) return const [];
@@ -35,8 +40,9 @@ class DeliveryRepository {
         queryParameters: {
           'input': trimmed,
           'language': 'en',
-          'types': 'address',
+          'types': types,
           'session': ?sessionToken,
+          'country': ?countryCode,
         },
       );
       final raw = response.data?['suggestions'];
