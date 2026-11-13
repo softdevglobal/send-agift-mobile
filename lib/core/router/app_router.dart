@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -232,28 +233,43 @@ CustomTransitionPage<void> _rightSheetPage(GoRouterState state, Widget child) {
         parent: animation,
         curve: Curves.easeOutCubic,
       );
-      return Align(
-        alignment: Alignment.centerRight,
-        child: SizedBox(
-          // Most of a phone's width; a fixed panel on a tablet.
-          width: math.min(
-            MediaQuery.sizeOf(context).width * 0.8,
-            ContentWidth.sidePanel,
-          ),
-          height: double.infinity,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(1, 0),
-              end: Offset.zero,
-            ).animate(curved),
-            child: Material(
-              elevation: 16,
-              shadowColor: Colors.black,
-              borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(28),
+      final topInset = MediaQuery.paddingOf(context).top;
+      // White status-bar text while the page behind is dimmed.
+      return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            // The panel starts below the status bar, so the clock and
+            // battery never sit on top of it.
+            padding: EdgeInsets.only(top: topInset + 6),
+            child: SizedBox(
+              // Most of a phone's width; a fixed panel on a tablet.
+              width: math.min(
+                MediaQuery.sizeOf(context).width * 0.8,
+                ContentWidth.sidePanel,
               ),
-              clipBehavior: Clip.antiAlias,
-              child: child,
+              height: double.infinity,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(curved),
+                child: Material(
+                  elevation: 16,
+                  shadowColor: Colors.black,
+                  borderRadius: const BorderRadius.horizontal(
+                    left: Radius.circular(28),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  // The status bar is already cleared above.
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: child,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
