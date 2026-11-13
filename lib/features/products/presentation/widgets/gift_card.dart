@@ -104,12 +104,13 @@ class GiftCard extends ConsumerWidget {
         padding: const EdgeInsets.all(7),
         // A promoted gift has its own tint, and is labelled Sponsored.
         decoration: BoxDecoration(
-          color: gift.sponsored ? AppColors.cream : AppColors.surface,
+          color: gift.sponsored ? AppColors.goldSoft : AppColors.surface,
           borderRadius: BorderRadius.circular(AppTheme.radiusXl),
           border: Border.all(
             color: gift.sponsored
-                ? AppColors.purple.withValues(alpha: 0.4)
+                ? AppColors.gold.withValues(alpha: 0.75)
                 : AppColors.foreground.withValues(alpha: 0.22),
+            width: gift.sponsored ? 1.5 : 1,
           ),
         ),
         child: Column(
@@ -148,7 +149,10 @@ class GiftCard extends ConsumerWidget {
                       bottom: 8,
                       child: Align(
                         alignment: Alignment.centerLeft,
-                        child: EntriesBadge(entries: gift.gameEntries),
+                        child: EntriesBadge(
+                          entries: gift.gameEntries,
+                          compact: true,
+                        ),
                       ),
                     ),
                 ],

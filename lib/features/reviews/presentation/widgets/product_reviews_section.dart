@@ -38,29 +38,38 @@ class ProductReviewsSection extends ConsumerWidget {
         if (data.reviewCount == 0) {
           return Container(
             width: double.infinity,
-            padding: const EdgeInsets.symmetric(vertical: 28, horizontal: 20),
+            padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 18),
             decoration: BoxDecoration(
+              color: AppColors.surface,
               borderRadius: BorderRadius.circular(AppTheme.radiusLg),
-              border: Border.all(
-                color: AppColors.border,
-                style: BorderStyle.solid,
-              ),
+              border: Border.all(color: AppColors.border),
             ),
             child: Column(
               children: [
-                const Icon(
-                  Icons.rate_review_outlined,
-                  color: AppColors.mutedForeground,
+                Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    for (var i = 0; i < 5; i++)
+                      const Padding(
+                        padding: EdgeInsets.symmetric(horizontal: 2),
+                        child: Icon(
+                          Icons.star_outline_rounded,
+                          size: 24,
+                          color: AppColors.star,
+                        ),
+                      ),
+                  ],
                 ),
-                const SizedBox(height: 8),
+                const SizedBox(height: 10),
                 Text('No reviews yet', style: theme.textTheme.titleSmall),
                 const SizedBox(height: 4),
                 Text(
-                  'Reviews come from delivered orders, so the first one lands '
-                  'once someone has received this gift.',
+                  'Be the first to love it. Reviews come from delivered '
+                  'orders, once someone has received this gift.',
                   textAlign: TextAlign.center,
                   style: theme.textTheme.bodySmall?.copyWith(
                     color: AppColors.mutedForeground,
+                    height: 1.4,
                   ),
                 ),
               ],
@@ -143,9 +152,9 @@ class StarMeterWithCount extends StatelessWidget {
         const SizedBox(width: 6),
         Text(
           '(${summary.reviewCount})',
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: AppColors.mutedForeground,
-          ),
+          style: Theme.of(
+            context,
+          ).textTheme.bodySmall?.copyWith(color: AppColors.mutedForeground),
         ),
       ],
     );

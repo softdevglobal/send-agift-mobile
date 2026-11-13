@@ -2,43 +2,55 @@ import 'package:flutter/material.dart';
 
 import '../theme/app_colors.dart';
 
-/// "Earn 3 game entries" on a promoted gift. Nothing shows for zero.
+/// The game entries a promoted gift earns. Nothing shows for zero.
+///
+/// [compact] is the small chip on a gift card ("+3 entries"); otherwise it
+/// says it in full ("Earn 3 game entries").
 class EntriesBadge extends StatelessWidget {
-  const EntriesBadge({super.key, required this.entries, this.large = false});
+  const EntriesBadge({
+    super.key,
+    required this.entries,
+    this.large = false,
+    this.compact = false,
+  });
 
   final int entries;
   final bool large;
+  final bool compact;
 
   @override
   Widget build(BuildContext context) {
     if (entries <= 0) return const SizedBox.shrink();
+    final label = compact
+        ? '+$entries ${entries == 1 ? 'entry' : 'entries'}'
+        : 'Earn $entries game ${entries == 1 ? 'entry' : 'entries'}';
     return Container(
       padding: EdgeInsets.symmetric(
-        horizontal: large ? 12 : 8,
-        vertical: large ? 6 : 4,
+        horizontal: large ? 12 : (compact ? 7 : 8),
+        vertical: large ? 6 : (compact ? 3 : 4),
       ),
       decoration: BoxDecoration(
-        color: AppColors.accent,
-        borderRadius: BorderRadius.circular(6),
+        color: compact ? AppColors.foreground : AppColors.accent,
+        borderRadius: BorderRadius.circular(compact ? 99 : 6),
       ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(
-            Icons.confirmation_number_outlined,
-            size: large ? 16 : 13,
-            color: AppColors.accentForeground,
+            Icons.confirmation_number_rounded,
+            size: large ? 16 : (compact ? 12 : 13),
+            color: compact ? AppColors.goldLight : AppColors.accentForeground,
           ),
           const SizedBox(width: 4),
           Flexible(
             child: Text(
-              'Earn $entries game ${entries == 1 ? 'entry' : 'entries'}',
+              label,
               maxLines: 1,
               overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: large ? 13 : 11,
-                fontWeight: FontWeight.w700,
-                color: AppColors.accentForeground,
+                fontSize: large ? 13 : (compact ? 10.5 : 11),
+                fontWeight: FontWeight.w800,
+                color: compact ? Colors.white : AppColors.accentForeground,
               ),
             ),
           ),
@@ -48,26 +60,120 @@ class EntriesBadge extends StatelessWidget {
   }
 }
 
-/// The label every promoted gift carries, wherever it is listed.
+/// The gold label every promoted gift carries, wherever it is listed.
 class SponsoredLabel extends StatelessWidget {
   const SponsoredLabel({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 3),
+      padding: const EdgeInsets.symmetric(horizontal: 7, vertical: 3),
       decoration: BoxDecoration(
-        color: AppColors.surface.withValues(alpha: 0.92),
-        borderRadius: BorderRadius.circular(5),
-        border: Border.all(color: AppColors.foreground.withValues(alpha: 0.3)),
+        color: AppColors.gold,
+        borderRadius: BorderRadius.circular(99),
       ),
-      child: const Text(
-        'SPONSORED',
-        style: TextStyle(
-          fontSize: 10,
-          fontWeight: FontWeight.w800,
-          letterSpacing: 0.6,
-        ),
+      child: const Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(Icons.star_rounded, size: 11, color: AppColors.goldInk),
+          SizedBox(width: 3),
+          Text(
+            'SPONSORED',
+            style: TextStyle(
+              fontSize: 9.5,
+              fontWeight: FontWeight.w900,
+              letterSpacing: 0.7,
+              color: AppColors.goldInk,
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// On a sponsored gift's page: what buying it earns, as a slim gold strip.
+class EntriesRewardCard extends StatelessWidget {
+  const EntriesRewardCard({super.key, required this.entries});
+
+  final int entries;
+
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final earns = entries > 0;
+    return Container(
+      padding: const EdgeInsets.fromLTRB(10, 10, 12, 10),
+      decoration: BoxDecoration(
+        color: AppColors.goldSoft,
+        borderRadius: BorderRadius.circular(16),
+        border: Border.all(color: AppColors.gold.withValues(alpha: 0.5)),
+      ),
+      child: Row(
+        children: [
+          // The ticket: how many entries, at a glance.
+          Container(
+            width: 46,
+            height: 46,
+            decoration: BoxDecoration(
+              color: AppColors.gold,
+              borderRadius: BorderRadius.circular(12),
+            ),
+            alignment: Alignment.center,
+            child: earns
+                ? Text(
+                    '+$entries',
+                    style: const TextStyle(
+                      fontSize: 17,
+                      fontWeight: FontWeight.w900,
+                      color: AppColors.goldInk,
+                    ),
+                  )
+                : const Icon(
+                    Icons.star_rounded,
+                    size: 24,
+                    color: AppColors.goldInk,
+                  ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Row(
+                  children: [
+                    Flexible(
+                      child: Text(
+                        earns
+                            ? 'Earn $entries game ${entries == 1 ? 'entry' : 'entries'}'
+                            : 'A promoted gift',
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    const SponsoredLabel(),
+                  ],
+                ),
+                if (earns) ...[
+                  const SizedBox(height: 2),
+                  Text(
+                    'Added once your payment is confirmed.',
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: AppColors.mutedForeground,
+                    ),
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ],
       ),
     );
   }
