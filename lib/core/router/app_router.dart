@@ -345,6 +345,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         pageBuilder: (context, state) => _fadePage(
           state,
           ShopScreen(shopId: state.pathParameters['id'] ?? ''),
+          // Image-led like explore: wide enough for more grid columns.
+          maxWidth: ContentWidth.browse,
         ),
       ),
       GoRoute(

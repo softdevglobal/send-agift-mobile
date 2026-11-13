@@ -92,6 +92,10 @@ class Gift {
 
   String get priceLabel => Money.format(priceAmount, currency);
 
+  /// The price for a card: no ".00" on a whole amount.
+  String get shortPriceLabel =>
+      Money.format(priceAmount, currency, wholeShort: true);
+
   String? get compareAtLabel =>
       compareAtAmount == null ? null : Money.format(compareAtAmount!, currency);
 

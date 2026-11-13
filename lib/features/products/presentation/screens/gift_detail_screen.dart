@@ -255,33 +255,34 @@ class _ShopRow extends ConsumerWidget {
               borderRadius: BorderRadius.circular(AppTheme.radiusMd),
               child: Row(
                 children: [
-                  // The seller's own photo, round; else the shop's logo; else an icon.
-                  Container(
-                    height: 46,
-                    width: 46,
-                    decoration: BoxDecoration(
-                      color: AppColors.accent,
-                      shape: gift.sellerImageUrl != null
-                          ? BoxShape.circle
-                          : BoxShape.rectangle,
-                      borderRadius: gift.sellerImageUrl != null
-                          ? null
-                          : BorderRadius.circular(AppTheme.radiusMd),
-                      border: gift.sellerImageUrl != null
-                          ? Border.all(color: AppColors.teal, width: 2)
-                          : null,
-                    ),
-                    clipBehavior: Clip.antiAlias,
-                    child: gift.sellerImageUrl != null
-                        ? AppNetworkImage(url: gift.sellerImageUrl!)
-                        : gift.shopImageUrl != null
-                        ? AppNetworkImage(url: gift.shopImageUrl!)
-                        : const Icon(
-                            Icons.storefront_rounded,
-                            size: 20,
-                            color: AppColors.primary,
+                  // The seller's photo fills the whole circle, with nothing
+                  // around it; else the shop's logo; else an icon.
+                  gift.sellerImageUrl != null
+                      ? ClipOval(
+                          child: AppNetworkImage(
+                            url: gift.sellerImageUrl!,
+                            width: 48,
+                            height: 48,
                           ),
-                  ),
+                        )
+                      : Container(
+                          height: 46,
+                          width: 46,
+                          decoration: BoxDecoration(
+                            color: AppColors.accent,
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.radiusMd,
+                            ),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: gift.shopImageUrl != null
+                              ? AppNetworkImage(url: gift.shopImageUrl!)
+                              : const Icon(
+                                  Icons.storefront_rounded,
+                                  size: 20,
+                                  color: AppColors.primary,
+                                ),
+                        ),
                   const SizedBox(width: 12),
                   Expanded(
                     child: Column(

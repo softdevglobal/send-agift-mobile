@@ -10,6 +10,11 @@ class Shop {
     this.sellerImageUrl,
     this.verified = false,
     this.categories = const [],
+    this.website,
+    this.workingDays = const [],
+    this.pickupEnabled = false,
+    this.giftOptions = const [],
+    this.returnsPolicy,
   });
 
   final String id;
@@ -28,6 +33,19 @@ class Shop {
   /// What the shop sells, as the seller listed it.
   final List<String> categories;
 
+  final String? website;
+
+  /// Days it fulfils orders: 'mon' … 'sun'.
+  final List<String> workingDays;
+
+  /// Customers can collect from the shop as well as have it delivered.
+  final bool pickupEnabled;
+
+  /// Extras it offers: 'message', 'wrapping', 'personalisation'.
+  final List<String> giftOptions;
+
+  final String? returnsPolicy;
+
   factory Shop.fromJson(Map<String, dynamic> json) {
     return Shop(
       id: json['id'] as String? ?? '',
@@ -40,12 +58,19 @@ class Shop {
       imageUrl: json['image_url'] as String?,
       sellerImageUrl: _text(json['seller_image_url']),
       verified: json['seller_verification_status'] == 'verified',
-      categories: [
-        for (final c in (json['categories'] as List? ?? const []))
-          if (c.toString().trim().isNotEmpty) c.toString().trim(),
-      ],
+      categories: _list(json['categories']),
+      website: _text(json['website']),
+      workingDays: _list(json['working_days']),
+      pickupEnabled: json['pickup_enabled'] == true,
+      giftOptions: _list(json['gift_options']),
+      returnsPolicy: _text(json['returns_policy']),
     );
   }
+
+  static List<String> _list(Object? value) => [
+    for (final v in (value is List ? value : const []))
+      if (v.toString().trim().isNotEmpty) v.toString().trim(),
+  ];
 
   static String? _text(Object? value) {
     final text = value is String ? value.trim() : '';

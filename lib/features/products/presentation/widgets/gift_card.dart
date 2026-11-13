@@ -204,11 +204,16 @@ class GiftCard extends ConsumerWidget {
                                   overflow: TextOverflow.ellipsis,
                                   style: _compareAtStyle,
                                 ),
-                              Text(
-                                gift.priceLabel,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: _priceStyle,
+                              // Never cut with "...": a long price shrinks to
+                              // fit beside the add button instead.
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  gift.shortPriceLabel,
+                                  maxLines: 1,
+                                  style: _priceStyle,
+                                ),
                               ),
                             ],
                           ),
