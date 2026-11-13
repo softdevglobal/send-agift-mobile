@@ -106,5 +106,12 @@
 	<array>
 		<string>remote-notification</string>
 	</array>
+	<key>NSAppTransportSecurity</key>
+	<dict>
+		<key>NSAllowsLocalNetworking</key>
+		<true/>
+	</dict>
+	<key>NSLocalNetworkUsageDescription</key>
+	<string>SendAGift connects to a development server on your network.</string>
 </dict>
 </plist>
