@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../domain/hill_rider.dart';
 import '../game_controls.dart';
 import 'game_chooser.dart';
+import 'game_overlay_area.dart';
 import 'hill_vehicles.dart';
 import 'tick_clock.dart';
 
@@ -147,24 +148,26 @@ class _HillRiderBoardState extends State<HillRiderBoard>
             builder: (context, _) => _Gauges(game: _game),
           ),
           if (!_started)
-            Align(
-              alignment: const Alignment(0, -0.2),
-              child: IgnorePointer(
-                child: Container(
-                  padding: const EdgeInsets.symmetric(
-                    horizontal: 18,
-                    vertical: 12,
-                  ),
-                  decoration: BoxDecoration(
-                    color: Colors.black.withValues(alpha: 0.45),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  child: const Text(
-                    'Hold GAS to start',
-                    style: TextStyle(
-                      color: Colors.white,
-                      fontWeight: FontWeight.w700,
-                      fontSize: 16,
+            GameOverlayArea(
+              child: Align(
+                alignment: const Alignment(0, -0.2),
+                child: IgnorePointer(
+                  child: Container(
+                    padding: const EdgeInsets.symmetric(
+                      horizontal: 18,
+                      vertical: 12,
+                    ),
+                    decoration: BoxDecoration(
+                      color: Colors.black.withValues(alpha: 0.45),
+                      borderRadius: BorderRadius.circular(24),
+                    ),
+                    child: const Text(
+                      'Hold GAS to start',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w700,
+                        fontSize: 16,
+                      ),
                     ),
                   ),
                 ),
@@ -174,8 +177,8 @@ class _HillRiderBoardState extends State<HillRiderBoard>
           Positioned(
             left: 16,
             right: 16,
-            // Clear of the hint line the play screen prints along the bottom.
-            bottom: MediaQuery.paddingOf(context).bottom + 46,
+            // The padding already ends above the play screen's hint line.
+            bottom: MediaQuery.paddingOf(context).bottom + 4,
             child: Row(
               children: [
                 _Pedal(
@@ -317,104 +320,106 @@ class _Gauges extends StatelessWidget {
       fuel.clamp(0.0, 1.0),
     )!;
     return IgnorePointer(
-      child: Stack(
-        children: [
-          // Just under the play screen's title and stats, which float over the
-          // top of the scene; any higher and it sits beneath them.
-          Positioned(
-            top: MediaQuery.paddingOf(context).top + 146,
-            left: 16,
-            child: Container(
-              padding: const EdgeInsets.all(8),
-              decoration: BoxDecoration(
-                color: Colors.black.withValues(alpha: 0.4),
-                borderRadius: BorderRadius.circular(14),
-              ),
-              child: Row(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  const Icon(
-                    Icons.local_gas_station_rounded,
-                    color: Colors.white,
-                    size: 18,
-                  ),
-                  const SizedBox(width: 6),
-                  Container(
-                    width: 90,
-                    height: 10,
-                    decoration: BoxDecoration(
-                      color: Colors.white.withValues(alpha: 0.2),
-                      borderRadius: BorderRadius.circular(5),
+      child: GameOverlayArea(
+        child: Stack(
+          children: [
+            // Just under the play screen's title and stats, which float over
+            // the top of the scene.
+            Positioned(
+              top: 0,
+              left: 16,
+              child: Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: Colors.black.withValues(alpha: 0.4),
+                  borderRadius: BorderRadius.circular(14),
+                ),
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    const Icon(
+                      Icons.local_gas_station_rounded,
+                      color: Colors.white,
+                      size: 18,
                     ),
-                    alignment: Alignment.centerLeft,
-                    child: FractionallySizedBox(
-                      widthFactor: fuel.clamp(0.0, 1.0),
-                      child: Container(
-                        decoration: BoxDecoration(
-                          color: fuelColor,
-                          borderRadius: BorderRadius.circular(5),
+                    const SizedBox(width: 6),
+                    Container(
+                      width: 90,
+                      height: 10,
+                      decoration: BoxDecoration(
+                        color: Colors.white.withValues(alpha: 0.2),
+                        borderRadius: BorderRadius.circular(5),
+                      ),
+                      alignment: Alignment.centerLeft,
+                      child: FractionallySizedBox(
+                        widthFactor: fuel.clamp(0.0, 1.0),
+                        child: Container(
+                          decoration: BoxDecoration(
+                            color: fuelColor,
+                            borderRadius: BorderRadius.circular(5),
+                          ),
                         ),
                       ),
                     ),
-                  ),
-                ],
-              ),
-            ),
-          ),
-          if (game.airborne)
-            const Align(
-              alignment: Alignment(0, -0.6),
-              child: Text(
-                'AIR!',
-                style: TextStyle(
-                  color: Color(0xFFFFE066),
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  shadows: [Shadow(color: Colors.black54, blurRadius: 8)],
+                  ],
                 ),
               ),
             ),
-          if (game.crashed)
-            Align(
-              alignment: const Alignment(0, -0.4),
-              // Slams in oversized and tilted, then settles with a wobble.
-              child: TweenAnimationBuilder<double>(
-                tween: Tween(begin: 0, end: 1),
-                duration: const Duration(milliseconds: 700),
-                curve: Curves.elasticOut,
-                builder: (context, t, child) => Transform.rotate(
-                  angle: (1 - t) * 0.35 - 0.06,
-                  child: Transform.scale(scale: 0.4 + t * 0.6, child: child),
-                ),
-                child: const Text(
-                  'CRASH!',
+            if (game.airborne)
+              const Align(
+                alignment: Alignment(0, -0.6),
+                child: Text(
+                  'AIR!',
                   style: TextStyle(
-                    color: Color(0xFFFF5252),
-                    fontSize: 46,
+                    color: Color(0xFFFFE066),
+                    fontSize: 28,
                     fontWeight: FontWeight.w900,
-                    letterSpacing: 2,
-                    shadows: [
-                      Shadow(color: Color(0xFFFFD54F), offset: Offset(3, 3)),
-                      Shadow(color: Colors.black87, blurRadius: 12),
-                    ],
+                    shadows: [Shadow(color: Colors.black54, blurRadius: 8)],
                   ),
                 ),
               ),
-            ),
-          if (!game.crashed && game.fuel == 0)
-            const Align(
-              alignment: Alignment(0, -0.4),
-              child: Text(
-                'OUT OF FUEL',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 28,
-                  fontWeight: FontWeight.w900,
-                  shadows: [Shadow(color: Colors.black87, blurRadius: 10)],
+            if (game.crashed)
+              Align(
+                alignment: const Alignment(0, -0.4),
+                // Slams in oversized and tilted, then settles with a wobble.
+                child: TweenAnimationBuilder<double>(
+                  tween: Tween(begin: 0, end: 1),
+                  duration: const Duration(milliseconds: 700),
+                  curve: Curves.elasticOut,
+                  builder: (context, t, child) => Transform.rotate(
+                    angle: (1 - t) * 0.35 - 0.06,
+                    child: Transform.scale(scale: 0.4 + t * 0.6, child: child),
+                  ),
+                  child: const Text(
+                    'CRASH!',
+                    style: TextStyle(
+                      color: Color(0xFFFF5252),
+                      fontSize: 46,
+                      fontWeight: FontWeight.w900,
+                      letterSpacing: 2,
+                      shadows: [
+                        Shadow(color: Color(0xFFFFD54F), offset: Offset(3, 3)),
+                        Shadow(color: Colors.black87, blurRadius: 12),
+                      ],
+                    ),
+                  ),
                 ),
               ),
-            ),
-        ],
+            if (!game.crashed && game.fuel == 0)
+              const Align(
+                alignment: Alignment(0, -0.4),
+                child: Text(
+                  'OUT OF FUEL',
+                  style: TextStyle(
+                    color: Colors.white,
+                    fontSize: 28,
+                    fontWeight: FontWeight.w900,
+                    shadows: [Shadow(color: Colors.black87, blurRadius: 10)],
+                  ),
+                ),
+              ),
+          ],
+        ),
       ),
     );
   }

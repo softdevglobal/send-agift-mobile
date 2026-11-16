@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../domain/basketball_game.dart';
 import '../game_controls.dart';
 import 'tick_clock.dart';
+import 'game_overlay_area.dart';
 
 // World units. x is sideways (the same units as a shot's aim), y is height
 // above the floor and z is depth away from the camera.
@@ -141,31 +142,39 @@ class _BasketballCourtState extends State<BasketballCourt>
                       drag: _drag,
                     ),
                   ),
-                  if (_game.onFire)
-                    const Positioned(
-                      top: 12,
-                      left: 12,
-                      child: _CourtBadge(
-                        icon: Icons.local_fire_department_rounded,
-                        label: 'ON FIRE ×2',
-                        color: Color(0xFFFF6D00),
-                      ),
+                  GameOverlayArea(
+                    child: Stack(
+                      children: [
+                        if (_game.onFire)
+                          const Positioned(
+                            top: 12,
+                            left: 12,
+                            child: _CourtBadge(
+                              icon: Icons.local_fire_department_rounded,
+                              label: 'ON FIRE ×2',
+                              color: Color(0xFFFF6D00),
+                            ),
+                          ),
+                        if (_game.level > 0)
+                          Positioned(
+                            top: 12,
+                            right: 12,
+                            child: _CourtBadge(
+                              icon: Icons.swap_horiz_rounded,
+                              label: 'Level ${_game.level + 1}',
+                              color: const Color(0xFF7C4DFF),
+                            ),
+                          ),
+                        if (!_started)
+                          const Align(
+                            alignment: Alignment(0, 0.3),
+                            child: _CourtPrompt(
+                              'Swipe up from the ball to shoot',
+                            ),
+                          ),
+                      ],
                     ),
-                  if (_game.level > 0)
-                    Positioned(
-                      top: 12,
-                      right: 12,
-                      child: _CourtBadge(
-                        icon: Icons.swap_horiz_rounded,
-                        label: 'Level ${_game.level + 1}',
-                        color: const Color(0xFF7C4DFF),
-                      ),
-                    ),
-                  if (!_started)
-                    const Align(
-                      alignment: Alignment(0, 0.3),
-                      child: _CourtPrompt('Swipe up from the ball to shoot'),
-                    ),
+                  ),
                 ],
               ),
             ),

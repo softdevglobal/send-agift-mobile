@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -74,6 +75,42 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
   bool _loading = true;
   String? _loadError;
   bool _paused = false;
+
+  // The title and score panels float over a full-screen game, and the hint
+  // runs along the bottom. Their real sizes are measured after each frame
+  // and handed to the game as its padding, so its own gauges, prompts and
+  // pedals sit clear of them however tall the panels turn out (an official
+  // attempt adds a badge; large text wraps the hint).
+  final _panelsKey = GlobalKey();
+  final _hintKey = GlobalKey();
+  EdgeInsets _overlayInsets = EdgeInsets.zero;
+
+  void _measurePanels() {
+    if (!mounted) return;
+    final screen = MediaQuery.sizeOf(context);
+    final safe = MediaQuery.paddingOf(context);
+    double bottomOf(GlobalKey key) {
+      final box = key.currentContext?.findRenderObject() as RenderBox?;
+      if (box == null || !box.hasSize) return 0;
+      return box.localToGlobal(Offset(0, box.size.height)).dy;
+    }
+
+    double topOf(GlobalKey key) {
+      final box = key.currentContext?.findRenderObject() as RenderBox?;
+      if (box == null || !box.hasSize) return screen.height;
+      return box.localToGlobal(Offset.zero).dy;
+    }
+
+    final top = math.max(bottomOf(_panelsKey), safe.top) + 8;
+    final bottom = math.max(screen.height - topOf(_hintKey), safe.bottom) + 8;
+    final next = EdgeInsets.fromLTRB(safe.left, top, safe.right, bottom);
+    if ((next.top - _overlayInsets.top).abs() > 0.5 ||
+        (next.bottom - _overlayInsets.bottom).abs() > 0.5 ||
+        next.left != _overlayInsets.left ||
+        next.right != _overlayInsets.right) {
+      setState(() => _overlayInsets = next);
+    }
+  }
 
   /// The "Leave the game?" pop-up is showing.
   bool _confirmingQuit = false;
@@ -398,6 +435,9 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
     // could not start, the message belongs in the middle of the panel
     // layout rather than painted across the whole screen.
     final immersive = widget.definition.immersive && engine != null;
+    if (immersive) {
+      WidgetsBinding.instance.addPostFrameCallback((_) => _measurePanels());
+    }
     // Practice shows the player's all-time best; an official attempt has its
     // own board, so the practice best would only mislead.
     final best = _official
@@ -428,7 +468,16 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
               Positioned.fill(
                 child: SizedBox.expand(
                   key: gamePlayAreaKey,
-                  child: _buildBody(visual, engine),
+                  // The scene still fills the screen; only what the game
+                  // places by the padding (gauges, prompts, buttons) keeps
+                  // clear of the panels.
+                  child: MediaQuery(
+                    data: MediaQuery.of(context).copyWith(
+                      padding: _overlayInsets,
+                      viewPadding: _overlayInsets,
+                    ),
+                    child: _buildBody(visual, engine),
+                  ),
                 ),
               ),
 
@@ -439,6 +488,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
                   // land on them: a game reading the whole screen would
                   // otherwise take a tap on the score as a move.
                   GestureDetector(
+                    key: _panelsKey,
                     behavior: HitTestBehavior.opaque,
                     onTap: () {},
                     child: Padding(
@@ -499,6 +549,7 @@ class _GamePlayScreenState extends ConsumerState<GamePlayScreen> {
                     ),
                   if (engine != null && visual.hint.isNotEmpty)
                     Padding(
+                      key: _hintKey,
                       padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
                       child: Text(
                         visual.hint,

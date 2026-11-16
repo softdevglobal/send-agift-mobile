@@ -152,7 +152,8 @@ class _SlingShotBoardState extends State<SlingShotBoard>
         Positioned(
           left: 12,
           right: 12,
-          bottom: 12,
+          // Above the play screen's hint line, which the padding ends at.
+          bottom: MediaQuery.paddingOf(context).bottom + 4,
           child: Wrap(
             alignment: WrapAlignment.center,
             spacing: 10,
