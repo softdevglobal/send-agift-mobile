@@ -801,7 +801,7 @@ class _EntryCard extends StatelessWidget {
           _Fact(
             icon: Icons.badge_outlined,
             label: 'Who can enter',
-            value: 'Players in ${c.countryName}',
+            value: whoCanEnter(c.countryName, c.stateNames),
           ),
           if (best != null)
             _Fact(
@@ -1280,3 +1280,18 @@ class _ClaimSheetState extends ConsumerState<_ClaimSheet> {
 }
 
 String _entries(int n) => '$n ${n == 1 ? 'entry' : 'entries'}';
+
+/// "Players in Sri Lanka", or with the states it is limited to:
+/// "Players in Central Province and Uva Province (Sri Lanka)", or
+/// "Players in 5 states of Sri Lanka" when the list would run long.
+@visibleForTesting
+String whoCanEnter(String country, List<String> states) {
+  if (states.isEmpty) return 'Players in $country';
+  if (states.length > 3) {
+    return 'Players in ${states.length} states of $country';
+  }
+  final names = states.length == 1
+      ? states.first
+      : '${states.sublist(0, states.length - 1).join(', ')} and ${states.last}';
+  return 'Players in $names ($country)';
+}

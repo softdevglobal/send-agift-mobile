@@ -52,6 +52,7 @@ class Competition {
     required this.gameSlug,
     required this.gameName,
     required this.countryName,
+    this.stateNames = const [],
     required this.startsAt,
     required this.endsAt,
     required this.entriesPerAttempt,
@@ -97,6 +98,10 @@ class Competition {
       gameSlug: json['game_slug'] as String? ?? '',
       gameName: json['game_name'] as String? ?? '',
       countryName: json['country_name'] as String? ?? '',
+      stateNames: [
+        for (final s in (json['states'] as List? ?? const []))
+          if (s is Map && s['name'] is String) s['name'] as String,
+      ],
       startsAt: _date(json['starts_at']) ?? DateTime.now(),
       endsAt: _date(json['ends_at']) ?? DateTime.now(),
       entriesPerAttempt: _int(json['entries_per_attempt']) ?? 0,
@@ -157,6 +162,7 @@ class Competition {
       gameSlug: gameSlug,
       gameName: gameName,
       countryName: countryName,
+      stateNames: stateNames,
       startsAt: startsAt,
       endsAt: endsAt,
       entriesPerAttempt: entriesPerAttempt,
@@ -213,6 +219,9 @@ class Competition {
   final String gameSlug;
   final String gameName;
   final String countryName;
+
+  /// The states the round is limited to; empty is every state.
+  final List<String> stateNames;
   final DateTime startsAt;
   final DateTime endsAt;
   final int entriesPerAttempt;
