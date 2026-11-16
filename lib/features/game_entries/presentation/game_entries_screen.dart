@@ -12,6 +12,7 @@ import '../../../core/widgets/stat_hero.dart';
 import '../../games/data/games_providers.dart';
 import '../../games/domain/game_entries.dart';
 import '../../games/presentation/competition_format.dart';
+import '../../games/presentation/widgets/official_rules.dart';
 import 'state_picker.dart';
 
 /// The customer's game entries: what they hold, where each came from, and
@@ -151,10 +152,9 @@ class _GameEntriesScreenState extends ConsumerState<GameEntriesScreen> {
                 ],
                 if ((w.play?.officialRules ?? '').isNotEmpty) ...[
                   const SizedBox(height: 12),
-                  ExpansionTile(
-                    tilePadding: EdgeInsets.zero,
-                    title: const Text('Official rules where you live'),
-                    children: [Text(w.play!.officialRules!)],
+                  OfficialRulesCard(
+                    rules: w.play!.officialRules!,
+                    label: 'Official rules where you live',
                   ),
                 ],
                 const SizedBox(height: 20),

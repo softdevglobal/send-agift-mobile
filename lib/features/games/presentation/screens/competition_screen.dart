@@ -20,6 +20,7 @@ import '../widgets/competition_card.dart';
 import '../widgets/countdown.dart';
 import '../widgets/game_action_button.dart';
 import '../widgets/leaderboard_list.dart';
+import '../widgets/official_rules.dart';
 
 const _prizeDisclosure =
     'Competition prizes are pre-funded by SendAgift or an approved sponsor. '
@@ -334,47 +335,23 @@ class _CompetitionViewState extends ConsumerState<_CompetitionView> {
 }
 
 void _showRules(BuildContext context, Competition c) {
-  showModalBottomSheet<void>(
-    context: context,
-    isScrollControlled: true,
-    showDragHandle: true,
-    builder: (context) => DraggableScrollableSheet(
-      expand: false,
-      initialChildSize: 0.7,
-      maxChildSize: 0.92,
-      builder: (context, controller) => ListView(
-        controller: controller,
-        padding: const EdgeInsets.fromLTRB(20, 0, 20, 32),
-        children: [
-          SheetHeader(
-            title: 'Official rules',
-            titleStyle: AppTypography.display(24),
-            showHandle: false,
-          ),
-          const SizedBox(height: 12),
-          Text(
-            c.officialRules ??
-                'The official rules are published here before the '
-                    'competition opens.',
-            style: Theme.of(
-              context,
-            ).textTheme.bodyMedium?.copyWith(height: 1.5),
-          ),
-          const SizedBox(height: 16),
-          _Disclosure(
-            icon: Icons.verified_user_outlined,
-            text: c.prizeGrowthEnabled ? _growingDisclosure : _prizeDisclosure,
-          ),
-          const SizedBox(height: 10),
-          _Disclosure(
-            icon: c.isChance
-                ? Icons.casino_outlined
-                : Icons.psychology_alt_outlined,
-            text: c.isChance ? _chanceDisclosure(c) : _skillDisclosure,
-          ),
-        ],
+  showOfficialRules(
+    context,
+    c.officialRules ??
+        'The official rules are published here before the competition opens.',
+    footer: [
+      _Disclosure(
+        icon: Icons.verified_user_outlined,
+        text: c.prizeGrowthEnabled ? _growingDisclosure : _prizeDisclosure,
       ),
-    ),
+      const SizedBox(height: 10),
+      _Disclosure(
+        icon: c.isChance
+            ? Icons.casino_outlined
+            : Icons.psychology_alt_outlined,
+        text: c.isChance ? _chanceDisclosure(c) : _skillDisclosure,
+      ),
+    ],
   );
 }
 
