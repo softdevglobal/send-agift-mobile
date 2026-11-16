@@ -1,5 +1,6 @@
 import 'dart:io' show Platform;
 
+import 'package:flutter/foundation.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 
 /// Central place for environment-driven configuration.
@@ -8,13 +9,28 @@ class AppConfig {
 
   static const String _fallbackBaseUrl = 'http://localhost:8081/api/v1';
 
+  /// The live API. A store build always talks to it unless `.env` names
+  /// another HTTPS server.
+  static const String productionBaseUrl = 'https://api.sendagift.win/api/v1';
+
   /// Base URL for the API, resolved for the current platform.
-  static String get apiBaseUrl {
-    final configured = dotenv.env['API_BASE_URL'];
-    final raw = (configured == null || configured.trim().isEmpty)
-        ? _fallbackBaseUrl
-        : configured.trim();
-    return _resolveHost(raw);
+  static String get apiBaseUrl => _resolveHost(
+    chooseApiBaseUrl(dotenv.env['API_BASE_URL'], release: kReleaseMode),
+  );
+
+  /// The API address from `.env`. In a release build anything but an HTTPS
+  /// address (a laptop's LAN IP, localhost, a blank line) is a development
+  /// setting left behind, and shipping it would leave every customer
+  /// unable to reach the server, so the live API is used instead.
+  @visibleForTesting
+  static String chooseApiBaseUrl(String? configured, {required bool release}) {
+    final value = configured?.trim() ?? '';
+    if (release) {
+      final uri = Uri.tryParse(value);
+      final https = uri != null && uri.scheme == 'https' && uri.host.isNotEmpty;
+      return https ? value : productionBaseUrl;
+    }
+    return value.isEmpty ? _fallbackBaseUrl : value;
   }
 
   /// The website, where the policy pages live. `WEB_BASE_URL` when set;
