@@ -74,8 +74,8 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       title: 'Welcome back',
       titleWidget: const AuthHeadline(lead: 'Welcome ', accent: 'back'),
       subtitle:
-          'Discover country-ready gifts, track every delivery, and earn '
-          'points along the way.',
+          'Discover country-ready gifts and track every delivery to the '
+          'door.',
       header: const AuthPerkChips(),
       form: Form(
         key: _formKey,

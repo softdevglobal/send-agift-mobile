@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../domain/stack_tower.dart';
 import '../game_controls.dart';
 import 'tick_clock.dart';
+import 'game_overlay_area.dart';
 
 /// World height of one floor.
 const double _floorH = 20;
@@ -169,24 +170,26 @@ class _StackTowerBoardState extends State<StackTowerBoard>
               ),
             ),
             if (!_started)
-              Align(
-                alignment: const Alignment(0, 0.55),
-                child: IgnorePointer(
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(
-                      horizontal: 18,
-                      vertical: 12,
-                    ),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withValues(alpha: 0.45),
-                      borderRadius: BorderRadius.circular(24),
-                    ),
-                    child: const Text(
-                      'Tap to start',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontWeight: FontWeight.w700,
-                        fontSize: 16,
+              GameOverlayArea(
+                child: Align(
+                  alignment: const Alignment(0, 0.55),
+                  child: IgnorePointer(
+                    child: Container(
+                      padding: const EdgeInsets.symmetric(
+                        horizontal: 18,
+                        vertical: 12,
+                      ),
+                      decoration: BoxDecoration(
+                        color: Colors.black.withValues(alpha: 0.45),
+                        borderRadius: BorderRadius.circular(24),
+                      ),
+                      child: const Text(
+                        'Tap to start',
+                        style: TextStyle(
+                          color: Colors.white,
+                          fontWeight: FontWeight.w700,
+                          fontSize: 16,
+                        ),
                       ),
                     ),
                   ),

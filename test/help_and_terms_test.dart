@@ -14,7 +14,7 @@ void main() {
 
     expect(find.text('Can I cancel an order?'), findsNothing);
     expect(
-      find.text('What happens to points if an order is cancelled or refunded?'),
+      find.text('What happens if an order is cancelled or refunded?'),
       findsOneWidget,
     );
   });

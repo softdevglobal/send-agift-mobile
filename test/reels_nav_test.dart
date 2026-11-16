@@ -8,6 +8,7 @@ import 'package:send_agift_mobile/app/app.dart';
 import 'package:send_agift_mobile/core/errors/app_exception.dart';
 import 'package:send_agift_mobile/features/auth/data/auth_controller.dart';
 import 'package:send_agift_mobile/features/auth/data/auth_repository.dart';
+import 'package:send_agift_mobile/features/messages/data/messages_providers.dart';
 import 'package:send_agift_mobile/features/reels/data/reel_social_repository.dart';
 import 'package:send_agift_mobile/features/reels/data/reels_providers.dart';
 import 'package:send_agift_mobile/features/reels/data/reels_repository.dart';
@@ -321,6 +322,9 @@ void main() {
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
+          _auth(),
+          // The real inbox polls the API, which tests have no config for.
+          unreadMessagesProvider.overrideWith((ref) => 0),
           catalogProvider.overrideWith((ref) async => sampleGifts),
           reelsRepositoryProvider.overrideWithValue(_FakeReelsRepository()),
         ],
@@ -330,7 +334,7 @@ void main() {
     await tester.pump(const Duration(milliseconds: 400));
 
     // The app opens on the storefront, not on a tab further along the bar.
-    expect(find.text('Discover the best gifts for every moment.'), findsOneWidget);
+    expect(find.text('UNFORGETTABLE'), findsOneWidget);
 
     // Scoped to the bar: the same glyphs (search, heart) also appear inside
     // the pages themselves.

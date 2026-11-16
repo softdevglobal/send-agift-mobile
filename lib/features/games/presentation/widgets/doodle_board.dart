@@ -71,11 +71,7 @@ class _DoodleBoardState extends State<DoodleBoard>
     super.initState();
     _fromLane = _game.lane;
     _fromHeight = _game.height;
-    _hop = AnimationController(
-      vsync: this,
-      duration: _hopDuration,
-      value: 1,
-    );
+    _hop = AnimationController(vsync: this, duration: _hopDuration, value: 1);
     _idle = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
@@ -117,9 +113,7 @@ class _DoodleBoardState extends State<DoodleBoard>
     });
     // Being flung two rungs takes longer than stepping up one.
     _hop
-      ..duration = _sprung
-          ? _springRungDuration * _rungs
-          : _hopDuration
+      ..duration = _sprung ? _springRungDuration * _rungs : _hopDuration
       ..forward(from: 0);
     widget.controls.onChanged();
   }
@@ -131,7 +125,15 @@ class _DoodleBoardState extends State<DoodleBoard>
     return LayoutBuilder(
       builder: (context, constraints) {
         final laneWidth = constraints.maxWidth / lanes;
-        final rungHeight = constraints.maxHeight / _visibleRungs;
+        // The tower stands in the part of the screen the play screen's
+        // panels and hint leave free, so the ledge underfoot is never
+        // under the hint line.
+        final pad = MediaQuery.paddingOf(context);
+        final towerHeight = math.max(
+          0.0,
+          constraints.maxHeight - pad.top - pad.bottom,
+        );
+        final rungHeight = towerHeight / _visibleRungs;
 
         return Stack(
           key: doodleSurfaceKey,
@@ -155,7 +157,11 @@ class _DoodleBoardState extends State<DoodleBoard>
             // Clipped to the board: a rung entering at the top, or the one
             // being left behind at the bottom, would otherwise be drawn over
             // the score panels and the hint beneath them.
-            Positioned.fill(
+            Positioned(
+              left: 0,
+              right: 0,
+              top: pad.top,
+              bottom: pad.bottom,
               child: ClipRect(
                 child: IgnorePointer(
                   child: Tilt3D(
@@ -531,7 +537,9 @@ class _Jumper extends StatelessWidget {
             ),
           ),
           Positioned.fill(
-            child: CustomPaint(painter: _JumperPainter(arc: arc, sprung: sprung)),
+            child: CustomPaint(
+              painter: _JumperPainter(arc: arc, sprung: sprung),
+            ),
           ),
         ],
       ),
@@ -635,11 +643,7 @@ class _JumperPainter extends CustomPainter {
       );
     }
 
-    canvas.drawCircle(
-      Offset(centre, headY),
-      headR,
-      Paint()..color = _skin,
-    );
+    canvas.drawCircle(Offset(centre, headY), headR, Paint()..color = _skin);
 
     // A face that looks where it is going: eyes up in flight, level on a
     // ledge, and a wider smile the higher it gets.

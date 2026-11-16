@@ -64,6 +64,7 @@ class _FakeAuth implements AuthRepository {
     required String displayName,
     required String countryId,
     required String phone,
+    String? stateId,
     String customerType = 'individual',
     String? signupToken,
   }) async {

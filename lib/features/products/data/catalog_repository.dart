@@ -78,12 +78,28 @@ class CatalogRepository {
       // The public product carries its shop inline, which is what the detail
       // screen shows as the seller line.
       final shopJson = data['shop'];
-      final shop = shopJson is Map<String, dynamic> ? Shop.fromJson(shopJson) : null;
+      final shop = shopJson is Map<String, dynamic>
+          ? Shop.fromJson(shopJson)
+          : null;
       return Gift.fromJson(data, shop: shop);
     } on DioException {
       return null;
     }
   }
+
+  /// One shop, for its page.
+  Future<Shop?> shop(String id) async {
+    try {
+      final response = await _client.dio.get<dynamic>('/shops/$id');
+      final data = response.data;
+      return data is Map<String, dynamic> ? Shop.fromJson(data) : null;
+    } on DioException {
+      return null;
+    }
+  }
+
+  /// A shop's published gifts.
+  Future<List<Gift>> shopGifts(Shop shop) => _fetchShopProducts(shop);
 
   Future<List<Shop>> _fetchShops() async {
     final response = await _client.dio.get<dynamic>('/shops');

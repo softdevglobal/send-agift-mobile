@@ -1,10 +1,12 @@
 import 'dart:math' as math;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../app/app_shell.dart';
+import '../capabilities/competitions_gate.dart';
 import '../layout/responsive.dart';
 import '../theme/app_colors.dart';
 import '../../features/auth/presentation/screens/login_screen.dart';
@@ -20,7 +22,7 @@ import '../../features/games/presentation/screens/competition_leaderboard_screen
 import '../../features/notifications/presentation/notifications_screen.dart';
 import '../../features/games/presentation/screens/competition_screen.dart';
 import '../../features/games/presentation/screens/chance_play_screen.dart';
-import '../../features/games/presentation/screens/points_screen.dart';
+import '../../features/game_entries/presentation/game_entries_screen.dart';
 import '../../features/games/presentation/screens/game_leaderboard_screen.dart';
 import '../../features/games/presentation/screens/game_play_screen.dart';
 import '../../features/games/presentation/screens/games_screen.dart';
@@ -35,6 +37,7 @@ import '../../features/orders/presentation/screens/received_gifts_screen.dart';
 import '../../features/reviews/presentation/screens/my_reviews_screen.dart';
 import '../../features/products/presentation/screens/explore_screen.dart';
 import '../../features/products/presentation/screens/gift_detail_screen.dart';
+import '../../features/products/presentation/screens/shop_screen.dart';
 import '../../features/profile/presentation/screens/account_screen.dart';
 import '../../features/profile/presentation/screens/addresses_screen.dart';
 import '../../features/profile/presentation/screens/change_email_screen.dart';
@@ -59,6 +62,10 @@ class AppRoutes {
 
   // Pushed screens
   static const gift = '/gift';
+
+  /// A shop's own page: who runs it and everything it sells.
+  static const shop = '/shop';
+  static String shopPath(String id) => '$shop/$id';
   // Not a tab: opens as a right-side panel over whatever's on screen.
   static const cart = '/cart';
   static const checkout = '/checkout';
@@ -74,8 +81,8 @@ class AppRoutes {
   static const competitions = '/competitions';
   static const notifications = '/notifications';
 
-  /// The customer's SendAgift Points balance and history.
-  static const points = '/points';
+  /// The customer's game entries and history.
+  static const gameEntries = '/game-entries';
 
   /// The membership packages on sale, and the customer's own membership.
   static const membership = '/membership';
@@ -226,28 +233,43 @@ CustomTransitionPage<void> _rightSheetPage(GoRouterState state, Widget child) {
         parent: animation,
         curve: Curves.easeOutCubic,
       );
-      return Align(
-        alignment: Alignment.centerRight,
-        child: SizedBox(
-          // Most of a phone's width; a fixed panel on a tablet.
-          width: math.min(
-            MediaQuery.sizeOf(context).width * 0.8,
-            ContentWidth.sidePanel,
-          ),
-          height: double.infinity,
-          child: SlideTransition(
-            position: Tween<Offset>(
-              begin: const Offset(1, 0),
-              end: Offset.zero,
-            ).animate(curved),
-            child: Material(
-              elevation: 16,
-              shadowColor: Colors.black,
-              borderRadius: const BorderRadius.horizontal(
-                left: Radius.circular(28),
+      final topInset = MediaQuery.paddingOf(context).top;
+      // White status-bar text while the page behind is dimmed.
+      return AnnotatedRegion<SystemUiOverlayStyle>(
+        value: SystemUiOverlayStyle.light,
+        child: Align(
+          alignment: Alignment.centerRight,
+          child: Padding(
+            // The panel starts below the status bar, so the clock and
+            // battery never sit on top of it.
+            padding: EdgeInsets.only(top: topInset + 6),
+            child: SizedBox(
+              // Most of a phone's width; a fixed panel on a tablet.
+              width: math.min(
+                MediaQuery.sizeOf(context).width * 0.8,
+                ContentWidth.sidePanel,
               ),
-              clipBehavior: Clip.antiAlias,
-              child: child,
+              height: double.infinity,
+              child: SlideTransition(
+                position: Tween<Offset>(
+                  begin: const Offset(1, 0),
+                  end: Offset.zero,
+                ).animate(curved),
+                child: Material(
+                  elevation: 16,
+                  shadowColor: Colors.black,
+                  borderRadius: const BorderRadius.horizontal(
+                    left: Radius.circular(28),
+                  ),
+                  clipBehavior: Clip.antiAlias,
+                  // The status bar is already cleared above.
+                  child: MediaQuery.removePadding(
+                    context: context,
+                    removeTop: true,
+                    child: child,
+                  ),
+                ),
+              ),
             ),
           ),
         ),
@@ -334,6 +356,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
             _rightSheetPage(state, const CartScreen()),
       ),
       GoRoute(
+        path: '${AppRoutes.shop}/:id',
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          ShopScreen(shopId: state.pathParameters['id'] ?? ''),
+          // Image-led like explore: wide enough for more grid columns.
+          maxWidth: ContentWidth.browse,
+        ),
+      ),
+      GoRoute(
         path: '${AppRoutes.gift}/:id',
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) => _fadePage(
@@ -377,7 +409,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) => _fadePage(
           state,
-          OrderDetailScreen(orderId: state.pathParameters['id'] ?? ''),
+          OrderDetailScreen(
+            orderId: state.pathParameters['id'] ?? '',
+            justPlaced: state.uri.queryParameters['placed'] == '1',
+          ),
         ),
       ),
       GoRoute(
@@ -449,13 +484,25 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           GameLeaderboardScreen(slug: state.pathParameters['slug'] ?? ''),
         ),
       ),
+      // A link to the competitions list itself: the games tab when they are
+      // on, the "not available" screen when they are off.
+      GoRoute(
+        path: AppRoutes.competitions,
+        parentNavigatorKey: _rootNavigatorKey,
+        pageBuilder: (context, state) => _fadePage(
+          state,
+          const CompetitionsGate(child: ForwardTo(AppRoutes.games)),
+        ),
+      ),
       GoRoute(
         path: '${AppRoutes.competitions}/:id/leaderboard',
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) => _fadePage(
           state,
-          CompetitionLeaderboardScreen(
-            competitionId: state.pathParameters['id'] ?? '',
+          CompetitionsGate(
+            child: CompetitionLeaderboardScreen(
+              competitionId: state.pathParameters['id'] ?? '',
+            ),
           ),
         ),
       ),
@@ -464,7 +511,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) => _fadePage(
           state,
-          CompetitionScreen(competitionId: state.pathParameters['id'] ?? ''),
+          CompetitionsGate(
+            child: CompetitionScreen(
+              competitionId: state.pathParameters['id'] ?? '',
+            ),
+          ),
         ),
       ),
       GoRoute(
@@ -475,11 +526,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
           final definition =
               gameDefinitions[state.uri.queryParameters['game'] ?? ''];
           if (definition == null) {
-            return _fadePage(state, CompetitionScreen(competitionId: id));
+            return _fadePage(
+              state,
+              CompetitionsGate(child: CompetitionScreen(competitionId: id)),
+            );
           }
           return _gameWindowPage(
             state,
-            GamePlayScreen(definition: definition, competitionId: id),
+            CompetitionsGate(
+              child: GamePlayScreen(definition: definition, competitionId: id),
+            ),
           );
         },
       ),
@@ -488,14 +544,21 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         parentNavigatorKey: _rootNavigatorKey,
         pageBuilder: (context, state) => _fadePage(
           state,
-          ChancePlayScreen(competitionId: state.pathParameters['id'] ?? ''),
+          CompetitionsGate(
+            child: ChancePlayScreen(
+              competitionId: state.pathParameters['id'] ?? '',
+            ),
+          ),
         ),
       ),
       GoRoute(
-        path: AppRoutes.points,
+        path: AppRoutes.gameEntries,
         parentNavigatorKey: _rootNavigatorKey,
-        pageBuilder: (context, state) => _fadePage(state, const PointsScreen()),
+        pageBuilder: (context, state) =>
+            _fadePage(state, const GameEntriesScreen()),
       ),
+      // Old links to the retired points screen.
+      GoRoute(path: '/points', redirect: (_, _) => AppRoutes.gameEntries),
       GoRoute(
         path: AppRoutes.membership,
         parentNavigatorKey: _rootNavigatorKey,

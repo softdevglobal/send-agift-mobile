@@ -18,13 +18,15 @@ class Gift {
     this.shopId,
     this.shopName,
     this.shopImageUrl,
+    this.sellerImageUrl,
     this.sellerId,
     this.compareAtAmount,
     this.rating = 0,
     this.reviewCount = 0,
     this.prepMinutes = 0,
     this.occasionTags = const [],
-    this.rewardPoints = 0,
+    this.gameEntries = 0,
+    this.sponsored = false,
     this.media = const [],
   });
 
@@ -38,6 +40,9 @@ class Gift {
   final String? shopId;
   final String? shopName;
   final String? shopImageUrl;
+
+  /// The seller's profile photo, shown beside the shop on the gift page.
+  final String? sellerImageUrl;
   final String? sellerId;
   final int? compareAtAmount;
   final double rating;
@@ -45,9 +50,12 @@ class Gift {
   final int prepMinutes;
   final List<String> occasionTags;
 
-  /// Points earned per unit once the order is delivered. The API sends 0 when
-  /// the seller cannot currently pay the reward, so any value here is real.
-  final int rewardPoints;
+  /// Game entries one purchase earns: the gift's level in a seller's
+  /// advertising package, while it still has budget. 0 when not promoted.
+  final int gameEntries;
+
+  /// On a seller's promoted list: listed higher and labelled Sponsored.
+  final bool sponsored;
 
   /// Every photo and video the seller added, photos first starting with the
   /// cover, then videos. Empty for a gift with only [image].
@@ -70,17 +78,23 @@ class Gift {
     shopId: shopId,
     shopName: name.trim().isEmpty ? shopName : name,
     shopImageUrl: shopImageUrl,
+    sellerImageUrl: sellerImageUrl,
     sellerId: sellerId,
     compareAtAmount: compareAtAmount,
     rating: rating,
     reviewCount: reviewCount,
     prepMinutes: prepMinutes,
     occasionTags: occasionTags,
-    rewardPoints: rewardPoints,
+    gameEntries: gameEntries,
+    sponsored: sponsored,
     media: media,
   );
 
   String get priceLabel => Money.format(priceAmount, currency);
+
+  /// The price for a card: no ".00" on a whole amount.
+  String get shortPriceLabel =>
+      Money.format(priceAmount, currency, wholeShort: true);
 
   String? get compareAtLabel =>
       compareAtAmount == null ? null : Money.format(compareAtAmount!, currency);
@@ -106,7 +120,8 @@ class Gift {
       'https://images.unsplash.com/photo-1513885535751-8b9238bd345a?auto=format&fit=crop&w=900&q=80';
 
   factory Gift.fromJson(Map<String, dynamic> json, {Shop? shop}) {
-    final tags = (json['occasion_tags'] as List?)
+    final tags =
+        (json['occasion_tags'] as List?)
             ?.map((tag) => tag.toString())
             .toList() ??
         const <String>[];
@@ -131,10 +146,16 @@ class Gift {
       shopId: json['shop_id'] as String?,
       shopName: shop?.name,
       shopImageUrl: shop?.imageUrl,
+      sellerImageUrl:
+          shop?.sellerImageUrl ??
+          ((json['seller_image_url'] as String?)?.trim().isNotEmpty == true
+              ? (json['seller_image_url'] as String).trim()
+              : null),
       sellerId: shop?.sellerId,
       prepMinutes: (json['prep_minutes'] as num?)?.toInt() ?? 0,
       occasionTags: tags,
-      rewardPoints: (json['reward_points'] as num?)?.toInt() ?? 0,
+      gameEntries: (json['game_entries'] as num?)?.toInt() ?? 0,
+      sponsored: json['sponsored'] as bool? ?? false,
     );
   }
 
@@ -153,16 +174,23 @@ class Gift {
   bool matchesQuery(String query) {
     final normalized = query.trim().toLowerCase();
     if (normalized.isEmpty) return true;
-    return [name, description, shopName ?? '', categoryId, ...occasionTags]
-        .join(' ')
-        .toLowerCase()
-        .contains(normalized);
+    return [
+      name,
+      description,
+      shopName ?? '',
+      categoryId,
+      ...occasionTags,
+    ].join(' ').toLowerCase().contains(normalized);
   }
 }
 
 /// One photo or video on a gift.
 class GiftMedia {
-  const GiftMedia({required this.url, required this.isVideo, this.position = 0});
+  const GiftMedia({
+    required this.url,
+    required this.isVideo,
+    this.position = 0,
+  });
 
   final String url;
   final bool isVideo;

@@ -69,7 +69,7 @@ class EmailChangeResult {
   /// Replaces the stored token: every older one has stopped working.
   final String token;
 
-  /// Until then prizes and gift points are on hold.
+  /// Until then prize claims are on hold.
   final DateTime? redemptionLockedUntil;
 
   factory EmailChangeResult.fromJson(Map<String, dynamic> json) =>

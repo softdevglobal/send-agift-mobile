@@ -8,14 +8,12 @@ class ReceivedGift {
     required this.deliveredAt,
     required this.items,
     this.giftMessage,
-    this.giftPoints = 0,
   });
 
   final String orderId;
   final String orderNumber;
   final String senderName;
   final String? giftMessage;
-  final int giftPoints;
   final DateTime deliveredAt;
   final List<ReceivedGiftItem> items;
 
@@ -28,7 +26,6 @@ class ReceivedGift {
       giftMessage: message is String && message.trim().isNotEmpty
           ? message.trim()
           : null,
-      giftPoints: (json['gift_points'] as num?)?.toInt() ?? 0,
       deliveredAt:
           DateTime.tryParse(json['delivered_at'] as String? ?? '')?.toLocal() ??
           DateTime.now(),

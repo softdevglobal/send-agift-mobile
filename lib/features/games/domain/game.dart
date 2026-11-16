@@ -10,13 +10,13 @@ class Game {
     required this.version,
     required this.config,
     this.description,
-    this.playCostPoints = 0,
+    this.entryCost = 0,
   });
 
   factory Game.fromJson(Map<String, dynamic> json) {
     final rawConfig = json['config'];
     return Game(
-      playCostPoints: (json['play_cost_points'] as num?)?.toInt() ?? 0,
+      entryCost: (json['entry_cost'] as num?)?.toInt() ?? 0,
       slug: json['slug'] as String? ?? '',
       name: json['name'] as String? ?? '',
       description: json['description'] as String?,
@@ -42,7 +42,7 @@ class Game {
   final Map<String, dynamic> config;
 
   /// Points one play costs, taken on the server when the game starts.
-  final int playCostPoints;
+  final int entryCost;
 }
 
 /// A play the server has opened. [seed] is what makes the board reproducible:
@@ -56,15 +56,15 @@ class GameSession {
     required this.seed,
     required this.config,
     required this.expiresAt,
-    this.pointsCharged = 0,
-    this.pointsBalance,
+    this.entriesCharged = 0,
+    this.entriesBalance,
   });
 
   factory GameSession.fromJson(Map<String, dynamic> json) {
     final rawConfig = json['config'];
     return GameSession(
-      pointsCharged: (json['points_charged'] as num?)?.toInt() ?? 0,
-      pointsBalance: (json['points_balance'] as num?)?.toInt(),
+      entriesCharged: (json['entries_charged'] as num?)?.toInt() ?? 0,
+      entriesBalance: (json['entries_balance'] as num?)?.toInt(),
       sessionId: json['session_id'] as String? ?? '',
       gameSlug: json['game_slug'] as String? ?? '',
       version: json['version'] as String? ?? '',
@@ -86,8 +86,8 @@ class GameSession {
   final DateTime expiresAt;
 
   /// What starting this play cost, and the balance it left.
-  final int pointsCharged;
-  final int? pointsBalance;
+  final int entriesCharged;
+  final int? entriesBalance;
 }
 
 /// The outcome of a submitted game.

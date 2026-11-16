@@ -19,7 +19,9 @@ import '../../data/catalog_providers.dart';
 import '../../domain/gift.dart';
 import '../widgets/gift_gallery.dart';
 import '../widgets/save_gift_button.dart';
-import '../../../../core/widgets/reward_points_badge.dart';
+import '../../../../core/widgets/entries_badge.dart';
+import '../../../../core/widgets/section_tag.dart';
+import '../../../games/data/games_providers.dart';
 
 /// Product page: large photo, shop line, price, description and a sticky
 /// add-to-cart bar. No sign-in required to reach or use any of it.
@@ -148,7 +150,10 @@ class _ContentState extends State<_Content> {
                     ],
                   ),
                   const SizedBox(height: 14),
-                  Text(gift.name, style: AppTypography.display(30, height: 1.05)),
+                  Text(
+                    gift.name,
+                    style: AppTypography.display(30, height: 1.05),
+                  ),
                   ProductRatingBadge(productId: gift.id),
                   const SizedBox(height: 12),
                   Row(
@@ -156,7 +161,10 @@ class _ContentState extends State<_Content> {
                     children: [
                       Text(
                         gift.priceLabel,
-                        style: AppTypography.poster(30, color: AppColors.purple),
+                        style: AppTypography.poster(
+                          30,
+                          color: AppColors.purple,
+                        ),
                       ),
                       if (gift.compareAtLabel != null) ...[
                         const SizedBox(width: 10),
@@ -174,26 +182,13 @@ class _ContentState extends State<_Content> {
                       ],
                     ],
                   ),
-                  if (gift.rewardPoints > 0) ...[
-                    const SizedBox(height: 12),
-                    Row(
-                      children: [
-                        RewardPointsBadge(
-                          points: gift.rewardPoints,
-                          large: true,
-                        ),
-                        const SizedBox(width: 8),
-                        const Expanded(
-                          child: Text(
-                            'per item, added to your points when you '
-                            'order. Spend them on games.',
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: AppColors.mutedForeground,
-                            ),
-                          ),
-                        ),
-                      ],
+                  if (gift.sponsored) ...[
+                    const SizedBox(height: 16),
+                    Consumer(
+                      builder: (context, ref, _) => EntriesRewardCard(
+                        entries: gift.gameEntries,
+                        available: ref.watch(entriesEarnableProvider),
+                      ),
                     ),
                   ],
                   if (gift.shopName != null) ...[
@@ -201,23 +196,20 @@ class _ContentState extends State<_Content> {
                     _ShopRow(gift: gift),
                   ],
                   if (gift.description.isNotEmpty) ...[
-                    const SizedBox(height: 24),
-                    Text(
-                      'About this gift',
-                      style: Theme.of(context).textTheme.titleMedium,
+                    const SizedBox(height: 26),
+                    const SectionTag(
+                      label: 'About this gift',
+                      icon: Icons.auto_awesome_rounded,
+                      color: AppColors.purple,
                     ),
-                    const SizedBox(height: 8),
-                    Text(
-                      gift.description,
-                      style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                            color: AppColors.mutedForeground,
-                          ),
-                    ),
+                    const SizedBox(height: 10),
+                    _AboutCard(text: gift.description),
                   ],
-                  const SizedBox(height: 28),
-                  Text(
-                    'Reviews',
-                    style: Theme.of(context).textTheme.titleMedium,
+                  const SizedBox(height: 26),
+                  const SectionTag(
+                    label: 'Reviews',
+                    icon: Icons.star_rounded,
+                    color: AppColors.teal,
                   ),
                   const SizedBox(height: 10),
                   ProductReviewsSection(
@@ -250,43 +242,74 @@ class _ShopRow extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    // Tapping the seller's photo or the shop name opens the shop's page.
+    final shopId = gift.shopId;
+    void openShop() {
+      if (shopId != null && shopId.isNotEmpty) {
+        context.push(AppRoutes.shopPath(shopId));
+      }
+    }
+
     return AppPanel(
       padding: const EdgeInsets.all(14),
       child: Row(
         children: [
-          Container(
-            height: 42,
-            width: 42,
-            decoration: BoxDecoration(
-              color: AppColors.accent,
-              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
-            ),
-            clipBehavior: Clip.antiAlias,
-            child: gift.shopImageUrl != null
-                ? AppNetworkImage(url: gift.shopImageUrl!)
-                : const Icon(
-                    Icons.storefront_rounded,
-                    size: 20,
-                    color: AppColors.primary,
-                  ),
-          ),
-          const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  gift.shopName!,
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
-                  style: Theme.of(context).textTheme.titleSmall,
-                ),
-                const SizedBox(height: 2),
-                Text(
-                  'Sold and fulfilled by this shop',
-                  style: Theme.of(context).textTheme.bodySmall,
-                ),
-              ],
+            child: InkWell(
+              key: const Key('gift-open-shop'),
+              onTap: openShop,
+              borderRadius: BorderRadius.circular(AppTheme.radiusMd),
+              child: Row(
+                children: [
+                  // The seller's photo fills the whole circle, with nothing
+                  // around it; else the shop's logo; else an icon.
+                  gift.sellerImageUrl != null
+                      ? ClipOval(
+                          child: AppNetworkImage(
+                            url: gift.sellerImageUrl!,
+                            width: 48,
+                            height: 48,
+                          ),
+                        )
+                      : Container(
+                          height: 46,
+                          width: 46,
+                          decoration: BoxDecoration(
+                            color: AppColors.accent,
+                            borderRadius: BorderRadius.circular(
+                              AppTheme.radiusMd,
+                            ),
+                          ),
+                          clipBehavior: Clip.antiAlias,
+                          child: gift.shopImageUrl != null
+                              ? AppNetworkImage(url: gift.shopImageUrl!)
+                              : const Icon(
+                                  Icons.storefront_rounded,
+                                  size: 20,
+                                  color: AppColors.primary,
+                                ),
+                        ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          gift.shopName!,
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                          style: Theme.of(context).textTheme.titleSmall,
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Sold and fulfilled by this shop',
+                          style: Theme.of(context).textTheme.bodySmall,
+                        ),
+                      ],
+                    ),
+                  ),
+                ],
+              ),
             ),
           ),
           const SizedBox(width: 8),
@@ -294,7 +317,9 @@ class _ShopRow extends ConsumerWidget {
             onPressed: () {
               final signedIn = ref.read(authProvider).isSignedIn;
               context.push(
-                signedIn ? AppRoutes.askAboutGiftPath(gift.id) : AppRoutes.login,
+                signedIn
+                    ? AppRoutes.askAboutGiftPath(gift.id)
+                    : AppRoutes.login,
               );
             },
             icon: const Icon(Icons.chat_bubble_outline_rounded, size: 17),
@@ -306,27 +331,106 @@ class _ShopRow extends ConsumerWidget {
   }
 }
 
+/// A gift's description in a card, folded to a few lines when it is long.
+class _AboutCard extends StatefulWidget {
+  const _AboutCard({required this.text});
+
+  final String text;
+
+  @override
+  State<_AboutCard> createState() => _AboutCardState();
+}
+
+class _AboutCardState extends State<_AboutCard> {
+  static const _folded = 5;
+  bool _open = false;
+
+  @override
+  Widget build(BuildContext context) {
+    final style = Theme.of(context).textTheme.bodyMedium?.copyWith(
+      color: AppColors.foreground.withValues(alpha: 0.78),
+      height: 1.55,
+    );
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.fromLTRB(16, 14, 16, 12),
+      decoration: BoxDecoration(
+        color: AppColors.surface,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border.all(color: AppColors.border),
+      ),
+      child: LayoutBuilder(
+        builder: (context, box) {
+          // Only offer "Read more" when the text really runs past the fold.
+          final painter = TextPainter(
+            text: TextSpan(text: widget.text, style: style),
+            maxLines: _folded,
+            textDirection: Directionality.of(context),
+          )..layout(maxWidth: box.maxWidth);
+          final long = painter.didExceedMaxLines;
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              AnimatedSize(
+                duration: const Duration(milliseconds: 220),
+                alignment: Alignment.topCenter,
+                child: Text(
+                  widget.text,
+                  style: style,
+                  maxLines: _open ? null : _folded,
+                  overflow: _open ? null : TextOverflow.fade,
+                ),
+              ),
+              if (long)
+                TextButton.icon(
+                  key: const Key('about-read-more'),
+                  style: TextButton.styleFrom(
+                    padding: EdgeInsets.zero,
+                    visualDensity: VisualDensity.compact,
+                  ),
+                  onPressed: () => setState(() => _open = !_open),
+                  icon: Icon(
+                    _open
+                        ? Icons.keyboard_arrow_up_rounded
+                        : Icons.keyboard_arrow_down_rounded,
+                    size: 18,
+                  ),
+                  label: Text(_open ? 'Show less' : 'Read more'),
+                ),
+            ],
+          );
+        },
+      ),
+    );
+  }
+}
+
+/// How the gift reaches someone, as two tiles side by side.
 class _DeliveryNotes extends StatelessWidget {
   const _DeliveryNotes();
 
   @override
   Widget build(BuildContext context) {
-    return AppPanel(
-      color: AppColors.cream,
-      child: Column(
-        children: const [
-          _NoteRow(
-            icon: Icons.local_shipping_outlined,
-            title: 'Delivered by the shop',
-            description:
-                'Each shop delivers within its own zones. Search an address '
-                'to see what can reach it.',
+    return const IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Expanded(
+            child: _NoteTile(
+              icon: Icons.local_shipping_rounded,
+              color: AppColors.teal,
+              title: 'Shop delivery',
+              description: 'Delivered by the shop within its own zones.',
+            ),
           ),
-          SizedBox(height: 14),
-          _NoteRow(
-            icon: Icons.refresh_rounded,
-            title: 'Easy returns',
-            description: 'Clear refund and dispute pathways on every order.',
+          SizedBox(width: 10),
+          Expanded(
+            child: _NoteTile(
+              icon: Icons.verified_user_rounded,
+              color: AppColors.purple,
+              title: 'Easy returns',
+              description: 'Clear refund and dispute steps on every order.',
+            ),
           ),
         ],
       ),
@@ -334,35 +438,50 @@ class _DeliveryNotes extends StatelessWidget {
   }
 }
 
-class _NoteRow extends StatelessWidget {
-  const _NoteRow({
+class _NoteTile extends StatelessWidget {
+  const _NoteTile({
     required this.icon,
+    required this.color,
     required this.title,
     required this.description,
   });
 
   final IconData icon;
+  final Color color;
   final String title;
   final String description;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Icon(icon, size: 19, color: AppColors.primary),
-        const SizedBox(width: 12),
-        Expanded(
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Text(title, style: Theme.of(context).textTheme.titleSmall),
-              const SizedBox(height: 2),
-              Text(description, style: Theme.of(context).textTheme.bodySmall),
-            ],
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: color.withValues(alpha: 0.08),
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+        border: Border.all(color: color.withValues(alpha: 0.25)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 36,
+            height: 36,
+            decoration: BoxDecoration(color: color, shape: BoxShape.circle),
+            child: Icon(icon, size: 18, color: Colors.white),
           ),
-        ),
-      ],
+          const SizedBox(height: 10),
+          Text(title, style: theme.textTheme.titleSmall),
+          const SizedBox(height: 3),
+          Text(
+            description,
+            style: theme.textTheme.bodySmall?.copyWith(
+              color: AppColors.mutedForeground,
+              height: 1.35,
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
@@ -398,7 +517,9 @@ class _AddToCartBar extends ConsumerWidget {
           Expanded(
             child: ElevatedButton.icon(
               onPressed: () {
-                ref.read(cartProvider.notifier).add(gift.id, quantity: quantity);
+                ref
+                    .read(cartProvider.notifier)
+                    .add(gift.id, quantity: quantity);
                 ScaffoldMessenger.of(context)
                   ..hideCurrentSnackBar()
                   ..showSnackBar(
@@ -471,7 +592,8 @@ class _NotFound extends StatelessWidget {
       child: EmptyState(
         icon: Icons.card_giftcard_outlined,
         title: 'Gift unavailable',
-        description: 'This gift is no longer published. Browse what else is new.',
+        description:
+            'This gift is no longer published. Browse what else is new.',
         action: ElevatedButton(
           onPressed: () => context.go(AppRoutes.explore),
           child: const Text('Browse gifts'),

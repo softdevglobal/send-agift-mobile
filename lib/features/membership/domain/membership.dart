@@ -1,8 +1,8 @@
 import '../../../core/utils/money.dart';
 
 /// SendAGift membership, the same packages the website sells: a price that
-/// renews on its true interval, a percentage off gifts, and bonus points
-/// added to My points with each paid period. The app never decides who can
+/// renews on its true interval, a percentage off gifts and the benefits the
+/// package lists. The app never decides who can
 /// join; it shows what the server says.
 
 DateTime? _date(dynamic raw) =>
@@ -52,8 +52,6 @@ class PlanOffer {
     required this.currency,
     required this.priceMinor,
     required this.billingLabel,
-    required this.memberBonusPoints,
-    required this.bonusTrigger,
     required this.memberDiscountBps,
     required this.giftBenefits,
     required this.termsVersion,
@@ -72,8 +70,6 @@ class PlanOffer {
       currency: json['currency'] as String? ?? 'USD',
       priceMinor: _int(json['price_minor']),
       billingLabel: json['billing_label'] as String? ?? '',
-      memberBonusPoints: _int(json['member_bonus_points']),
-      bonusTrigger: json['bonus_trigger'] as String? ?? 'payment',
       memberDiscountBps: _int(json['member_discount_bps']),
       giftBenefits: benefits is List
           ? benefits.whereType<String>().toList(growable: false)
@@ -94,21 +90,11 @@ class PlanOffer {
 
   /// The true interval: "every month", "every 28 days".
   final String billingLabel;
-  final int memberBonusPoints;
-
-  /// "payment" (with each paid period) or "first_gift".
-  final String bonusTrigger;
   final int memberDiscountBps;
   final List<String> giftBenefits;
   final String termsVersion;
 
   String get priceLabel => Money.format(priceMinor, currency);
-
-  /// When the bonus lands, in the customer's words.
-  String get bonusWhen => bonusTrigger == 'first_gift'
-      ? 'After your first qualifying completed gift in each paid period.'
-      : 'Added to My points as soon as each membership payment goes through. '
-            'Unused points carry over.';
 }
 
 /// What the membership page shows: whether joining is possible here, and the
@@ -136,28 +122,6 @@ class MembershipOffers {
   final List<PlanOffer> offers;
 }
 
-class BonusSlot {
-  const BonusSlot({required this.bonusPoints, required this.status});
-
-  factory BonusSlot.fromJson(Map<String, dynamic> json) => BonusSlot(
-    bonusPoints: _int(json['bonus_points']),
-    status: json['status'] as String? ?? 'unawarded',
-  );
-
-  final int bonusPoints;
-
-  /// unawarded, awarded, reversed or restored.
-  final String status;
-
-  bool get credited => status == 'awarded' || status == 'restored';
-
-  String get statusLabel => switch (status) {
-    'awarded' || 'restored' => 'Added',
-    'reversed' => 'Taken back',
-    _ => 'Waiting',
-  };
-}
-
 /// One period the customer has paid for.
 class PaidPeriod {
   const PaidPeriod({
@@ -167,11 +131,9 @@ class PaidPeriod {
     required this.amountMinor,
     required this.currency,
     required this.status,
-    this.bonusSlot,
   });
 
   factory PaidPeriod.fromJson(Map<String, dynamic> json) {
-    final slot = json['bonus_slot'];
     return PaidPeriod(
       id: json['id'] as String? ?? '',
       periodStart: _date(json['period_start']) ?? DateTime.now(),
@@ -179,7 +141,6 @@ class PaidPeriod {
       amountMinor: _int(json['amount_minor']),
       currency: json['currency'] as String? ?? 'USD',
       status: json['status'] as String? ?? 'paid',
-      bonusSlot: slot is Map<String, dynamic> ? BonusSlot.fromJson(slot) : null,
     );
   }
 
@@ -191,7 +152,6 @@ class PaidPeriod {
 
   /// paid, refunded, disputed or voided.
   final String status;
-  final BonusSlot? bonusSlot;
 
   String get amountLabel => Money.format(amountMinor, currency);
 }

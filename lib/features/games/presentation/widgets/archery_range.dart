@@ -130,7 +130,8 @@ class _ArcheryRangeState extends State<ArcheryRange>
         Positioned(
           left: 12,
           right: 12,
-          bottom: 12,
+          // Above the play screen's hint line, which the padding ends at.
+          bottom: MediaQuery.paddingOf(context).bottom + 4,
           // Wraps rather than overflowing on narrow phones or large text.
           child: Wrap(
             alignment: WrapAlignment.center,
@@ -242,7 +243,9 @@ class _RangePainter extends CustomPainter {
           : 0.0;
       _stuck(canvas, _impact(g, arrow), g.radius, quiver);
     }
-    if (struck && last != null) _ripple(canvas, _impact(g, last), g.radius, since);
+    if (struck && last != null) {
+      _ripple(canvas, _impact(g, last), g.radius, since);
+    }
     canvas.restore();
     if (flying) {
       _flying(

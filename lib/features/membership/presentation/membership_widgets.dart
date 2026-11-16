@@ -42,14 +42,16 @@ import '../domain/membership.dart';
       tab: false,
     ),
     'view_points' || 'view_earning_rules' => (
-      route: AppRoutes.points,
-      label: 'My points',
+      route: AppRoutes.gameEntries,
+      label: 'Game entries',
       tab: false,
     ),
+    // Competitions are not on offer at launch: send people shopping
+    // instead of to a screen that says so.
     'view_competitions' => (
-      route: AppRoutes.games,
-      label: 'See competitions',
-      tab: false,
+      route: AppRoutes.explore,
+      label: 'Send a gift',
+      tab: true,
     ),
     'contact_support' => (
       route: AppRoutes.help,
@@ -240,13 +242,11 @@ Future<void> closeMembershipCheckout() async {
 String _welcomedKey(String periodId) => 'membership-welcomed:$periodId';
 
 /// Shows the welcome the first time a paid period is seen on this device.
-/// Returns whether it showed. [onPointsScreen] keeps "See my points" from
-/// opening the screen the customer is already on.
+/// Returns whether it showed.
 Future<bool> maybeShowMembershipWelcome(
   BuildContext context,
-  MembershipStatus? status, {
-  bool onPointsScreen = false,
-}) async {
+  MembershipStatus? status,
+) async {
   final period = status?.currentPeriod;
   if (status == null || period == null || period.id.isEmpty) return false;
   final prefs = await SharedPreferences.getInstance();
@@ -256,28 +256,20 @@ Future<bool> maybeShowMembershipWelcome(
   if (!context.mounted) return false;
   await showDialog<void>(
     context: context,
-    builder: (_) =>
-        _MembershipWelcome(status: status, onPointsScreen: onPointsScreen),
+    builder: (_) => _MembershipWelcome(status: status),
   );
   return true;
 }
 
 class _MembershipWelcome extends StatelessWidget {
-  const _MembershipWelcome({
-    required this.status,
-    required this.onPointsScreen,
-  });
+  const _MembershipWelcome({required this.status});
 
   final MembershipStatus status;
-  final bool onPointsScreen;
 
   @override
   Widget build(BuildContext context) {
     final offer = status.offer;
     final period = status.currentPeriod!;
-    final slot = period.bonusSlot;
-    final credited = slot != null && slot.credited ? slot.bonusPoints : 0;
-    final bonus = offer?.memberBonusPoints ?? 0;
 
     return Dialog(
       clipBehavior: Clip.antiAlias,
@@ -321,26 +313,6 @@ class _MembershipWelcome extends StatelessWidget {
                     textAlign: TextAlign.center,
                     style: AppTypography.display(26, color: Colors.white),
                   ),
-                  if (credited > 0) ...[
-                    const SizedBox(height: 14),
-                    Container(
-                      padding: const EdgeInsets.symmetric(
-                        horizontal: 14,
-                        vertical: 7,
-                      ),
-                      decoration: BoxDecoration(
-                        color: AppColors.teal,
-                        borderRadius: BorderRadius.circular(999),
-                      ),
-                      child: Text(
-                        '+$credited points added',
-                        style: const TextStyle(
-                          fontWeight: FontWeight.w800,
-                          color: AppColors.tealForeground,
-                        ),
-                      ),
-                    ),
-                  ],
                 ],
               ),
             ),
@@ -358,16 +330,6 @@ class _MembershipWelcome extends StatelessWidget {
                       title:
                           '${formatBps(offer.memberDiscountBps)} off every gift',
                       body: 'Taken off at checkout.',
-                    ),
-                  if (bonus > 0)
-                    MembershipPerk(
-                      icon: Icons.verified_rounded,
-                      color: AppColors.accentForeground,
-                      title: '$bonus bonus points',
-                      body: offer?.bonusTrigger == 'first_gift'
-                          ? 'After your first delivered gift each period.'
-                          : 'In My points every time your membership renews. '
-                                'Unused points carry over.',
                     ),
                   for (final b in offer?.giftBenefits ?? const <String>[])
                     MembershipPerk(
@@ -392,11 +354,8 @@ class _MembershipWelcome extends StatelessWidget {
                   ),
                   const SizedBox(height: 16),
                   FilledButton(
-                    onPressed: () {
-                      Navigator.of(context).pop();
-                      if (!onPointsScreen) context.push(AppRoutes.points);
-                    },
-                    child: const Text('See my points'),
+                    onPressed: () => Navigator.of(context).pop(),
+                    child: const Text('See my membership'),
                   ),
                   const SizedBox(height: 8),
                   OutlinedButton(

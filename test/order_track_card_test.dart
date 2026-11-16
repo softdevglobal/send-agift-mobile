@@ -19,7 +19,11 @@ CustomerOrder _order(String status) => CustomerOrder.fromJson({
   'items': const [],
 });
 
-Future<void> _open(WidgetTester tester, CustomerOrder order) async {
+Future<void> _open(
+  WidgetTester tester,
+  CustomerOrder order, {
+  bool justPlaced = false,
+}) async {
   tester.view.physicalSize = const Size(1080, 3200);
   tester.view.devicePixelRatio = 3; // 360 × 1066
   addTearDown(tester.view.reset);
@@ -29,7 +33,9 @@ Future<void> _open(WidgetTester tester, CustomerOrder order) async {
         fakeAuth(customer: {'email': 'p@test.dev'}),
         customerOrderProvider('o1').overrideWith((ref) async => order),
       ],
-      child: const MaterialApp(home: OrderDetailScreen(orderId: 'o1')),
+      child: MaterialApp(
+        home: OrderDetailScreen(orderId: 'o1', justPlaced: justPlaced),
+      ),
     ),
   );
   for (var i = 0; i < 20; i++) {
@@ -38,6 +44,16 @@ Future<void> _open(WidgetTester tester, CustomerOrder order) async {
 }
 
 void main() {
+  testWidgets('right after checkout the order offers a way back home', (
+    tester,
+  ) async {
+    await _open(tester, _order('paid'), justPlaced: true);
+    // Nothing to go back to, so the top bar offers home instead.
+    expect(find.byKey(const Key('order-home')), findsOneWidget);
+    expect(find.byKey(const Key('order-continue-shopping')), findsOneWidget);
+    expect(tester.takeException(), isNull);
+  });
+
   testWidgets('a paid order shows its journey step by step, as on the web', (
     tester,
   ) async {

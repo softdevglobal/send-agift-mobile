@@ -128,6 +128,23 @@ const policyLinks = <PolicyLink>[
   ),
 ];
 
+/// Opens one policy's page from the website, inside the app when it can.
+Future<void> openPolicy(BuildContext context, PolicyLink policy) async {
+  final messenger = ScaffoldMessenger.of(context);
+  var opened = await launchUrl(policy.url, mode: LaunchMode.inAppBrowserView);
+  // Some devices have no in-app browser; the regular browser still works.
+  if (!opened) opened = await launchUrl(policy.url);
+  if (!opened) {
+    messenger.showSnackBar(
+      SnackBar(content: Text('Could not open ${policy.title}.')),
+    );
+  }
+}
+
+/// The policy with [docId], e.g. 'CUST-01'.
+PolicyLink policyById(String docId) =>
+    policyLinks.firstWhere((policy) => policy.docId == docId);
+
 /// Policies and terms. Each opens its page from the website inside the app.
 class TermsScreen extends StatelessWidget {
   const TermsScreen({super.key});

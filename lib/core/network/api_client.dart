@@ -1,4 +1,5 @@
 import 'package:dio/dio.dart';
+import 'package:flutter/foundation.dart';
 
 import '../config/app_config.dart';
 import '../errors/app_exception.dart';
@@ -14,14 +15,19 @@ class ApiClient {
           connectTimeout: const Duration(seconds: 15),
           receiveTimeout: const Duration(seconds: 15),
           contentType: 'application/json',
+          // Names the app to the server: games are played in the mobile app
+          // only, and the server checks this before starting a play.
+          headers: {'X-Client-Channel': _channel},
         ),
       ) {
     dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          final token = await _tokenStorage.accessToken;
-          if (token != null) {
-            options.headers['Authorization'] = 'Bearer $token';
+          if (options.extra[_noAuthKey] != true) {
+            final token = await _tokenStorage.accessToken;
+            if (token != null) {
+              options.headers['Authorization'] = 'Bearer $token';
+            }
           }
           handler.next(options);
         },
@@ -33,6 +39,18 @@ class ApiClient {
   }
 
   final Dio dio;
+
+  static const _noAuthKey = 'noAuth';
+
+  /// For sign-in and sign-up calls: they must never carry a saved token,
+  /// least of all one left behind by an earlier account.
+  static final noAuth = Options(extra: {_noAuthKey: true});
+
+  static String get _channel => switch (defaultTargetPlatform) {
+    TargetPlatform.iOS => 'ios',
+    TargetPlatform.android => 'android',
+    _ => kIsWeb ? 'web' : 'android',
+  };
   final TokenStorage _tokenStorage;
 
   AppException mapError(DioException error) {

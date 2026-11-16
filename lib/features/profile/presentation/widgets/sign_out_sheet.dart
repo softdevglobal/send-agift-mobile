@@ -134,11 +134,11 @@ class _SignOutSheetState extends State<_SignOutSheet> {
             children: [
               Expanded(
                 child: _KeptTile(
-                  icon: Icons.stars_rounded,
+                  icon: Icons.confirmation_number_outlined,
                   color: AppColors.purple,
                   tint: AppColors.categoryTints[5],
                   value: widget.points,
-                  label: 'Points',
+                  label: 'Entries',
                 ),
               ),
               const SizedBox(width: 10),

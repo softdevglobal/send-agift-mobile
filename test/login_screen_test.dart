@@ -23,7 +23,7 @@ void main() {
 
       expect(tester.takeException(), isNull);
       expect(find.text('Good to see you again'), findsNothing);
-      expect(find.text('Earn points'), findsOneWidget);
+      expect(find.text('Save favourites'), findsOneWidget);
       expect(find.byKey(const Key('login-submit')), findsOneWidget);
       expect(find.byKey(const Key('auth-back')), findsOneWidget);
     });

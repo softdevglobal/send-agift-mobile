@@ -32,9 +32,16 @@ class Money {
   /// rendered with the ISO code instead (`AUD 25.00`). The rule is generic
   /// rather than a symbol table because admins can add countries. And
   /// therefore currencies. At any time.
-  static String format(int minorAmount, String currency) {
+  /// [wholeShort] drops ".00" from a whole amount ("LKR 98,000"), for
+  /// tight places like a gift card.
+  static String format(
+    int minorAmount,
+    String currency, {
+    bool wholeShort = false,
+  }) {
     final code = currency.isEmpty ? 'USD' : currency.toUpperCase();
-    final digits = fractionDigits(code);
+    final full = fractionDigits(code);
+    final digits = wholeShort && minorAmount % _pow10(full) == 0 ? 0 : full;
     final value = minorToMajor(minorAmount, code);
 
     try {
@@ -46,8 +53,10 @@ class Money {
           decimalDigits: digits,
         ).format(value);
       }
-      return NumberFormat.simpleCurrency(name: code, decimalDigits: digits)
-          .format(value);
+      return NumberFormat.simpleCurrency(
+        name: code,
+        decimalDigits: digits,
+      ).format(value);
     } catch (_) {
       return '${value.toStringAsFixed(digits)} $code';
     }

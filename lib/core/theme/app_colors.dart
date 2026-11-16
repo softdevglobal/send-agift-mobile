@@ -54,6 +54,12 @@ class AppColors {
   static const Color destructive = Color(0xFFDC2626);
   static const Color star = Color(0xFFEEA23A);
 
+  // Gold, for sponsored gifts and the game entries they earn.
+  static const Color gold = Color(0xFFE6B422);
+  static const Color goldLight = Color(0xFFFFE08A);
+  static const Color goldSoft = Color(0xFFFFF7DD);
+  static const Color goldInk = Color(0xFF5C4200);
+
   /// Soft tints behind the category tiles, cycling the three brand hues (and
   /// their blends) so the strip reads as colourful without leaving the
   /// palette.

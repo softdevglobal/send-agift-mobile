@@ -7,6 +7,7 @@ import 'package:send_agift_mobile/features/games/presentation/game_definitions.d
 import 'package:send_agift_mobile/features/games/presentation/screens/game_play_screen.dart'
     show GamePlayScreen, gamePlayAreaKey;
 
+import 'package:send_agift_mobile/features/games/presentation/widgets/game_hud.dart';
 import 'package:send_agift_mobile/features/games/presentation/widgets/tilt_3d.dart';
 
 import 'support/fake_games_repository.dart';
@@ -45,6 +46,37 @@ Future<Rect> _playArea(WidgetTester tester, String slug) async {
 }
 
 void main() {
+  testWidgets('a game\'s own gauges and pedals stay clear of the panels', (
+    tester,
+  ) async {
+    await _playArea(tester, 'hill-rider');
+    await tester.tap(find.text('Monster truck'));
+    for (var i = 0; i < 6; i++) {
+      await tester.pump(const Duration(milliseconds: 50));
+    }
+    final stats = tester.getRect(find.byType(GameStatsRow));
+    final hint = tester.getRect(find.textContaining('Hold GAS to drive'));
+    final gauge = tester.getRect(find.byIcon(Icons.local_gas_station_rounded));
+    final gas = tester.getRect(find.byKey(const ValueKey('hill-gas')));
+    final brake = tester.getRect(find.byKey(const ValueKey('hill-brake')));
+
+    expect(
+      gauge.top,
+      greaterThanOrEqualTo(stats.bottom),
+      reason: 'fuel gauge under the stats',
+    );
+    expect(
+      gas.bottom,
+      lessThanOrEqualTo(hint.top),
+      reason: 'GAS over the hint',
+    );
+    expect(
+      brake.bottom,
+      lessThanOrEqualTo(hint.top),
+      reason: 'BRAKE over the hint',
+    );
+  });
+
   for (final slug in _sceneGames) {
     testWidgets('$slug fills the screen it is given', (tester) async {
       final area = await _playArea(tester, slug);
@@ -83,7 +115,8 @@ void main() {
       expect(
         area.height,
         screen.height,
-        reason: '$slug leaves '
+        reason:
+            '$slug leaves '
             '${(screen.height - area.height).round()}px of screen unpainted',
       );
     });

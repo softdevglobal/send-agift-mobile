@@ -34,7 +34,6 @@ void main() {
 
     expect(gift.senderName, 'Sam');
     expect(gift.giftMessage, 'Happy birthday!');
-    expect(gift.giftPoints, 250);
     expect(gift.items, hasLength(2));
     expect(gift.items.first.delivered, isTrue);
     expect(gift.items.first.reviewId, 'r1');

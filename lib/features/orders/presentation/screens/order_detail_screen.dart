@@ -15,6 +15,7 @@ import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/quantity_stepper.dart';
 import '../../../checkout/data/checkout_repository.dart';
 import '../../../checkout/presentation/in_app_payment.dart';
+import '../../../games/data/games_providers.dart';
 import '../../../messages/data/messages_providers.dart';
 import '../../../products/data/catalog_providers.dart';
 import '../../../reviews/data/reviews_repository.dart';
@@ -30,9 +31,16 @@ import 'order_list_screen.dart';
 /// customer messages that shop about their item. A delivery question, a
 /// change, or photos of a gift that arrived damaged.
 class OrderDetailScreen extends ConsumerWidget {
-  const OrderDetailScreen({super.key, required this.orderId});
+  const OrderDetailScreen({
+    super.key,
+    required this.orderId,
+    this.justPlaced = false,
+  });
 
   final String orderId;
+
+  /// Opened straight from checkout: offer a way back to shopping.
+  final bool justPlaced;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -40,7 +48,18 @@ class OrderDetailScreen extends ConsumerWidget {
 
     return Scaffold(
       // The hero carries the order number; the bar just says where you are.
-      appBar: AppBar(title: const Text('Order details')),
+      appBar: AppBar(
+        title: const Text('Order details'),
+        // Nothing to go back to after checkout: offer home instead.
+        leading: Navigator.of(context).canPop()
+            ? null
+            : IconButton(
+                key: const Key('order-home'),
+                tooltip: 'Home',
+                icon: const Icon(Icons.home_rounded),
+                onPressed: () => context.go(AppRoutes.home),
+              ),
+      ),
       body: SafeArea(
         child: order.when(
           loading: () => const Center(
@@ -55,7 +74,9 @@ class OrderDetailScreen extends ConsumerWidget {
               child: const Text('Try again'),
             ),
           ),
-          data: (order) => FadeSlideIn(child: _OrderBody(order: order)),
+          data: (order) => FadeSlideIn(
+            child: _OrderBody(order: order, justPlaced: justPlaced),
+          ),
         ),
       ),
     );
@@ -63,9 +84,10 @@ class OrderDetailScreen extends ConsumerWidget {
 }
 
 class _OrderBody extends StatelessWidget {
-  const _OrderBody({required this.order});
+  const _OrderBody({required this.order, this.justPlaced = false});
 
   final CustomerOrder order;
+  final bool justPlaced;
 
   @override
   Widget build(BuildContext context) {
@@ -80,14 +102,15 @@ class _OrderBody extends StatelessWidget {
         32,
       ),
       children: [
+        if (justPlaced) ...[_PlacedBanner(), const SizedBox(height: 14)],
         _OrderHero(order: order, delivery: delivery),
         if (order.status == 'pending_payment') ...[
           const SizedBox(height: 14),
           _PayNowCard(order: order),
         ],
-        if (order.rewardPointsTotal > 0 || order.giftPointsLabel != null) ...[
+        if (order.gameEntriesTotal > 0) ...[
           const SizedBox(height: 14),
-          _PointsCard(order: order),
+          _EntriesCard(order: order),
         ],
         const SizedBox(height: 14),
         _TrackingCard(order: order, delivery: delivery),
@@ -169,7 +192,9 @@ class _PayNowCardState extends ConsumerState<_PayNowCard>
           .read(checkoutRepositoryProvider)
           .syncPayment(widget.orderId);
       if (paid && mounted) {
-        ref.invalidate(customerOrderProvider(widget.orderId));
+        ref
+          ..invalidate(customerOrderProvider(widget.orderId))
+          ..invalidate(gameEntriesProvider);
       }
     } catch (_) {
       // Offline, or not signed in: the order simply stays as it is.
@@ -426,12 +451,12 @@ class _OrderHero extends StatelessWidget {
               const SizedBox(width: 8),
               Expanded(
                 child: _HeroFact(
-                  icon: Icons.stars_rounded,
-                  label: 'Points',
-                  value: order.rewardPointsTotal > 0
-                      ? '${order.rewardsEarned ? '+' : ''}${order.rewardPointsTotal}'
+                  icon: Icons.confirmation_number_outlined,
+                  label: 'Game entries',
+                  value: order.gameEntriesTotal > 0
+                      ? '${order.entriesGranted ? '+' : ''}${order.gameEntriesTotal}'
                       : '-',
-                  highlight: order.rewardPointsTotal > 0,
+                  highlight: order.gameEntriesTotal > 0,
                 ),
               ),
             ],
@@ -486,14 +511,18 @@ class _HeroFact extends StatelessWidget {
               fontSize: 11,
             ),
           ),
-          Text(
-            value,
-            maxLines: 1,
-            overflow: TextOverflow.ellipsis,
-            style: const TextStyle(
-              color: Colors.white,
-              fontWeight: FontWeight.w700,
-              fontSize: 14,
+          // Shrinks to fit rather than cutting a long total short.
+          FittedBox(
+            fit: BoxFit.scaleDown,
+            alignment: Alignment.centerLeft,
+            child: Text(
+              value,
+              maxLines: 1,
+              style: const TextStyle(
+                color: Colors.white,
+                fontWeight: FontWeight.w700,
+                fontSize: 14,
+              ),
             ),
           ),
         ],
@@ -502,27 +531,26 @@ class _HeroFact extends StatelessWidget {
   }
 }
 
-/// What this order means for the customer's points: the reward it carries
-/// and any points sent with the gift.
-class _PointsCard extends StatelessWidget {
-  const _PointsCard({required this.order});
+/// The game entries this order earns, and where they are.
+class _EntriesCard extends StatelessWidget {
+  const _EntriesCard({required this.order});
 
   final CustomerOrder order;
 
   @override
   Widget build(BuildContext context) {
-    final points = order.rewardPointsTotal;
-    final headline = points <= 0
+    final n = order.gameEntriesTotal;
+    final headline = n <= 0
         ? null
-        : order.rewardsEarned
-        ? '+$points points added to your balance'
-        : order.items.firstWhere((i) => i.rewardLabel != null).rewardLabel ??
-              '$points points';
+        : order.entriesGranted
+        ? '+$n game ${n == 1 ? 'entry' : 'entries'} added'
+        : order.items.firstWhere((i) => i.entriesLabel != null).entriesLabel ??
+              '$n game entries';
 
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFFEF3C7),
+        color: AppColors.accent,
         borderRadius: BorderRadius.circular(22),
       ),
       child: Row(
@@ -531,11 +559,11 @@ class _PointsCard extends StatelessWidget {
             width: 46,
             height: 46,
             decoration: BoxDecoration(
-              color: const Color(0xFFFBBF24),
+              color: AppColors.teal,
               borderRadius: BorderRadius.circular(12),
             ),
             child: const Icon(
-              Icons.stars_rounded,
+              Icons.confirmation_number_outlined,
               color: Colors.white,
               size: 26,
             ),
@@ -546,12 +574,12 @@ class _PointsCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 const Text(
-                  'POINTS FROM THIS ORDER',
+                  'GAME ENTRIES FROM THIS ORDER',
                   style: TextStyle(
                     fontSize: 10,
                     letterSpacing: 1.4,
                     fontWeight: FontWeight.w700,
-                    color: Color(0xFF8A5A12),
+                    color: AppColors.accentForeground,
                   ),
                 ),
                 if (headline != null)
@@ -560,29 +588,18 @@ class _PointsCard extends StatelessWidget {
                     style: const TextStyle(
                       fontWeight: FontWeight.w800,
                       fontSize: 15,
-                      color: Color(0xFF4A2E08),
-                    ),
-                  ),
-                if (order.giftPointsLabel != null)
-                  Padding(
-                    padding: const EdgeInsets.only(top: 2),
-                    child: Text(
-                      order.giftPointsLabel!,
-                      style: const TextStyle(
-                        fontSize: 12,
-                        color: Color(0xFF6B4410),
-                      ),
+                      color: AppColors.foreground,
                     ),
                   ),
               ],
             ),
           ),
           IconButton(
-            tooltip: 'My points',
-            onPressed: () => context.push(AppRoutes.points),
+            tooltip: 'Game entries',
+            onPressed: () => context.push(AppRoutes.gameEntries),
             icon: const Icon(
               Icons.chevron_right_rounded,
-              color: Color(0xFF6B4410),
+              color: AppColors.accentForeground,
             ),
           ),
         ],
@@ -658,7 +675,7 @@ class _OrderItemCard extends ConsumerWidget {
                       '${item.fulfilmentLabel}',
                       style: textTheme.bodySmall,
                     ),
-                    if (item.rewardLabel != null) ...[
+                    if (item.entriesLabel != null) ...[
                       const SizedBox(height: 4),
                       Row(
                         children: [
@@ -670,7 +687,7 @@ class _OrderItemCard extends ConsumerWidget {
                           const SizedBox(width: 4),
                           Expanded(
                             child: Text(
-                              item.rewardLabel!,
+                              item.entriesLabel!,
                               style: textTheme.bodySmall?.copyWith(
                                 color: const Color(0xFF8A5A12),
                                 fontWeight: FontWeight.w600,
@@ -1057,6 +1074,51 @@ class _TrackRow extends StatelessWidget {
                 ],
               ),
             ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Shown right after checkout: the order is in, and the way back to shopping.
+class _PlacedBanner extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    return Container(
+      padding: const EdgeInsets.all(14),
+      decoration: BoxDecoration(
+        color: AppColors.accent,
+        borderRadius: BorderRadius.circular(AppTheme.radiusLg),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          Row(
+            children: [
+              const Icon(
+                Icons.check_circle_rounded,
+                color: AppColors.accentForeground,
+              ),
+              const SizedBox(width: 10),
+              Expanded(
+                child: Text(
+                  'Your order is in. We will keep you posted here.',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: AppColors.accentForeground,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 12),
+          FilledButton.icon(
+            key: const Key('order-continue-shopping'),
+            onPressed: () => context.go(AppRoutes.home),
+            icon: const Icon(Icons.storefront_rounded, size: 18),
+            label: const Text('Continue shopping'),
           ),
         ],
       ),

@@ -10,7 +10,8 @@ import '../../../../core/widgets/pressable_scale.dart';
 import '../../../cart/data/cart_controller.dart';
 import '../../domain/gift.dart';
 import 'save_gift_button.dart';
-import '../../../../core/widgets/reward_points_badge.dart';
+import '../../../../core/widgets/entries_badge.dart';
+import '../../../games/data/games_providers.dart';
 
 /// Grid card for a gift: photo, shop line, price, and a one-tap add to cart.
 class GiftCard extends ConsumerWidget {
@@ -102,11 +103,15 @@ class GiftCard extends ConsumerWidget {
       // adds and the measured cell height still fits.
       child: Container(
         padding: const EdgeInsets.all(7),
+        // A promoted gift has its own tint, and is labelled Sponsored.
         decoration: BoxDecoration(
-          color: AppColors.surface,
+          color: gift.sponsored ? AppColors.goldSoft : AppColors.surface,
           borderRadius: BorderRadius.circular(AppTheme.radiusXl),
           border: Border.all(
-            color: AppColors.foreground.withValues(alpha: 0.22),
+            color: gift.sponsored
+                ? AppColors.gold.withValues(alpha: 0.75)
+                : AppColors.foreground.withValues(alpha: 0.22),
+            width: gift.sponsored ? 1.5 : 1,
           ),
         ),
         child: Column(
@@ -136,11 +141,21 @@ class GiftCard extends ConsumerWidget {
                       left: 10,
                       child: _Badge(label: '$discount% OFF'),
                     ),
-                  if (gift.rewardPoints > 0)
+                  if (gift.sponsored)
+                    const Positioned(left: 8, top: 8, child: SponsoredLabel()),
+                  if (gift.gameEntries > 0 &&
+                      ref.watch(entriesEarnableProvider))
                     Positioned(
                       left: 8,
+                      right: 8,
                       bottom: 8,
-                      child: RewardPointsBadge(points: gift.rewardPoints),
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        child: EntriesBadge(
+                          entries: gift.gameEntries,
+                          compact: true,
+                        ),
+                      ),
                     ),
                 ],
               ),
@@ -191,11 +206,16 @@ class GiftCard extends ConsumerWidget {
                                   overflow: TextOverflow.ellipsis,
                                   style: _compareAtStyle,
                                 ),
-                              Text(
-                                gift.priceLabel,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: _priceStyle,
+                              // Never cut with "...": a long price shrinks to
+                              // fit beside the add button instead.
+                              FittedBox(
+                                fit: BoxFit.scaleDown,
+                                alignment: Alignment.centerLeft,
+                                child: Text(
+                                  gift.shortPriceLabel,
+                                  maxLines: 1,
+                                  style: _priceStyle,
+                                ),
                               ),
                             ],
                           ),

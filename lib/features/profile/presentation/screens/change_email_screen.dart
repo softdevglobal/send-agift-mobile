@@ -267,7 +267,7 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
     const SizedBox(height: 12),
     const Text(
       'Changing your email signs you out of every other device and puts '
-      'prizes and gift points on hold for a few days. You can change it '
+      'prize claims on hold for a few days. You can change it '
       'twice every 30 days.',
       style: TextStyle(
         color: AppColors.mutedForeground,
@@ -373,7 +373,7 @@ class _ChangeEmailScreenState extends ConsumerState<ChangeEmailScreen> {
         'We emailed your old address a link that undoes this for 7 days, in '
         'case it wasn’t you.',
       ),
-      point('Prizes and gift points are on hold $hold as a precaution.'),
+      point('Prize claims are on hold $hold as a precaution.'),
       const SizedBox(height: 14),
       FilledButton(
         onPressed: () => Navigator.of(context).pop(),

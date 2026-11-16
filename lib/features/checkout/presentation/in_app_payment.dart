@@ -4,6 +4,7 @@ import 'package:flutter_stripe/flutter_stripe.dart';
 
 import '../../../core/errors/app_exception.dart';
 import '../../../core/theme/app_colors.dart';
+import '../../games/data/games_providers.dart';
 import '../data/checkout_repository.dart';
 
 /// The publishable key the Stripe SDK was last set up with.
@@ -82,5 +83,7 @@ Future<InAppPaymentOutcome> payOrderInApp(WidgetRef ref, String orderId) async {
     if (seconds > 0) await Future<void>.delayed(Duration(seconds: seconds));
     if (await repository.syncPayment(orderId)) break;
   }
+  // A paid order earns its game entries; show them wherever the balance is.
+  ref.invalidate(gameEntriesProvider);
   return InAppPaymentOutcome.paid;
 }

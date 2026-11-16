@@ -54,8 +54,8 @@ class OfferBanner extends StatelessWidget {
                 Text('UP TO 50% OFF', style: headline),
                 const SizedBox(height: 14),
                 Text(
-                  'Seasonal hampers, keepsakes, and wellness gifts, with bonus '
-                  'points on eligible checkouts.',
+                  'Seasonal hampers, keepsakes, and wellness gifts from '
+                  'local sellers.',
                   style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                         color: AppColors.foreground.withValues(alpha: 0.75),
                         fontWeight: FontWeight.w500,

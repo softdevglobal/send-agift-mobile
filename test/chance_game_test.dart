@@ -25,8 +25,8 @@ Competition _round(String slug, {String method = 'instant', int? odds = 500}) {
     countryName: 'New Zealand',
     startsAt: DateTime.now().subtract(const Duration(hours: 1)),
     endsAt: DateTime.now().add(const Duration(hours: 5)),
-    pointsPerAttempt: 5,
-    pointsDeductionEnabled: true,
+    entriesPerAttempt: 5,
+    entriesDeductionEnabled: true,
     maxAttempts: 10,
     minAge: 18,
     requiresIdentityVerification: true,
@@ -42,7 +42,7 @@ Competition _round(String slug, {String method = 'instant', int? odds = 500}) {
       attemptsUsed: 0,
       attemptsRemaining: 10,
       eligible: true,
-      pointsBalance: 100,
+      entriesBalance: 100,
     ),
   );
 }
@@ -68,7 +68,7 @@ void main() {
     expect(find.textContaining('This is a game of chance'), findsOneWidget);
     expect(find.textContaining('Chance plays no part'), findsNothing);
     expect(find.textContaining('Each play wins 1 in 500'), findsWidgets);
-    expect(find.text('Play now · 5 points'), findsOneWidget);
+    expect(find.text('Play now · 5 entries'), findsOneWidget);
   });
 
   testWidgets('a winning spin reveals the win after the wheel stops', (tester) async {

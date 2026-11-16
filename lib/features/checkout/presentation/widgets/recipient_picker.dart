@@ -17,10 +17,19 @@ class RecipientPicker extends ConsumerWidget {
     required this.selectedId,
     required this.onChanged,
     this.requireContact = false,
+    this.selectedAddressId,
+    this.onAddressChanged,
   });
 
   final String? selectedId;
   final ValueChanged<String?> onChanged;
+
+  /// One of the recipient's addresses, or null for their default.
+  final String? selectedAddressId;
+
+  /// When set, a recipient with several addresses gets a choice of which
+  /// one this gift goes to.
+  final ValueChanged<String>? onAddressChanged;
 
   /// New recipients must have an email and a phone, as for a free gift.
   final bool requireContact;
@@ -90,16 +99,27 @@ class RecipientPicker extends ConsumerWidget {
             label: const Text('New recipient'),
           ),
         ),
-        if (selectedId != null) _Address(recipientId: selectedId!),
+        if (selectedId != null)
+          _Address(
+            recipientId: selectedId!,
+            addressId: selectedAddressId,
+            onAddressChanged: onAddressChanged,
+          ),
       ],
     );
   }
 }
 
 class _Address extends ConsumerWidget {
-  const _Address({required this.recipientId});
+  const _Address({
+    required this.recipientId,
+    this.addressId,
+    this.onAddressChanged,
+  });
 
   final String recipientId;
+  final String? addressId;
+  final ValueChanged<String>? onAddressChanged;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -113,8 +133,9 @@ class _Address extends ConsumerWidget {
       ),
       error: (_, _) => const SizedBox.shrink(),
       data: (recipient) {
-        final address = recipient.deliveryAddress;
-        return Container(
+        final address = recipient.addressOrDefault(addressId);
+        final choose = onAddressChanged;
+        final card = Container(
           width: double.infinity,
           margin: const EdgeInsets.only(top: 12),
           padding: const EdgeInsets.all(12),
@@ -183,6 +204,38 @@ class _Address extends ConsumerWidget {
               ),
             ],
           ),
+        );
+        if (choose == null ||
+            recipient.addresses.length < 2 ||
+            address == null) {
+          return card;
+        }
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            card,
+            const SizedBox(height: 12),
+            DropdownButtonFormField<String>(
+              key: ValueKey('recipient-address-${address.id}'),
+              initialValue: address.id,
+              isExpanded: true,
+              decoration: const InputDecoration(labelText: 'Deliver to'),
+              items: [
+                for (final option in recipient.addresses)
+                  DropdownMenuItem<String>(
+                    value: option.id,
+                    child: Text(
+                      '${option.title} · ${option.formatted}',
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ),
+              ],
+              onChanged: (id) {
+                if (id != null) choose(id);
+              },
+            ),
+          ],
         );
       },
     );

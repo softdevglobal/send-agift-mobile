@@ -227,30 +227,30 @@ class _HomeTopBar extends ConsumerWidget {
   }
 }
 
-/// "Gifts that pay you back": the ones carrying the most reward points.
-/// Left out when no published gift carries any.
+/// Promoted gifts that earn game entries, the most first. Left out when
+/// none is promoted.
 List<Widget> _rewardShelf(
   BuildContext context,
   AsyncValue<List<Gift>> catalog,
 ) {
   final rewarding =
       (catalog.valueOrNull ?? const <Gift>[])
-          .where((g) => g.rewardPoints > 0)
+          .where((g) => g.sponsored && g.gameEntries > 0)
           .toList()
-        ..sort((a, b) => b.rewardPoints.compareTo(a.rewardPoints));
+        ..sort((a, b) => b.gameEntries.compareTo(a.gameEntries));
   if (rewarding.isEmpty) return const [];
   return [
     const SizedBox(height: 34),
     FadeSlideIn(
       delay: const Duration(milliseconds: 200),
       child: SectionHeading(
-        title: 'Gifts that pay you back',
-        subtitle: 'Earn points when they are delivered.',
+        title: 'Gifts that earn game entries',
+        subtitle: 'Sponsored. Entries arrive once your payment is confirmed.',
         actionLabel: 'View all',
         onAction: () => context.go(AppRoutes.explore),
       ),
     ),
-    _GiftShelf(gifts: AsyncValue.data(rewarding), heroPrefix: 'home-points'),
+    _GiftShelf(gifts: AsyncValue.data(rewarding), heroPrefix: 'home-entries'),
   ];
 }
 

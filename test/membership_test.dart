@@ -43,7 +43,6 @@ void main() {
     expect(s.paymentPending, isFalse);
     expect(s.offer!.memberDiscountBps, 500);
     expect(s.offer!.giftBenefits, ['Free delivery']);
-    expect(s.currentPeriod!.bonusSlot!.credited, isTrue);
     expect(s.subscription!.canCancel, isTrue);
     expect(s.nextChargeMinor, 99900);
   });

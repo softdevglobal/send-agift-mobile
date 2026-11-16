@@ -16,6 +16,8 @@ import '../widgets/auth_scaffold.dart';
 import '../widgets/social_sign_in_buttons.dart';
 import '../../domain/code_signup.dart';
 import '../../domain/social_signup.dart';
+import '../../../game_entries/presentation/state_picker.dart';
+import '../../../profile/presentation/screens/terms_screen.dart';
 
 /// Customer registration. Just enough to start gifting. A photo and
 /// delivery addresses are added later from the Account tab. Sellers and
@@ -66,6 +68,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
 
   String _customerType = 'individual';
   String? _countryId;
+  String? _stateId;
+  bool _stateRequired = false;
   String _dialIso = 'LK';
   bool _submitting = false;
   String? _error;
@@ -142,6 +146,10 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
       setState(() => _error = 'Choose the country you are gifting from.');
       return;
     }
+    if (_stateRequired && _stateId == null) {
+      setState(() => _error = 'Choose your state or region.');
+      return;
+    }
 
     setState(() {
       _submitting = true;
@@ -157,6 +165,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             .completeSocialSignup(
               signup: social,
               countryId: _countryId!,
+              stateId: _stateId,
               phone: '$_dial ${_phoneController.text.trim()}',
               displayName: _nameController.text.trim(),
               customerType: _customerType,
@@ -187,6 +196,7 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
             password: _passwordController.text,
             displayName: _nameController.text.trim(),
             countryId: _countryId!,
+            stateId: _stateId,
             phone: '$_dial ${_phoneController.text.trim()}',
             customerType: _customerType,
             signupToken: _code?.signupToken,
@@ -378,9 +388,37 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                             child: Text('${country.name} (${country.isoCode})'),
                           ),
                       ],
-                      onChanged: (value) => setState(() => _countryId = value),
+                      onChanged: (value) => setState(() {
+                        _countryId = value;
+                        _stateId = null;
+                        // The phone code follows the country (+61 for
+                        // Australia), unless the phone came verified from a
+                        // text code. It can still be changed by hand.
+                        final iso = list
+                            .where((c) => c.id == value)
+                            .firstOrNull
+                            ?.isoCode
+                            .toUpperCase();
+                        if (!_phoneLocked &&
+                            iso != null &&
+                            dialCodes.any((d) => d.iso2 == iso)) {
+                          _dialIso = iso;
+                        }
+                      }),
                     ),
                   ),
+                  if (_countryId != null)
+                    StatePicker(
+                      countryId: _countryId!,
+                      value: _stateId,
+                      enabled: !_submitting,
+                      onChanged: (v) => setState(() => _stateId = v),
+                      onRequired: (required) {
+                        if (required != _stateRequired) {
+                          setState(() => _stateRequired = required);
+                        }
+                      },
+                    ),
                 ],
               ),
             ),
@@ -401,7 +439,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                       SizedBox(
                         width: 108,
                         child: DropdownButtonFormField<String>(
-                          key: const Key('register-dial'),
+                          // Rebuilt when the country changes the code.
+                          key: ValueKey('register-dial-$_dialIso'),
                           initialValue: _dialIso,
                           isExpanded: true,
                           selectedItemBuilder: (_) => [
@@ -521,6 +560,8 @@ class _RegisterScreenState extends ConsumerState<RegisterScreen> {
                 label: 'Create my account',
               ),
             ),
+            const SizedBox(height: 14),
+            _TermsAssent(),
           ],
         ),
       ),
@@ -926,6 +967,38 @@ class _CountryPlaceholder extends StatelessWidget {
         border: Border.all(color: AppColors.border),
       ),
       child: Text(label, style: Theme.of(context).textTheme.bodyMedium),
+    );
+  }
+}
+
+/// What creating an account agrees to, with each document one tap away.
+class _TermsAssent extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    final style = Theme.of(
+      context,
+    ).textTheme.bodySmall?.copyWith(color: AppColors.mutedForeground);
+    Widget link(String docId, String label) => InkWell(
+      onTap: () => openPolicy(context, policyById(docId)),
+      child: Text(
+        label,
+        style: style?.copyWith(
+          color: AppColors.foreground,
+          fontWeight: FontWeight.w600,
+          decoration: TextDecoration.underline,
+        ),
+      ),
+    );
+    return Wrap(
+      alignment: WrapAlignment.center,
+      crossAxisAlignment: WrapCrossAlignment.center,
+      children: [
+        Text('By creating an account you agree to the ', style: style),
+        link('CUST-01', 'Customer Terms'),
+        Text(' and ', style: style),
+        link('PRIV-01', 'Privacy Policy'),
+        Text('.', style: style),
+      ],
     );
   }
 }

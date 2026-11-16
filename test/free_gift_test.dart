@@ -110,6 +110,7 @@ class _FakeCheckout implements CheckoutRepository {
     required String recipientId,
     required DateTime deliveryDate,
     required List<(String productId, int quantity)> items,
+    String? recipientAddressId,
   }) async {
     quotes++;
     return DeliveryQuote.fromJson({

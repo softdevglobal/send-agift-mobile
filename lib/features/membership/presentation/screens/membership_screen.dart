@@ -11,7 +11,6 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/widgets/empty_state.dart';
 import '../../../auth/data/auth_controller.dart';
-import '../../../games/data/games_providers.dart';
 import '../../data/membership_repository.dart';
 import '../../domain/membership.dart';
 import '../membership_widgets.dart';
@@ -89,8 +88,7 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen>
         await closeMembershipCheckout();
         ref
           ..invalidate(membershipStatusProvider)
-          ..invalidate(memberDiscountBpsProvider)
-          ..invalidate(pointsWalletProvider);
+          ..invalidate(memberDiscountBpsProvider);
         if (!mounted) return;
         await maybeShowMembershipWelcome(context, status);
         if (mounted) context.pushReplacement(AppRoutes.myMembership);
@@ -127,8 +125,8 @@ class _MembershipScreenState extends ConsumerState<MembershipScreen>
                   Text('SENDAGIFT MEMBERSHIP', style: AppTypography.eyebrow),
                   const SizedBox(height: 6),
                   Text(
-                    'Gift discounts, benefits and bonus points with every '
-                    'paid membership period.',
+                    'Gift discounts and benefits with every paid membership '
+                    'period.',
                     style: const TextStyle(
                       color: AppColors.mutedForeground,
                       height: 1.4,
@@ -203,10 +201,9 @@ class _Offers extends ConsumerWidget {
               const SizedBox(height: 16),
             ],
             Text(
-              'Bonus points are added to My points, the same points you earn '
-              'from gifts and prizes. Points cannot be transferred or '
-              'withdrawn as cash. Competition availability and point '
-              'conditions apply, and vary by location.',
+              'A membership gives a discount and benefits on the gifts you '
+              'send. It does not include game entries. You can turn renewal '
+              'off at any time from My membership.',
               style: Theme.of(context).textTheme.bodySmall,
             ),
           ],
@@ -362,13 +359,6 @@ class _MembershipOfferCardState extends ConsumerState<MembershipOfferCard> {
                         'On the gift price of every order while you are a '
                         'member.',
                   ),
-                if (o.memberBonusPoints > 0)
-                  MembershipPerk(
-                    icon: Icons.verified_rounded,
-                    color: AppColors.accentForeground,
-                    title: '+${o.memberBonusPoints} bonus points',
-                    body: o.bonusWhen,
-                  ),
                 for (final b in o.giftBenefits)
                   MembershipPerk(
                     icon: Icons.card_giftcard_rounded,
@@ -523,8 +513,8 @@ class _HowItWorks extends StatelessWidget {
       ),
       (
         Icons.verified_rounded,
-        'Get your bonus',
-        'Bonus points land in My points with each paid period and carry over.',
+        'Renew or stop',
+        'Renews on its own interval until you turn renewal off.',
       ),
     ];
     return Column(

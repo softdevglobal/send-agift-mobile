@@ -5,6 +5,7 @@ import 'package:flutter/material.dart';
 import '../../domain/cricket_game.dart';
 import '../game_controls.dart';
 import 'tick_clock.dart';
+import 'game_overlay_area.dart';
 
 // World units: x sideways, y up, z away from the camera behind the batter.
 const double _stumpZ = 240;
@@ -100,15 +101,21 @@ class _CricketPitchState extends State<CricketPitch>
                     swingTick: _swingTick,
                   ),
                 ),
-                AnimatedBuilder(
-                  animation: _clock,
-                  builder: (context, _) => _Hud(game: _game),
-                ),
-                if (!_started)
-                  const Align(
-                    alignment: Alignment(0, 0.35),
-                    child: _Prompt('Tap to start'),
+                GameOverlayArea(
+                  child: Stack(
+                    children: [
+                      AnimatedBuilder(
+                        animation: _clock,
+                        builder: (context, _) => _Hud(game: _game),
+                      ),
+                      if (!_started)
+                        const Align(
+                          alignment: Alignment(0, 0.35),
+                          child: _Prompt('Tap to start'),
+                        ),
+                    ],
                   ),
+                ),
               ],
             ),
           ),

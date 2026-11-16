@@ -110,12 +110,16 @@ class _MenuButton extends StatelessWidget {
             children: [
               Icon(icon, color: solid ? Colors.white : foreground),
               const SizedBox(width: 8),
-              Text(
-                label,
-                style: TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.w800,
-                  color: solid ? Colors.white : foreground,
+              Flexible(
+                child: Text(
+                  label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  style: TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w800,
+                    color: solid ? Colors.white : foreground,
+                  ),
                 ),
               ),
             ],

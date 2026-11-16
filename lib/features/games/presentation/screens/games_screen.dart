@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
+import '../../../../core/capabilities/competitions_capability.dart';
 import '../../../../core/router/app_router.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -25,13 +26,17 @@ class GamesScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final games = ref.watch(gamesListProvider);
+    // Competitions are only asked for once the server says they are on, so
+    // with them off this screen never fetches or shows one.
+    final competitionsOn = ref.watch(competitionsOnProvider);
 
     return Scaffold(
       appBar: AppBar(title: const Text('Game zone')),
       body: RefreshIndicator(
         color: AppColors.primary,
         onRefresh: () async {
-          ref.invalidate(competitionsProvider);
+          ref.invalidate(competitionsEnabledProvider);
+          if (competitionsOn) ref.invalidate(competitionsProvider);
           return ref.refresh(gamesListProvider.future);
         },
         child: CustomScrollView(
@@ -46,7 +51,8 @@ class GamesScreen extends ConsumerWidget {
               ),
               sliver: SliverToBoxAdapter(child: _Header()),
             ),
-            const SliverToBoxAdapter(child: CompetitionsArena()),
+            if (competitionsOn)
+              const SliverToBoxAdapter(child: CompetitionsArena()),
             // Games get their own section below the competitions band, so
             // practice play never reads as part of a prize round.
             SliverPadding(
@@ -134,7 +140,7 @@ class _Header extends StatelessWidget {
   const _Header();
 
   @override
-  Widget build(BuildContext context) => const _PointsBanner();
+  Widget build(BuildContext context) => const _EntriesBanner();
 }
 
 /// Opens the games section: what these are, and how many there are.
@@ -182,20 +188,21 @@ class _GamesHeader extends StatelessWidget {
   }
 }
 
-/// The player's available points, at the top of the zone. Just the
-/// balance, so it reads at a glance before they pick a game.
-class _PointsBanner extends ConsumerWidget {
-  const _PointsBanner();
+/// The player's game entries, at the top of the zone. Just the balance, so
+/// it reads at a glance before they pick a game.
+class _EntriesBanner extends ConsumerWidget {
+  const _EntriesBanner();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final signedIn = ref.watch(authProvider.select((a) => a.isSignedIn));
     final balance = signedIn
-        ? ref.watch(pointsWalletProvider).valueOrNull?.balance
+        ? ref.watch(gameEntriesProvider).valueOrNull?.balance
         : null;
 
     return PressableScale(
-      onTap: () => context.push(signedIn ? AppRoutes.points : AppRoutes.login),
+      onTap: () =>
+          context.push(signedIn ? AppRoutes.gameEntries : AppRoutes.login),
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
         decoration: BoxDecoration(
@@ -212,7 +219,7 @@ class _PointsBanner extends ConsumerWidget {
                 borderRadius: BorderRadius.circular(AppTheme.radiusBoxSm),
               ),
               child: const Icon(
-                Icons.stars_rounded,
+                Icons.confirmation_number_outlined,
                 color: Color(0xFFFCD980),
                 size: 20,
               ),
@@ -222,9 +229,9 @@ class _PointsBanner extends ConsumerWidget {
               child: signedIn
                   ? Text(
                       balance == null
-                          ? 'Your points  …'
-                          : 'Your points  $balance',
-                      key: const Key('games-points-balance'),
+                          ? 'Game entries  …'
+                          : 'Game entries  $balance',
+                      key: const Key('games-entries-balance'),
                       style: AppTypography.display(18, color: Colors.white),
                     )
                   : Text(
@@ -405,7 +412,7 @@ class _GameTileState extends ConsumerState<_GameTile>
                             ),
                           ),
                         ),
-                        if (game.playCostPoints > 0) ...[
+                        if (game.entryCost > 0) ...[
                           const SizedBox(width: 6),
                           Container(
                             padding: const EdgeInsets.symmetric(
@@ -419,7 +426,7 @@ class _GameTileState extends ConsumerState<_GameTile>
                               ),
                             ),
                             child: Text(
-                              '${game.playCostPoints} pts',
+                              '${game.entryCost} pts',
                               style: const TextStyle(
                                 color: Color(0xFF6B4410),
                                 fontWeight: FontWeight.w800,

@@ -3,7 +3,6 @@ import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import 'package:intl/intl.dart';
 
 import '../../../../core/errors/app_exception.dart';
 import '../../../../core/router/app_router.dart';
@@ -12,7 +11,6 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/theme/app_typography.dart';
 import '../../../../core/utils/money.dart';
 import '../../../../core/widgets/empty_state.dart';
-import '../../../games/data/games_providers.dart';
 import '../../data/membership_repository.dart';
 import '../../domain/membership.dart';
 import '../membership_widgets.dart';
@@ -67,8 +65,7 @@ class _MyMembershipScreenState extends ConsumerState<MyMembershipScreen> {
   Future<void> _refreshAfterChange() async {
     ref
       ..invalidate(membershipStatusProvider)
-      ..invalidate(memberDiscountBpsProvider)
-      ..invalidate(pointsWalletProvider);
+      ..invalidate(memberDiscountBpsProvider);
   }
 
   Future<void> _testPay() async {
@@ -118,7 +115,7 @@ class _MyMembershipScreenState extends ConsumerState<MyMembershipScreen> {
         title: const Text('Cancel your renewal?'),
         content: const Text(
           'Your membership will end when the current paid period ends. '
-          'Points you already have stay in My points.',
+          'Your benefits last until then.',
         ),
         actions: [
           TextButton(
@@ -173,15 +170,7 @@ class _MyMembershipScreenState extends ConsumerState<MyMembershipScreen> {
 
     return Scaffold(
       backgroundColor: AppColors.background,
-      appBar: AppBar(
-        title: const Text('My membership'),
-        actions: [
-          TextButton(
-            onPressed: () => context.push(AppRoutes.points),
-            child: const Text('My points'),
-          ),
-        ],
-      ),
+      appBar: AppBar(title: const Text('My membership')),
       body: status.when(
         loading: () => const Center(child: CircularProgressIndicator()),
         error: (error, _) => EmptyState(
@@ -222,8 +211,8 @@ class _MyMembershipScreenState extends ConsumerState<MyMembershipScreen> {
                   icon: Icons.workspace_premium_outlined,
                   title: 'You’re not a member',
                   description:
-                      'Members get gift discounts, benefits and '
-                      'bonus points with each paid period.',
+                      'Members get gift discounts and benefits with each '
+                      'paid period.',
                   action: FilledButton(
                     onPressed: () => context.push(AppRoutes.membership),
                     child: const Text('See memberships'),
@@ -243,7 +232,6 @@ class _MyMembershipScreenState extends ConsumerState<MyMembershipScreen> {
     final period = s.currentPeriod;
     final sub = s.subscription;
     final target = nextActionRoute(s.nextAction);
-    final slot = period?.bonusSlot;
     final since = s.periods.isEmpty
         ? null
         : s.periods
@@ -264,8 +252,7 @@ class _MyMembershipScreenState extends ConsumerState<MyMembershipScreen> {
             : null,
         onAction: () => followNextAction(context, s.nextAction),
       ),
-      if (offer != null &&
-          (offer.memberDiscountBps > 0 || offer.memberBonusPoints > 0)) ...[
+      if (offer != null && offer.memberDiscountBps > 0) ...[
         const SizedBox(height: 20),
         Text('YOUR PERKS', style: AppTypography.eyebrow),
         const SizedBox(height: 10),
@@ -283,21 +270,6 @@ class _MyMembershipScreenState extends ConsumerState<MyMembershipScreen> {
                     footer: period != null
                         ? 'Until ${formatMembershipDate(period.periodEnd)}'
                         : 'While a period is paid',
-                  ),
-                ),
-              if (offer.memberDiscountBps > 0 && offer.memberBonusPoints > 0)
-                const SizedBox(width: 10),
-              if (offer.memberBonusPoints > 0)
-                Expanded(
-                  child: _PerkTile(
-                    color: AppColors.accentForeground,
-                    icon: Icons.stars_rounded,
-                    big:
-                        '+${_points(slot?.bonusPoints ?? offer.memberBonusPoints)}',
-                    title: 'bonus points',
-                    footer: slot != null
-                        ? 'This period · ${slot.statusLabel}'
-                        : 'Every paid period',
                   ),
                 ),
             ],
@@ -336,8 +308,6 @@ class _MyMembershipScreenState extends ConsumerState<MyMembershipScreen> {
     ];
   }
 }
-
-String _points(int n) => NumberFormat.decimalPattern().format(n);
 
 /// The membership as a member card: the package, its state, how long they
 /// have been a member and how far through the paid period they are.
@@ -909,12 +879,6 @@ class _PeriodRow extends StatelessWidget {
                     children: [
                       _Pill(p.amountLabel, AppColors.primary),
                       _Pill(paid ? 'Paid' : p.status, dot),
-                      if (p.bonusSlot != null)
-                        _Pill(
-                          '+${_points(p.bonusSlot!.bonusPoints)} pts · '
-                          '${p.bonusSlot!.statusLabel.toLowerCase()}',
-                          AppColors.purple,
-                        ),
                     ],
                   ),
                 ],
