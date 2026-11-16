@@ -54,18 +54,25 @@ class _SavedScreenState extends ConsumerState<SavedScreen> {
       ..sort((a, b) => tagCounts[b]!.compareTo(tagCounts[a]!));
     final occasion = occasions.contains(_occasion) ? _occasion : null;
 
-    final shown =
-        saved
-            .where((g) => occasion == null || g.occasionTags.contains(occasion))
-            .toList()
-          ..sort(
+    final matching = saved
+        .where((g) => occasion == null || g.occasionTags.contains(occasion))
+        .toList();
+    // Saved order is the catalog's, which already puts sponsored gifts
+    // first; any other sort applies within the sponsored ones and the rest.
+    final ordered = _sort == _Sort.saved
+        ? matching
+        : ([...matching]..sort(
             (a, b) => switch (_sort) {
               _Sort.saved => 0,
               _Sort.priceLow => a.priceAmount.compareTo(b.priceAmount),
               _Sort.priceHigh => b.priceAmount.compareTo(a.priceAmount),
               _Sort.rating => b.rating.compareTo(a.rating),
             },
-          );
+          ));
+    final shown = [
+      ...ordered.where((g) => g.sponsored),
+      ...ordered.where((g) => !g.sponsored),
+    ];
 
     return Scaffold(
       backgroundColor: AppColors.background,

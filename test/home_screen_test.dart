@@ -5,6 +5,8 @@ import 'package:send_agift_mobile/features/home/presentation/screens/home_screen
 import 'package:send_agift_mobile/features/products/data/catalog_providers.dart';
 import 'support/sample_gifts.dart';
 import 'package:send_agift_mobile/features/products/domain/gift.dart';
+import 'package:send_agift_mobile/features/products/presentation/widgets/gift_card.dart';
+import 'package:send_agift_mobile/features/products/presentation/widgets/gift_grid.dart';
 
 import 'support/fake_auth.dart';
 
@@ -60,6 +62,60 @@ void main() {
     expect(tester.takeException(), isNull);
 
     // Let the carousel's timer go before the tree is torn down.
+    await tester.pumpWidget(const SizedBox());
+  });
+
+  testWidgets('home lists up to 10 new gifts down the page, then View all', (
+    tester,
+  ) async {
+    tester.view.physicalSize = const Size(390 * 3, 844 * 3);
+    tester.view.devicePixelRatio = 3;
+    addTearDown(tester.view.reset);
+
+    final gifts = [
+      for (var i = 0; i < 12; i++)
+        Gift(
+          id: 'g$i',
+          name: 'Gift $i',
+          priceAmount: 1000,
+          currency: 'LKR',
+          image: '',
+        ),
+    ];
+
+    await tester.pumpWidget(
+      ProviderScope(
+        overrides: [
+          fakeAuth(),
+          catalogProvider.overrideWith((ref) async => gifts),
+        ],
+        child: const MaterialApp(home: HomeScreen()),
+      ),
+    );
+    for (var i = 0; i < 20; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    await tester.scrollUntilVisible(
+      find.text('View all gifts'),
+      300,
+      scrollable: find.byType(Scrollable).first,
+    );
+    for (var i = 0; i < 10; i++) {
+      await tester.pump(const Duration(milliseconds: 100));
+    }
+
+    expect(
+      find.descendant(
+        of: find.byType(GiftGrid),
+        matching: find.byType(GiftCard),
+      ),
+      findsNWidgets(10),
+    );
+    expect(find.text('Gift 10'), findsNothing);
+    expect(find.text('View all gifts'), findsOneWidget);
+    expect(tester.takeException(), isNull);
+
     await tester.pumpWidget(const SizedBox());
   });
 }

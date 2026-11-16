@@ -226,3 +226,20 @@ class GiftMedia {
     });
   }
 }
+
+/// Gifts with the sponsored ones first, everywhere gifts are listed. Among
+/// the sponsored, the higher priority level (more game entries per purchase)
+/// comes first. Everything else keeps the order it came in, so the sort is
+/// stable and the same on every refresh.
+List<Gift> sponsoredFirst(Iterable<Gift> gifts) {
+  final indexed = gifts.indexed.toList()
+    ..sort((a, b) {
+      final x = a.$2, y = b.$2;
+      if (x.sponsored != y.sponsored) return x.sponsored ? -1 : 1;
+      if (x.sponsored && x.gameEntries != y.gameEntries) {
+        return y.gameEntries.compareTo(x.gameEntries);
+      }
+      return a.$1.compareTo(b.$1);
+    });
+  return [for (final (_, g) in indexed) g];
+}

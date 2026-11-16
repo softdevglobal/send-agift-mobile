@@ -17,6 +17,7 @@ import '../../../notifications/data/notifications_repository.dart';
 import '../../../products/data/catalog_providers.dart';
 import '../../../products/domain/gift.dart';
 import '../../../products/presentation/widgets/gift_card.dart';
+import '../../../products/presentation/widgets/gift_grid.dart';
 import '../widgets/category_strip.dart';
 import '../widgets/games_teaser.dart';
 import '../widgets/feature_bar.dart';
@@ -96,7 +97,12 @@ class HomeScreen extends ConsumerWidget {
                   onAction: () => context.go(AppRoutes.explore),
                 ),
               ),
-              _GiftShelf(gifts: catalog, heroPrefix: 'home'),
+              _GiftShelf(
+                gifts: catalog,
+                heroPrefix: 'home',
+                grid: true,
+                onViewAll: () => context.go(AppRoutes.explore),
+              ),
               ..._rewardShelf(context, catalog),
               const SizedBox(height: 34),
               const FadeSlideIn(
@@ -174,9 +180,7 @@ class _HomeTopBar extends ConsumerWidget {
                 IconButton(
                   key: const Key('home-free-gift'),
                   onPressed: () => context.push(AppRoutes.freeGift),
-                  style: IconButton.styleFrom(
-                    backgroundColor: AppColors.teal,
-                  ),
+                  style: IconButton.styleFrom(backgroundColor: AppColors.teal),
                   icon: const Icon(Icons.redeem_rounded),
                   color: AppColors.tealForeground,
                   tooltip: 'Claim your free gift',
@@ -254,14 +258,28 @@ List<Widget> _rewardShelf(
   ];
 }
 
-/// Horizontal shelf of the newest published gifts.
+/// The newest published gifts: a sideways shelf, or a grid down the page.
 class _GiftShelf extends StatelessWidget {
-  const _GiftShelf({required this.gifts, required this.heroPrefix});
+  const _GiftShelf({
+    required this.gifts,
+    required this.heroPrefix,
+    this.grid = false,
+    this.onViewAll,
+  });
 
   final AsyncValue<List<Gift>> gifts;
 
   /// Keeps hero tags unique when the same gift sits on two shelves.
   final String heroPrefix;
+
+  /// A two-up grid of up to [gridLimit] gifts down the page, instead of a
+  /// sideways shelf.
+  final bool grid;
+
+  /// Shown as a full-width button under the grid.
+  final VoidCallback? onViewAll;
+
+  static const gridLimit = 10;
 
   @override
   Widget build(BuildContext context) {
@@ -288,6 +306,36 @@ class _GiftShelf extends StatelessWidget {
               'and they show up here.',
               style: Theme.of(context).textTheme.bodyMedium,
             ),
+          );
+        }
+
+        if (grid) {
+          return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              GiftGrid(
+                gifts: gifts.take(gridLimit).toList(),
+                heroPrefix: heroPrefix,
+              ),
+              if (onViewAll != null)
+                Padding(
+                  padding: const EdgeInsets.fromLTRB(
+                    AppTheme.gutter,
+                    16,
+                    AppTheme.gutter,
+                    0,
+                  ),
+                  child: OutlinedButton.icon(
+                    onPressed: onViewAll,
+                    icon: const Icon(Icons.arrow_forward_rounded),
+                    iconAlignment: IconAlignment.end,
+                    label: const Text('View all gifts'),
+                    style: OutlinedButton.styleFrom(
+                      minimumSize: const Size.fromHeight(50),
+                    ),
+                  ),
+                ),
+            ],
           );
         }
 

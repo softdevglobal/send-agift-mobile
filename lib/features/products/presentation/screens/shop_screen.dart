@@ -11,6 +11,7 @@ import '../../../../core/widgets/empty_state.dart';
 import '../../../../core/widgets/fade_slide_in.dart';
 import '../../../../core/widgets/storefront_decor.dart';
 import '../../data/catalog_providers.dart';
+import '../../domain/gift.dart';
 import '../../domain/shop.dart';
 import '../widgets/gift_grid.dart';
 
@@ -35,10 +36,7 @@ class ShopScreen extends ConsumerWidget {
         data: (value) {
           if (value == null) return _Missing(onRetry: retry);
           final (shop, gifts) = value;
-          final sorted = [
-            ...gifts.where((g) => g.sponsored),
-            ...gifts.where((g) => !g.sponsored),
-          ];
+          final sorted = sponsoredFirst(gifts);
           final width = MediaQuery.sizeOf(context).width;
           // Taller on a wide screen, so the photo is not a thin strip.
           final coverHeight = (width * 0.55).clamp(210.0, 320.0);

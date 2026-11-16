@@ -42,9 +42,9 @@ class CatalogRepository {
       }
 
       // An empty list is real information: no shop has published yet.
-      _cache = gifts;
+      _cache = sponsoredFirst(gifts);
       _cachedAt = DateTime.now();
-      return gifts;
+      return _cache!;
     } on DioException catch (error) {
       // Nothing is cached, so a retry asks the backend again.
       throw _client.mapError(error);
@@ -99,7 +99,8 @@ class CatalogRepository {
   }
 
   /// A shop's published gifts.
-  Future<List<Gift>> shopGifts(Shop shop) => _fetchShopProducts(shop);
+  Future<List<Gift>> shopGifts(Shop shop) async =>
+      sponsoredFirst(await _fetchShopProducts(shop));
 
   Future<List<Shop>> _fetchShops() async {
     final response = await _client.dio.get<dynamic>('/shops');

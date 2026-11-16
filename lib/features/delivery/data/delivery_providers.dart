@@ -99,7 +99,8 @@ final giftAvailabilityProvider = FutureProvider<GiftAvailability?>((ref) {
 /// Gifts that can reach the remembered address in time, or null when there
 /// is no address to check against.
 final deliverableGiftsProvider = Provider<AsyncValue<List<Gift>?>>((ref) {
-  return ref
-      .watch(giftAvailabilityProvider)
-      .whenData((availability) => availability?.gifts);
+  return ref.watch(giftAvailabilityProvider).whenData((availability) {
+    final gifts = availability?.gifts;
+    return gifts == null ? null : sponsoredFirst(gifts);
+  });
 });
