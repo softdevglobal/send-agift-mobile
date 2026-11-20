@@ -156,15 +156,19 @@ class _GamesHeader extends StatelessWidget {
       children: [
         Row(
           children: [
-            const Flexible(
-              child: SectionTag(
-                label: 'Games',
-                icon: Icons.sports_esports_rounded,
-                color: AppColors.purple,
+            // The tag takes the room it needs; the count sits at the far
+            // right edge.
+            const Expanded(
+              child: Align(
+                alignment: Alignment.centerLeft,
+                child: SectionTag(
+                  label: 'Games',
+                  icon: Icons.sports_esports_rounded,
+                  color: AppColors.purple,
+                ),
               ),
             ),
             const SizedBox(width: 8),
-            const Spacer(),
             if (count != null && count! > 0)
               Text(
                 '${count!} TO PLAY',

@@ -233,42 +233,33 @@ CustomTransitionPage<void> _rightSheetPage(GoRouterState state, Widget child) {
         parent: animation,
         curve: Curves.easeOutCubic,
       );
-      final topInset = MediaQuery.paddingOf(context).top;
-      // White status-bar text while the page behind is dimmed.
+      // The panel runs from the very top of the screen; its own SafeArea
+      // keeps the content clear of the clock. Dark status-bar icons, since
+      // the battery and signal sit over the white panel.
       return AnnotatedRegion<SystemUiOverlayStyle>(
-        value: SystemUiOverlayStyle.light,
+        value: SystemUiOverlayStyle.dark,
         child: Align(
           alignment: Alignment.centerRight,
-          child: Padding(
-            // The panel starts below the status bar, so the clock and
-            // battery never sit on top of it.
-            padding: EdgeInsets.only(top: topInset + 6),
-            child: SizedBox(
-              // Most of a phone's width; a fixed panel on a tablet.
-              width: math.min(
-                MediaQuery.sizeOf(context).width * 0.8,
-                ContentWidth.sidePanel,
-              ),
-              height: double.infinity,
-              child: SlideTransition(
-                position: Tween<Offset>(
-                  begin: const Offset(1, 0),
-                  end: Offset.zero,
-                ).animate(curved),
-                child: Material(
-                  elevation: 16,
-                  shadowColor: Colors.black,
-                  borderRadius: const BorderRadius.horizontal(
-                    left: Radius.circular(28),
-                  ),
-                  clipBehavior: Clip.antiAlias,
-                  // The status bar is already cleared above.
-                  child: MediaQuery.removePadding(
-                    context: context,
-                    removeTop: true,
-                    child: child,
-                  ),
+          child: SizedBox(
+            // Most of a phone's width; a fixed panel on a tablet.
+            width: math.min(
+              MediaQuery.sizeOf(context).width * 0.8,
+              ContentWidth.sidePanel,
+            ),
+            height: double.infinity,
+            child: SlideTransition(
+              position: Tween<Offset>(
+                begin: const Offset(1, 0),
+                end: Offset.zero,
+              ).animate(curved),
+              child: Material(
+                elevation: 16,
+                shadowColor: Colors.black,
+                borderRadius: const BorderRadius.horizontal(
+                  left: Radius.circular(28),
                 ),
+                clipBehavior: Clip.antiAlias,
+                child: child,
               ),
             ),
           ),

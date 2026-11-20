@@ -296,6 +296,10 @@ Future<ArrivalChoice?> showArrivalDateSheet(
 
   return showModalBottomSheet<ArrivalChoice>(
     context: context,
+    // Above the floating tab bar, which would otherwise cover the last
+    // choices; scrolls when a small phone cannot fit them all.
+    useRootNavigator: true,
+    isScrollControlled: true,
     useSafeArea: true,
     backgroundColor: AppColors.surface,
     shape: const RoundedRectangleBorder(
@@ -345,8 +349,13 @@ Future<ArrivalChoice?> showArrivalDateSheet(
         );
       }
 
-      return Padding(
-        padding: const EdgeInsets.fromLTRB(12, 14, 12, 18),
+      return SingleChildScrollView(
+        padding: EdgeInsets.fromLTRB(
+          12,
+          14,
+          12,
+          18 + MediaQuery.paddingOf(sheetContext).bottom,
+        ),
         child: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.stretch,
