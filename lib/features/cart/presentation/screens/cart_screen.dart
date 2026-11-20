@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
@@ -27,85 +28,135 @@ class CartScreen extends ConsumerWidget {
     final summary = ref.watch(cartSummaryProvider);
     final itemCount = ref.watch(cartCountProvider);
 
-    return Scaffold(
-      backgroundColor: AppColors.surface,
-      body: SafeArea(
-        bottom: false,
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(AppTheme.gutter, 10, 12, 4),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text('Cart', style: AppTypography.display(28)),
-                        const SizedBox(height: 4),
-                        Text(
-                          lines.isEmpty
-                              ? 'Gifts you add stay here until you check out.'
-                              : '$itemCount item${itemCount == 1 ? '' : 's'} '
-                                    'ready for checkout.',
-                          style: Theme.of(context).textTheme.bodyMedium,
-                        ),
-                      ],
+    return _StatusBarHidden(
+      child: Scaffold(
+        backgroundColor: AppColors.surface,
+        body: SafeArea(
+          bottom: false,
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(AppTheme.gutter, 10, 12, 4),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text('Cart', style: AppTypography.display(28)),
+                          const SizedBox(height: 4),
+                          Text(
+                            lines.isEmpty
+                                ? 'Gifts you add stay here until you check out.'
+                                : '$itemCount item${itemCount == 1 ? '' : 's'} '
+                                      'ready for checkout.',
+                            style: Theme.of(context).textTheme.bodyMedium,
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  if (lines.isNotEmpty)
-                    TextButton(
-                      onPressed: () => ref.read(cartProvider.notifier).clear(),
-                      child: const Text('Clear'),
+                    if (lines.isNotEmpty)
+                      TextButton(
+                        onPressed: () =>
+                            ref.read(cartProvider.notifier).clear(),
+                        child: const Text('Clear'),
+                      ),
+                    IconButton(
+                      onPressed: () => context.pop(),
+                      icon: const Icon(Icons.close_rounded),
+                      color: AppColors.foreground,
+                      tooltip: 'Close',
                     ),
-                  IconButton(
-                    onPressed: () => context.pop(),
-                    icon: const Icon(Icons.close_rounded),
-                    color: AppColors.foreground,
-                    tooltip: 'Close',
-                  ),
-                ],
+                  ],
+                ),
               ),
-            ),
-            Expanded(
-              child: lines.isEmpty
-                  ? EmptyState(
-                      icon: Icons.shopping_bag_outlined,
-                      title: 'Your cart is empty',
-                      description:
-                          'Browse the catalog and add a gift to get started. '
-                          'no account needed.',
-                      action: ElevatedButton(
-                        onPressed: () => context.go(AppRoutes.explore),
-                        child: const Text('Discover gifts'),
+              Expanded(
+                child: lines.isEmpty
+                    ? EmptyState(
+                        icon: Icons.shopping_bag_outlined,
+                        title: 'Your cart is empty',
+                        description:
+                            'Browse the catalog and add a gift to get started. '
+                            'no account needed.',
+                        action: ElevatedButton(
+                          onPressed: () => context.go(AppRoutes.explore),
+                          child: const Text('Discover gifts'),
+                        ),
+                      )
+                    : ListView.separated(
+                        padding: const EdgeInsets.fromLTRB(
+                          AppTheme.gutter,
+                          14,
+                          AppTheme.gutter,
+                          24,
+                        ),
+                        itemCount: lines.length,
+                        separatorBuilder: (context, index) =>
+                            const SizedBox(height: 10),
+                        itemBuilder: (context, index) => FadeSlideIn(
+                          delay: Duration(milliseconds: 40 * index),
+                          child: _CartLineTile(line: lines[index]),
+                        ),
                       ),
-                    )
-                  : ListView.separated(
-                      padding: const EdgeInsets.fromLTRB(
-                        AppTheme.gutter,
-                        14,
-                        AppTheme.gutter,
-                        24,
-                      ),
-                      itemCount: lines.length,
-                      separatorBuilder: (context, index) =>
-                          const SizedBox(height: 10),
-                      itemBuilder: (context, index) => FadeSlideIn(
-                        delay: Duration(milliseconds: 40 * index),
-                        child: _CartLineTile(line: lines[index]),
-                      ),
-                    ),
-            ),
-          ],
+              ),
+            ],
+          ),
         ),
+        bottomNavigationBar: lines.isEmpty
+            ? null
+            : _CartSummaryBar(summary: summary),
       ),
-      bottomNavigationBar: lines.isEmpty
-          ? null
-          : _CartSummaryBar(summary: summary),
     );
   }
+}
+
+/// Hides the clock, battery and signal while the cart is the screen on
+/// top, so the panel covers the whole height. They come back as soon as
+/// another screen opens over the cart (a gift, checkout) and when it closes.
+class _StatusBarHidden extends StatefulWidget {
+  const _StatusBarHidden({required this.child});
+
+  final Widget child;
+
+  @override
+  State<_StatusBarHidden> createState() => _StatusBarHiddenState();
+}
+
+class _StatusBarHiddenState extends State<_StatusBarHidden> {
+  bool? _hidden;
+
+  void _apply(bool hide) {
+    if (_hidden == hide) return;
+    _hidden = hide;
+    if (hide) {
+      SystemChrome.setEnabledSystemUIMode(
+        SystemUiMode.manual,
+        overlays: const [SystemUiOverlay.bottom],
+      );
+    } else {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    // Rebuilt whenever this route stops or starts being the top one.
+    _apply(ModalRoute.of(context)?.isCurrent ?? true);
+  }
+
+  @override
+  void dispose() {
+    if (_hidden ?? false) {
+      SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
+    }
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) => widget.child;
 }
 
 class _CartLineTile extends ConsumerWidget {
