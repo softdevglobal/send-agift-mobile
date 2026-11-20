@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/widgets/tap_outside_closes_keyboard.dart';
 import '../core/layout/responsive.dart';
 import '../core/notifications/push_notifications.dart';
 import '../core/router/app_router.dart';
@@ -62,7 +63,9 @@ class _SendAGiftAppState extends ConsumerState<SendAGiftApp> {
       theme: AppTheme.light,
       routerConfig: router,
       // Tablets show the phone design scaled up rather than at phone size.
-      builder: (context, child) => TabletScale(child: child!),
+      // A tap anywhere outside a text or number field closes the keyboard.
+      builder: (context, child) =>
+          TapOutsideClosesKeyboard(child: TabletScale(child: child!)),
     );
   }
 }

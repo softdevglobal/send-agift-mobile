@@ -124,16 +124,32 @@ class SocialSignInClient {
   }
 
   Future<ProviderToken?> facebook() async {
+    // Facebook puts this in a Limited Login token unchanged; the API checks
+    // it so a token captured elsewhere cannot be replayed.
+    final nonce = _newNonce();
     final result = await FacebookAuth.instance.login(
       permissions: const ['public_profile', 'email'],
-      // A full access token, which the API can check with Facebook.
+      // A full access token where the person allows it. On an iPhone that
+      // has not allowed tracking, Facebook gives a Limited Login ID token
+      // instead, which the API checks against Facebook's keys.
       loginTracking: LoginTracking.enabled,
+      nonce: nonce,
     );
     switch (result.status) {
       case LoginStatus.success:
-        final token = result.accessToken?.tokenString;
-        if (token == null || token.isEmpty) {
+        final access = result.accessToken;
+        final token = access?.tokenString;
+        if (access == null || token == null || token.isEmpty) {
           throw const AppException('Facebook did not return a sign-in token.');
+        }
+        if (access is LimitedToken) {
+          return (
+            provider: 'facebook',
+            token: token,
+            tokenType: 'id_token',
+            nonce: access.nonce.isNotEmpty ? access.nonce : nonce,
+            name: null,
+          );
         }
         return (
           provider: 'facebook',
